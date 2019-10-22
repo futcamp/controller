@@ -20,6 +20,7 @@ package ru.futcamp.controller;
 import ru.futcamp.controller.modules.meteo.IMeteoDevice;
 import ru.futcamp.controller.modules.meteo.db.MeteoDBData;
 import ru.futcamp.controller.modules.secure.ISecureDevice;
+import ru.futcamp.controller.modules.therm.IThermDevice;
 
 import java.util.List;
 
@@ -33,4 +34,7 @@ public interface IController {
     List<ISecureDevice> getSecureDevices();
     List<MeteoDBData> getMeteoDataByDate(String sensor, String date);
     void saveSecureStates();
+    List<IThermDevice> getThermDevices();
+    IThermDevice getThermDeviceByAlias(String alias);
+    void saveThermState(IThermDevice device) throws Exception;
 }

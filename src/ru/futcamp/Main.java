@@ -24,6 +24,8 @@ import ru.futcamp.controller.modules.meteo.IMeteoStation;
 import ru.futcamp.controller.modules.meteo.db.IMeteoDB;
 import ru.futcamp.controller.modules.secure.ISecurity;
 import ru.futcamp.controller.modules.secure.db.ISecureDB;
+import ru.futcamp.controller.modules.therm.IThermControl;
+import ru.futcamp.controller.modules.therm.db.IThermDB;
 import ru.futcamp.net.INotifier;
 import ru.futcamp.net.tgbot.ITelegramBot;
 import ru.futcamp.net.tgbot.menu.IMenu;
@@ -52,19 +54,25 @@ public class Main {
         IMeteoStation meteo = (IMeteoStation)builder.makeService(METEO_SRV, meteoDB);
         Runnable meteoTask = (Runnable)builder.makeService(METEO_TSK_SRV, log, cfg, meteo, cfg);
 
+        IThermDB thermDb = (IThermDB)builder.makeService(THERM_DB_SRV);
+        IThermControl thermCtrl = (IThermControl)builder.makeService(THERM_CTRL_SRV, thermDb);
+        Runnable thermTask = (Runnable)builder.makeService(THERM_TASK_SRV, log, thermCtrl, meteo, cfg);
+
         ISecureDB secDb = (ISecureDB)builder.makeService(SECURE_DB_TASK_SRV);
         ISecurity secure = (ISecurity)builder.makeService(SECURE_SRV, secDb);
         Runnable secureTask = (Runnable)builder.makeService(SECURE_TASK_SRV, log, secure, notify, cfg);
 
-        IController ctrl = (IController)builder.makeService(CTRL_SRV, log, cfg, meteo, meteoTask, secure, secureTask);
+        IController ctrl = (IController)builder.makeService(CTRL_SRV, log, cfg, meteo, meteoTask, secure, secureTask, thermCtrl, thermTask);
 
         IMenu mainMenu = (IMenu)builder.makeService(TG_BOT_MAIN_MENU_SRV, cfg);
         IMenu meteoMenu = (IMenu)builder.makeService(TG_BOT_METEO_MENU_SRV, ctrl);
         IMenu camMenu = (IMenu)builder.makeService(TG_BOT_CAM_MENU_SRV, cfg);
         IMenu secMenu = (IMenu)builder.makeService(TG_BOT_SECURE_MENU_SRV, ctrl);
         IMenu meteoStatMenu = (IMenu)builder.makeService(TG_BOT_METEO_STAT_MENU_SRV, ctrl, cfg);
+        IMenu thermMenu = (IMenu)builder.makeService(THERM_MENU_SRV, ctrl, cfg);
+        IMenu thermCtrlMenu = (IMenu)builder.makeService(THERM_CTRL_MENU_SRV, ctrl, log);
         TelegramBotsApi tgBotApi = (TelegramBotsApi)builder.makeService(TG_BOT_API_SRV);
-        ITelegramBot tgBot = (ITelegramBot)builder.makeService(TG_BOT_SRV, log, cfg, mainMenu, meteoMenu, camMenu, secMenu, meteoStatMenu);
+        ITelegramBot tgBot = (ITelegramBot)builder.makeService(TG_BOT_SRV, log, cfg, mainMenu, meteoMenu, camMenu, secMenu, meteoStatMenu, thermMenu, thermCtrlMenu);
 
         IWebServer server = (IWebServer)builder.makeService(WEB_SRV);
         IHandlersBuilder hdlBuilder = (IHandlersBuilder)builder.makeService(WEB_HDL_SRV, log, ctrl);

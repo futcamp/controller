@@ -24,11 +24,11 @@ import ru.futcamp.controller.modules.meteo.db.MeteoDBData;
 import ru.futcamp.controller.modules.secure.ISecureDevice;
 import ru.futcamp.controller.modules.secure.ISecurity;
 import ru.futcamp.controller.modules.secure.SecureDevice;
+import ru.futcamp.controller.modules.therm.IThermControl;
+import ru.futcamp.controller.modules.therm.IThermDevice;
+import ru.futcamp.controller.modules.therm.ThermDevice;
 import ru.futcamp.utils.configs.IConfigs;
-import ru.futcamp.utils.configs.settings.MeteoDeviceSettings;
-import ru.futcamp.utils.configs.settings.MeteoSettings;
-import ru.futcamp.utils.configs.settings.SecureDeviceSettings;
-import ru.futcamp.utils.configs.settings.SecureSettings;
+import ru.futcamp.utils.configs.settings.*;
 import ru.futcamp.utils.log.ILogger;
 
 import java.util.List;
@@ -45,15 +45,20 @@ public class Controller implements IController {
     private Runnable meteoTask;
     private ISecurity secure;
     private Runnable secureTask;
+    private IThermControl thermCtrl;
+    private Runnable thermTask;
 
     public Controller(ILogger log, IConfigs cfg, IMeteoStation meteo, Runnable meteoTask,
-                      ISecurity secure, Runnable secureTask) {
+                      ISecurity secure, Runnable secureTask, IThermControl thermCtrl,
+                      Runnable thermTask) {
         this.log = log;
         this.cfg = cfg;
         this.meteo = meteo;
         this.meteoTask = meteoTask;
         this.secure = secure;
         this.secureTask = secureTask;
+        this.thermCtrl = thermCtrl;
+        this.thermTask = thermTask;
     }
 
     /**
@@ -62,6 +67,7 @@ public class Controller implements IController {
     public void startModules() {
         MeteoSettings meteoCfg = cfg.getMeteoCfg();
         SecureSettings secCfg = cfg.getSecureCfg();
+        ThermSettings thermCfg = cfg.getThermCfg();
         /*
          * Prepare db
          */
@@ -98,6 +104,21 @@ public class Controller implements IController {
                         dev.getChannel(), "CONTROLLER");
             }
         }
+        if (cfg.getModCfg("therm")) {
+            for (ThermDeviceSettings dev : thermCfg.getDevices()) {
+                IThermDevice device = new ThermDevice(dev.getName(), dev.getAlias(), dev.getIp(), dev.getSensor());
+                thermCtrl.addDevice(device);
+                log.info("Add new therm device name: " + dev.getName() + " ip: " + dev.getIp(), "CTRL");
+            }
+
+            thermCtrl.setDBFileName(thermCfg.getDb());
+            try {
+                thermCtrl.loadStates();
+            } catch (Exception e) {
+                log.error("Fail to load therm states from db: " + e.getMessage(), "CTRL");
+                return;
+            }
+        }
 
         /*
          * Starting all timers
@@ -105,11 +126,15 @@ public class Controller implements IController {
         log.info("Starting controller tasks", "CTRL");
         if (cfg.getModCfg("meteo")) {
             Timer meteoTmr = new Timer(true);
-            meteoTmr.scheduleAtFixedRate((TimerTask) meteoTask, 0, 1000);
+            meteoTmr.scheduleAtFixedRate((TimerTask)meteoTask, 0, 1000);
         }
         if (cfg.getModCfg("security")) {
             Timer secureTmr = new Timer(true);
-            secureTmr.scheduleAtFixedRate((TimerTask) secureTask, 0, 1000);
+            secureTmr.scheduleAtFixedRate((TimerTask)secureTask, 0, 1000);
+        }
+        if (cfg.getModCfg("therm")) {
+            Timer thermTmr = new Timer(true);
+            thermTmr.scheduleAtFixedRate((TimerTask)thermTask, 0, 1000);
         }
     }
 
@@ -188,5 +213,31 @@ public class Controller implements IController {
         } catch (Exception e) {
             log.error("Fail to save states to DB: " + e.getMessage(), "CTRL");
         }
+    }
+
+    /**
+     * Get devices list
+     * @return Devices list
+     */
+    public List<IThermDevice> getThermDevices() {
+        return thermCtrl.getDevices();
+    }
+
+    /**
+     * Get therm device by alias
+     * @param alias Alias of device
+     * @return Device pointer
+     */
+    public IThermDevice getThermDeviceByAlias(String alias) {
+        return thermCtrl.getDeviceByAlias(alias);
+    }
+
+    /**
+     * Save therm state to db
+     * @param device Device pointer
+     * @throws Exception If fail to save state
+     */
+    public void saveThermState(IThermDevice device) throws Exception {
+        thermCtrl.saveState(device);
     }
 }

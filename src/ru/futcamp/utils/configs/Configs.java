@@ -34,6 +34,7 @@ public class Configs implements IConfigs {
     private SecureSettings secureCfg;
     private ModulesSettings modCfg;
     private CtrlSettings ctrlCfg;
+    private ThermSettings thermCfg;
 
     /**
      * Reading and parsing configs
@@ -76,6 +77,10 @@ public class Configs implements IConfigs {
 
             case CTRL_SET:
                 ctrlCfg = JSON.parseObject(data, CtrlSettings.class);
+                break;
+
+            case THERM_SET:
+                thermCfg = JSON.parseObject(data, ThermSettings.class);
                 break;
         }
     }
@@ -129,5 +134,13 @@ public class Configs implements IConfigs {
      */
     public CtrlSettings getCtrlCfg() {
         return ctrlCfg;
+    }
+
+    /**
+     * Get therm control configs
+     * @return Therm control configs
+     */
+    public ThermSettings getThermCfg() {
+        return thermCfg;
     }
 }

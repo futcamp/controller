@@ -30,6 +30,11 @@ import ru.futcamp.controller.modules.secure.SecureTask;
 import ru.futcamp.controller.modules.secure.Security;
 import ru.futcamp.controller.modules.secure.db.ISecureDB;
 import ru.futcamp.controller.modules.secure.db.SecureDB;
+import ru.futcamp.controller.modules.therm.IThermControl;
+import ru.futcamp.controller.modules.therm.ThermControl;
+import ru.futcamp.controller.modules.therm.ThermTask;
+import ru.futcamp.controller.modules.therm.db.IThermDB;
+import ru.futcamp.controller.modules.therm.db.ThermDB;
 import ru.futcamp.net.INotifier;
 import ru.futcamp.net.Notifier;
 import ru.futcamp.net.tgbot.ITelegramBot;
@@ -83,7 +88,7 @@ class ServiceBuilder {
 
             case TG_BOT_SRV:
                 return new TelegramBot((ILogger)sc[0], (IConfigs)sc[1], (IMenu)sc[2], (IMenu)sc[3], (IMenu)sc[4],
-                                        (IMenu)sc[5], (IMenu)sc[6]);
+                                        (IMenu)sc[5], (IMenu)sc[6], (IMenu)sc[7], (IMenu)sc[8]);
 
             case TG_BOT_API_SRV:
                 return new TelegramBotsApi();
@@ -99,7 +104,7 @@ class ServiceBuilder {
 
             case CTRL_SRV:
                 return new Controller((ILogger)sc[0], (IConfigs)sc[1], (IMeteoStation)sc[2], (Runnable)sc[3],
-                                        (ISecurity) sc[4], (Runnable)sc[5]);
+                                        (ISecurity) sc[4], (Runnable)sc[5], (IThermControl)sc[6], (Runnable)sc[7]);
 
             case METEO_SRV:
                 return new MeteoStation((IMeteoDB)sc[0]);
@@ -136,6 +141,21 @@ class ServiceBuilder {
 
             case TG_BOT_METEO_STAT_MENU_SRV:
                 return new MeteoStatMenu((IController)sc[0], (IConfigs)sc[1]);
+
+            case THERM_DB_SRV:
+                return new ThermDB();
+
+            case THERM_CTRL_SRV:
+                return new ThermControl((IThermDB)sc[0]);
+
+            case THERM_TASK_SRV:
+                return new ThermTask((ILogger)sc[0], (IThermControl)sc[1], (IMeteoStation)sc[2], (IConfigs)sc[3]);
+
+            case THERM_MENU_SRV:
+                return new ThermMenu((IController)sc[0], (IConfigs)sc[1]);
+
+            case THERM_CTRL_MENU_SRV:
+                return new ThermCtrlMenu((IController)sc[0], (ILogger)sc[1]);
         }
         return null;
     }

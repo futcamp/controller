@@ -15,16 +15,16 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.controller.modules.therm;
 
-public class TelegramMeteoStatSettings {
-    private String[] sensors;
+import java.util.List;
 
-    public String[] getSensors() {
-        return sensors;
-    }
-
-    public void setSensors(String[] sensors) {
-        this.sensors = sensors;
-    }
+public interface IThermControl {
+    IThermDevice getDevice(String name);
+    List<IThermDevice> getDevices();
+    void saveState(IThermDevice device) throws Exception;
+    void addDevice(IThermDevice device);
+    void setDBFileName(String fileName);
+    void loadStates() throws Exception;
+    IThermDevice getDeviceByAlias(String alias);
 }
