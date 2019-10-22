@@ -37,9 +37,10 @@ public class HttpServer implements IHttpServer {
      * Prepare requests and server
      * @throws IOException If fail to init server
      */
-    public void prepare() throws IOException {
+    public void prepare(String api) throws IOException {
         server.init();
         server.addHandler("/", builder.makeHandler(INDEX_HDL));
+        server.addHandler("/api/" + api + "/security", builder.makeHandler(SECURE_HDL));
     }
 
     /**

@@ -20,5 +20,9 @@ package ru.futcamp;
 public enum DefaultPath {
     TG_CFG_PATH,
     LOG_PATH,
-    HTTP_PATH
+    HTTP_PATH,
+    METEO_PATH,
+    SECURE_PATH,
+    MOD_PATH,
+    CTRL_PATH
 }
