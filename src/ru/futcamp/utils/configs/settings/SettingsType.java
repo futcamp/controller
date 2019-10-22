@@ -19,5 +19,9 @@ package ru.futcamp.utils.configs.settings;
 
 public enum SettingsType {
     TGBOT_SET,
-    HTTP_SET
+    HTTP_SET,
+    METEO_SET,
+    SECURE_SET,
+    MOD_SET,
+    CTRL_SET
 }

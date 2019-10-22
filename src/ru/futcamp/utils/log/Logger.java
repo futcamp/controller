@@ -17,9 +17,7 @@
 
 package ru.futcamp.utils.log;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -36,20 +34,20 @@ public class Logger implements ILogger {
     /**
      * Save log message to file
      * @param message Log message
-     * @param fileName Name of log file
+     * @param fileName PathTo log file
      * @throws IOException Saving exception
      */
     private synchronized void saveToFile(String message, String fileName) throws IOException {
         Date date = new Date();
         SimpleDateFormat dtm = new SimpleDateFormat("20YYMMdd");
 
-        File file = new File(fileName + dtm.format(date) + ".log");
-        FileWriter writer = new FileWriter(file, true);
-
-        writer.append(message);
-        writer.append("\n");
-
-        writer.close();
+        Writer out = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(fileName + dtm.format(date) + ".log"), "UTF-8"));
+        try {
+            out.append(message + "\n");
+        } finally {
+            out.close();
+        }
     }
 
     /**

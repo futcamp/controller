@@ -17,12 +17,14 @@
 
 package ru.futcamp.utils.configs;
 
-import ru.futcamp.utils.configs.settings.HttpSettings;
-import ru.futcamp.utils.configs.settings.SettingsType;
-import ru.futcamp.utils.configs.settings.TelegramSettings;
+import ru.futcamp.utils.configs.settings.*;
 
 public interface IConfigs {
     void readFromFile(String fileName, SettingsType set) throws Exception;
     TelegramSettings getTelegramCfg();
     HttpSettings getHttpCfg();
+    MeteoSettings getMeteoCfg();
+    SecureSettings getSecureCfg();
+    boolean getModCfg(String name);
+    CtrlSettings getCtrlCfg();
 }

@@ -21,6 +21,10 @@ public class TelegramSettings {
     private String key;
     private String login;
     private String[] users;
+    private String[] chats;
+    private TelegramMenuItemSettings[] main;
+    private TelegramMeteoStatSettings[] meteostat;
+    private TelegramCamGroupSettings[] camgroups;
 
     public String getKey() {
         return key;
@@ -44,5 +48,37 @@ public class TelegramSettings {
 
     public void setUsers(String[] users) {
         this.users = users;
+    }
+
+    public TelegramCamGroupSettings[] getCamgroups() {
+        return camgroups;
+    }
+
+    public void setCamgroups(TelegramCamGroupSettings[] camgroups) {
+        this.camgroups = camgroups;
+    }
+
+    public String[] getChats() {
+        return chats;
+    }
+
+    public void setChats(String[] chats) {
+        this.chats = chats;
+    }
+
+    public TelegramMeteoStatSettings[] getMeteostat() {
+        return meteostat;
+    }
+
+    public void setMeteostat(TelegramMeteoStatSettings[] meteostat) {
+        this.meteostat = meteostat;
+    }
+
+    public TelegramMenuItemSettings[] getMain() {
+        return main;
+    }
+
+    public void setMain(TelegramMenuItemSettings[] main) {
+        this.main = main;
     }
 }

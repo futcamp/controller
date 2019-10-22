@@ -20,6 +20,6 @@ package ru.futcamp.net.web;
 import java.io.IOException;
 
 public interface IHttpServer {
-    void prepare() throws IOException;
+    void prepare(String api) throws IOException;
     void start(int port, int queue, int threads) throws IOException;
 }

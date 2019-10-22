@@ -18,15 +18,28 @@
 package ru.futcamp.net.web.handlers;
 
 import com.sun.net.httpserver.HttpHandler;
+import ru.futcamp.controller.IController;
+import ru.futcamp.utils.log.ILogger;
 
 /**
  * Handlers builder
  */
 public class HandlersBuilder implements IHandlersBuilder {
+    private ILogger log;
+    private IController ctrl;
+
+    public HandlersBuilder(ILogger log, IController ctrl) {
+        this.log = log;
+        this.ctrl = ctrl;
+    }
+
     public HttpHandler makeHandler(Handlers handler) {
         switch (handler) {
             case INDEX_HDL:
                 return new IndexHandler();
+
+            case SECURE_HDL:
+                return new SecureHandler(log, ctrl);
         }
         return null;
     }

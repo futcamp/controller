@@ -18,5 +18,6 @@
 package ru.futcamp.net.web.handlers;
 
 public enum Handlers {
-    INDEX_HDL
+    INDEX_HDL,
+    SECURE_HDL
 }

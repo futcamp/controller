@@ -18,16 +18,22 @@
 package ru.futcamp.utils.configs;
 
 import com.alibaba.fastjson.JSON;
-import ru.futcamp.utils.configs.settings.HttpSettings;
-import ru.futcamp.utils.configs.settings.SettingsType;
-import ru.futcamp.utils.configs.settings.TelegramSettings;
+import ru.futcamp.utils.configs.settings.*;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class Configs implements IConfigs {
     private TelegramSettings tgCfg;
     private HttpSettings httpCfg;
+    private MeteoSettings meteoCfg;
+    private SecureSettings secureCfg;
+    private ModulesSettings modCfg;
+    private CtrlSettings ctrlCfg;
 
     /**
      * Reading and parsing configs
@@ -35,7 +41,17 @@ public class Configs implements IConfigs {
      * @throws Exception Reading configs file exception
      */
     public void readFromFile(String fileName, SettingsType set) throws Exception {
-        String data = new String(Files.readAllBytes(Paths.get(fileName)));
+        String str = "";
+        String data = "";
+        File fileDir = new File(fileName);
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+                                new FileInputStream(fileDir), "UTF8"));
+
+        while ((str = in.readLine()) != null) {
+            data += str;
+        }
+        in.close();
 
         switch (set) {
             case TGBOT_SET:
@@ -44,6 +60,23 @@ public class Configs implements IConfigs {
 
             case HTTP_SET:
                 httpCfg = JSON.parseObject(data, HttpSettings.class);
+                break;
+
+            case METEO_SET:
+                meteoCfg = JSON.parseObject(data, MeteoSettings.class);
+                break;
+
+            case SECURE_SET:
+                secureCfg = JSON.parseObject(data, SecureSettings.class);
+                break;
+
+            case MOD_SET:
+                modCfg = JSON.parseObject(data, ModulesSettings.class);
+                break;
+
+            case CTRL_SET:
+                ctrlCfg = JSON.parseObject(data, CtrlSettings.class);
+                break;
         }
     }
 
@@ -60,4 +93,41 @@ public class Configs implements IConfigs {
      * @return Http server configs
      */
     public HttpSettings getHttpCfg() { return this.httpCfg; }
+
+    /**
+     * Get meteo settings
+     * @return Meteo settings
+     */
+    public MeteoSettings getMeteoCfg() {
+        return meteoCfg;
+    }
+
+    /**
+     * Get security settings
+     * @return Security settings
+     */
+    public SecureSettings getSecureCfg() {
+        return secureCfg;
+    }
+
+    /**
+     * Get modules enable settings
+     * @param name Name of module
+     * @return State
+     */
+    public boolean getModCfg(String name) {
+        for (ModSettings mod : modCfg.getModules()) {
+            if (mod.getName().equals(name))
+                return mod.isEnable();
+        }
+        return false;
+    }
+
+    /**
+     * Get controller settings
+     * @return Controller settings
+     */
+    public CtrlSettings getCtrlCfg() {
+        return ctrlCfg;
+    }
 }

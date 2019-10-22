@@ -44,6 +44,18 @@ class Path {
 
             case HTTP_PATH:
                 return "/etc/futcamp/http.conf";
+
+            case METEO_PATH:
+                return "/etc/futcamp/meteo.conf";
+
+            case SECURE_PATH:
+                return "/etc/futcamp/secure.conf";
+
+            case MOD_PATH:
+                return "/etc/futcamp/modules.conf";
+
+            case CTRL_PATH:
+                return "/etc/futcamp/controller.conf";
         }
         return null;
     }
