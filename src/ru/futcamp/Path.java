@@ -56,6 +56,9 @@ class Path {
 
             case CTRL_PATH:
                 return "/etc/futcamp/controller.conf";
+
+            case THERM_PATH:
+                return "/etc/futcamp/therm.conf";
         }
         return null;
     }

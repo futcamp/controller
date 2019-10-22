@@ -15,16 +15,22 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.controller.modules.therm;
 
-public class TelegramMeteoStatSettings {
-    private String[] sensors;
-
-    public String[] getSensors() {
-        return sensors;
-    }
-
-    public void setSensors(String[] sensors) {
-        this.sensors = sensors;
-    }
+public interface IThermDevice {
+    String getName();
+    void setName(String name);
+    String getAlias();
+    void setAlias(String alias);
+    String getIp();
+    void setIp(String ip);
+    String getSensor();
+    void setSensor(String sensor);
+    void syncStates() throws Exception;
+    boolean isStatus();
+    void setStatus(boolean status);
+    boolean isHeater();
+    void setHeater(boolean heater);
+    int getThreshold();
+    void setThreshold(int threshold);
 }

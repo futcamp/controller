@@ -15,16 +15,16 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.controller.modules.therm.db;
 
-public class TelegramMeteoStatSettings {
-    private String[] sensors;
+import java.sql.SQLException;
+import java.util.List;
 
-    public String[] getSensors() {
-        return sensors;
-    }
-
-    public void setSensors(String[] sensors) {
-        this.sensors = sensors;
-    }
+public interface IThermDB {
+    void setFileName(String fileName);
+    void connect() throws SQLException;
+    List<ThermDBData> loadThermDataAll() throws SQLException;
+    ThermDBData loadThermData(String device) throws SQLException;
+    void saveStates(ThermDBData data) throws SQLException;
+    void close() throws SQLException;
 }

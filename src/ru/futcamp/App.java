@@ -76,6 +76,9 @@ public class App implements IApp {
             if (cfg.getModCfg("security")) {
                 cfg.readFromFile(path.getPath(SECURE_PATH), SECURE_SET);
             }
+            if (cfg.getModCfg("therm")) {
+                cfg.readFromFile(path.getPath(THERM_PATH), THERM_SET);
+            }
         } catch (Exception e) {
             log.error("Fail to read configs: " + e.getMessage(), "APP");
             return;

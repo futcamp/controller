@@ -23,5 +23,6 @@ public enum SettingsType {
     METEO_SET,
     SECURE_SET,
     MOD_SET,
-    CTRL_SET
+    CTRL_SET,
+    THERM_SET
 }

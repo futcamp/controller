@@ -24,5 +24,6 @@ public enum DefaultPath {
     METEO_PATH,
     SECURE_PATH,
     MOD_PATH,
-    CTRL_PATH
+    CTRL_PATH,
+    THERM_PATH
 }

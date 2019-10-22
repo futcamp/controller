@@ -17,14 +17,32 @@
 
 package ru.futcamp.utils.configs.settings;
 
-public class TelegramMeteoStatSettings {
-    private String[] sensors;
+public class ThermSettings {
+    private int interval;
+    private String db;
+    private ThermDeviceSettings[] devices;
 
-    public String[] getSensors() {
-        return sensors;
+    public int getInterval() {
+        return interval;
     }
 
-    public void setSensors(String[] sensors) {
-        this.sensors = sensors;
+    public void setInterval(int interval) {
+        this.interval = interval;
+    }
+
+    public String getDb() {
+        return db;
+    }
+
+    public void setDb(String db) {
+        this.db = db;
+    }
+
+    public ThermDeviceSettings[] getDevices() {
+        return devices;
+    }
+
+    public void setDevices(ThermDeviceSettings[] devices) {
+        this.devices = devices;
     }
 }

@@ -24,6 +24,7 @@ public class TelegramSettings {
     private String[] chats;
     private TelegramMenuItemSettings[] main;
     private TelegramMeteoStatSettings[] meteostat;
+    private TelegramThermSettings[] therm;
     private TelegramCamGroupSettings[] camgroups;
 
     public String getKey() {
@@ -80,5 +81,13 @@ public class TelegramSettings {
 
     public void setMain(TelegramMenuItemSettings[] main) {
         this.main = main;
+    }
+
+    public TelegramThermSettings[] getTherm() {
+        return therm;
+    }
+
+    public void setTherm(TelegramThermSettings[] therm) {
+        this.therm = therm;
     }
 }

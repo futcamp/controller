@@ -22,5 +22,7 @@ public enum LevelMenu {
     METEO_MENU,
     METEO_STAT_MENU,
     CAM_MENU,
-    SECURE_MENU
+    SECURE_MENU,
+    THERM_MENU,
+    THERM_CTRL_MENU
 }

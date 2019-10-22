@@ -27,4 +27,5 @@ public interface IConfigs {
     SecureSettings getSecureCfg();
     boolean getModCfg(String name);
     CtrlSettings getCtrlCfg();
+    ThermSettings getThermCfg();
 }
