@@ -87,7 +87,6 @@ public class ThermDB implements IThermDB {
         ResultSet resultSet = statement.executeQuery("SELECT * FROM therm WHERE name = '" + name + "'");
 
         while (resultSet.next()) {
-
             states.setName(resultSet.getString("name"));
             states.setStatus(resultSet.getBoolean("status"));
             states.setThreshold(resultSet.getInt("threshold"));

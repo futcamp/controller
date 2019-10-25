@@ -24,5 +24,7 @@ public interface ISecureDB {
     void connect() throws SQLException;
     SecureDBData loadSecureStates() throws SQLException;
     void saveStates(SecureDBData data) throws SQLException;
+    void saveMIHStatus(MIHDBData status) throws SQLException;
+    MIHDBData loadMIHData() throws SQLException;
     void close() throws SQLException;
 }

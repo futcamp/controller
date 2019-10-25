@@ -18,6 +18,7 @@
 package ru.futcamp.controller.modules.secure;
 
 import ru.futcamp.net.INotifier;
+import ru.futcamp.utils.TimeControl;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.log.ILogger;
 
@@ -31,14 +32,16 @@ public class SecureTask extends TimerTask {
     private ISecurity secure;
     private INotifier notify;
     private IConfigs cfg;
+    private IMainInHome mih;
 
     private int counter = 0;
 
-    public SecureTask(ILogger log, ISecurity secure, INotifier notify, IConfigs cfg) {
+    public SecureTask(ILogger log, ISecurity secure, INotifier notify, IConfigs cfg, IMainInHome mih) {
         this.log = log;
         this.secure = secure;
         this.notify = notify;
         this.cfg = cfg;
+        this.mih = mih;
     }
 
     @Override
@@ -49,6 +52,14 @@ public class SecureTask extends TimerTask {
             return;
         counter = 0;
 
+        processSecure();
+        processMIH();
+    }
+
+    /**
+     * Process Secure
+     */
+    private void processSecure() {
         for (ISecureDevice device : secure.getDevices()) {
             if (secure.isStatus()) {
                 if (device.isState()) {
@@ -97,6 +108,44 @@ public class SecureTask extends TimerTask {
                 log.error("Fail to sync alarm state with device " + device.getName() + ": " +
                         e.getMessage(), "SECURETASK");
             }
+        }
+    }
+
+    /**
+     * Process Man In Home subsystem
+     */
+    private void processMIH() {
+        int curTime = TimeControl.getCurHour();
+
+        if (mih.isStatus()) {
+            if (curTime >= mih.getTimeOn() &&
+                    curTime <= mih.getTimeOff()) {
+
+                mih.setLamp(true);
+                /*
+                 * Switch on radio
+                 */
+                if (curTime % 2 == 0) {
+                    mih.setRadio(false);
+                } else {
+                    mih.setRadio(true);
+                }
+            } else {
+                mih.setLamp(false);
+                mih.setRadio(false);
+            }
+        } else {
+            mih.setLamp(false);
+            mih.setRadio(false);
+        }
+
+        /*
+         * Sync states with device
+         */
+        try {
+            mih.syncStates();
+        } catch (Exception e) {
+            log.error("Fail to sync MIH states: " + e.getMessage(), "SECURETASK");
         }
     }
 }

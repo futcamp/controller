@@ -42,7 +42,7 @@ public class Logger implements ILogger {
         SimpleDateFormat dtm = new SimpleDateFormat("20YYMMdd");
 
         Writer out = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(fileName + dtm.format(date) + ".log"), "UTF-8"));
+                new FileOutputStream(fileName + dtm.format(date) + ".log", true), "UTF-8"));
         try {
             out.append(message + "\n");
         } finally {

@@ -17,41 +17,32 @@
 
 package ru.futcamp.utils.configs.settings;
 
-public class SecureSettings {
-    private int interval;
-    private String db;
-    private String mih;
-    private SecureDeviceSettings[] devices;
+public class LcdSettings {
+    private String ip;
+    private String name;
+    private LcdDeviceSettings[] sensors;
 
-    public int getInterval() {
-        return interval;
+    public LcdDeviceSettings[] getSensors() {
+        return sensors;
     }
 
-    public void setInterval(int interval) {
-        this.interval = interval;
+    public void setSensors(LcdDeviceSettings[] sensors) {
+        this.sensors = sensors;
     }
 
-    public SecureDeviceSettings[] getDevices() {
-        return devices;
+    public String getIp() {
+        return ip;
     }
 
-    public void setDevices(SecureDeviceSettings[] devices) {
-        this.devices = devices;
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
-    public String getDb() {
-        return db;
+    public String getName() {
+        return name;
     }
 
-    public void setDb(String db) {
-        this.db = db;
-    }
-
-    public String getMih() {
-        return mih;
-    }
-
-    public void setMih(String mih) {
-        this.mih = mih;
+    public void setName(String name) {
+        this.name = name;
     }
 }

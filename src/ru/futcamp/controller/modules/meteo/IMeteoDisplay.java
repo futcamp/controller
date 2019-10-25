@@ -15,15 +15,9 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.net.tgbot.menu;
+package ru.futcamp.controller.modules.meteo;
 
-public enum LevelMenu {
-    MAIN_MENU,
-    METEO_MENU,
-    METEO_STAT_MENU,
-    CAM_MENU,
-    SECURE_MENU,
-    MIH_MENU,
-    THERM_MENU,
-    THERM_CTRL_MENU
+public interface IMeteoDisplay {
+    void updateData(String ip, int id, int value, String type) throws Exception;
+    void showData(String ip) throws Exception;
 }

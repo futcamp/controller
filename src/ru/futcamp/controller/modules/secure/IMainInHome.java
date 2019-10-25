@@ -15,15 +15,23 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.net.tgbot.menu;
+package ru.futcamp.controller.modules.secure;
 
-public enum LevelMenu {
-    MAIN_MENU,
-    METEO_MENU,
-    METEO_STAT_MENU,
-    CAM_MENU,
-    SECURE_MENU,
-    MIH_MENU,
-    THERM_MENU,
-    THERM_CTRL_MENU
+public interface IMainInHome {
+    void setStatus(boolean status);
+    boolean isStatus();
+    void setLamp(boolean lamp);
+    boolean isLamp();
+    void setRadio(boolean radio);
+    boolean isRadio();
+    void saveData() throws Exception;
+    void loadDataFromDb() throws Exception;
+    void setDBFileName(String fileName);
+    void setTimeOn(int timeOn);
+    int getTimeOn();
+    void setTimeOff(int timeOff);
+    int getTimeOff();
+    void syncStates() throws Exception;
+    String getIp();
+    void setIp(String ip);
 }

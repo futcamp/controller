@@ -20,14 +20,10 @@ package ru.futcamp;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import ru.futcamp.controller.Controller;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.meteo.IMeteoStation;
-import ru.futcamp.controller.modules.meteo.MeteoStation;
-import ru.futcamp.controller.modules.meteo.MeteoTask;
+import ru.futcamp.controller.modules.meteo.*;
 import ru.futcamp.controller.modules.meteo.db.IMeteoDB;
 import ru.futcamp.controller.modules.meteo.db.MeteoDB;
-import ru.futcamp.controller.modules.secure.ISecurity;
-import ru.futcamp.controller.modules.secure.SecureTask;
-import ru.futcamp.controller.modules.secure.Security;
+import ru.futcamp.controller.modules.secure.*;
 import ru.futcamp.controller.modules.secure.db.ISecureDB;
 import ru.futcamp.controller.modules.secure.db.SecureDB;
 import ru.futcamp.controller.modules.therm.IThermControl;
@@ -88,7 +84,7 @@ class ServiceBuilder {
 
             case TG_BOT_SRV:
                 return new TelegramBot((ILogger)sc[0], (IConfigs)sc[1], (IMenu)sc[2], (IMenu)sc[3], (IMenu)sc[4],
-                                        (IMenu)sc[5], (IMenu)sc[6], (IMenu)sc[7], (IMenu)sc[8]);
+                                        (IMenu)sc[5], (IMenu)sc[6], (IMenu)sc[7], (IMenu)sc[8], (IMenu)sc[9]);
 
             case TG_BOT_API_SRV:
                 return new TelegramBotsApi();
@@ -104,13 +100,14 @@ class ServiceBuilder {
 
             case CTRL_SRV:
                 return new Controller((ILogger)sc[0], (IConfigs)sc[1], (IMeteoStation)sc[2], (Runnable)sc[3],
-                                        (ISecurity) sc[4], (Runnable)sc[5], (IThermControl)sc[6], (Runnable)sc[7]);
+                                        (ISecurity) sc[4], (Runnable)sc[5], (IThermControl)sc[6], (Runnable)sc[7],
+                                        (IMainInHome)sc[8]);
 
             case METEO_SRV:
                 return new MeteoStation((IMeteoDB)sc[0]);
 
             case METEO_TSK_SRV:
-                return new MeteoTask((ILogger)sc[0], (IMeteoStation)sc[2], (IConfigs)sc[3]);
+                return new MeteoTask((ILogger)sc[0], (IMeteoStation)sc[2], (IConfigs)sc[3], (IMeteoDisplay)sc[4]);
 
             case TG_BOT_MAIN_MENU_SRV:
                 return new MainMenu((IConfigs)sc[0]);
@@ -125,7 +122,7 @@ class ServiceBuilder {
                 return new Security((ISecureDB)sc[0]);
 
             case SECURE_TASK_SRV:
-                return new SecureTask((ILogger)sc[0], (ISecurity)sc[1], (INotifier)sc[2], (IConfigs)sc[3]);
+                return new SecureTask((ILogger)sc[0], (ISecurity)sc[1], (INotifier)sc[2], (IConfigs)sc[3], (IMainInHome)sc[4]);
 
             case TG_BOT_SECURE_MENU_SRV:
                 return new SecureMenu((IController)sc[0]);
@@ -154,8 +151,17 @@ class ServiceBuilder {
             case THERM_MENU_SRV:
                 return new ThermMenu((IController)sc[0], (IConfigs)sc[1]);
 
-            case THERM_CTRL_MENU_SRV:
+            case TG_BOT_THERM_CTRL_MENU_SRV:
                 return new ThermCtrlMenu((IController)sc[0], (ILogger)sc[1]);
+
+            case MIH_SRV:
+                return new ManInHome((ISecureDB)sc[0]);
+
+            case TG_BOT_MIH_MENU:
+                return new MIHMenu((IController)sc[0]);
+
+            case METEO_LCD_SRV:
+                return new MeteoDisplay();
         }
         return null;
     }
