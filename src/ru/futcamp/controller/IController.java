@@ -27,6 +27,7 @@ import java.util.List;
 public interface IController {
     void startModules();
     List<IMeteoDevice> getMeteoDevices();
+    IMeteoDevice getMeteoDevice(String name);
     void setSecureState(String ip, int channel, boolean state);
     void setSecureStatus(boolean status);
     boolean isSecureStatus();
@@ -37,4 +38,16 @@ public interface IController {
     List<IThermDevice> getThermDevices();
     IThermDevice getThermDeviceByAlias(String alias);
     void saveThermState(IThermDevice device) throws Exception;
+    void saveMIHStates();
+    void setMIHStatus(boolean status);
+    void setMIHRadio(boolean status);
+    void setMIHLamp(boolean status);
+    void setMIHTimeOn(boolean status);
+    void setMIHTimeOn(int time);
+    void setMIHTimeOff(int time);
+    boolean isMIHStatus();
+    boolean isMIHRadio();
+    boolean isMIHLamp();
+    int getMIHTimeOn();
+    int getMIHTimeOff();
 }

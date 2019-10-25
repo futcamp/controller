@@ -21,6 +21,7 @@ import ru.futcamp.controller.modules.meteo.IMeteoDevice;
 import ru.futcamp.controller.modules.meteo.IMeteoStation;
 import ru.futcamp.controller.modules.meteo.MeteoDevice;
 import ru.futcamp.controller.modules.meteo.db.MeteoDBData;
+import ru.futcamp.controller.modules.secure.IMainInHome;
 import ru.futcamp.controller.modules.secure.ISecureDevice;
 import ru.futcamp.controller.modules.secure.ISecurity;
 import ru.futcamp.controller.modules.secure.SecureDevice;
@@ -47,10 +48,11 @@ public class Controller implements IController {
     private Runnable secureTask;
     private IThermControl thermCtrl;
     private Runnable thermTask;
+    private IMainInHome mih;
 
     public Controller(ILogger log, IConfigs cfg, IMeteoStation meteo, Runnable meteoTask,
                       ISecurity secure, Runnable secureTask, IThermControl thermCtrl,
-                      Runnable thermTask) {
+                      Runnable thermTask, IMainInHome mih) {
         this.log = log;
         this.cfg = cfg;
         this.meteo = meteo;
@@ -59,6 +61,7 @@ public class Controller implements IController {
         this.secureTask = secureTask;
         this.thermCtrl = thermCtrl;
         this.thermTask = thermTask;
+        this.mih = mih;
     }
 
     /**
@@ -79,6 +82,13 @@ public class Controller implements IController {
                 secure.loadStates();
             } catch (Exception e) {
                 log.error("Fail to load secure states from db: " + e.getMessage(), "CTRL");
+                return;
+            }
+            mih.setDBFileName(secCfg.getDb());
+            try {
+                mih.loadDataFromDb();
+            } catch (Exception e) {
+                log.error("Fail to load ManInHome states from db: " + e.getMessage(), "CTRL");
                 return;
             }
         }
@@ -103,6 +113,7 @@ public class Controller implements IController {
                 log.info("Add new secure device name: " + dev.getName() + " ip: " + dev.getIp() + " chan: " +
                         dev.getChannel(), "CONTROLLER");
             }
+            mih.setIp(secCfg.getMih());
         }
         if (cfg.getModCfg("therm")) {
             for (ThermDeviceSettings dev : thermCfg.getDevices()) {
@@ -145,6 +156,13 @@ public class Controller implements IController {
     public List<IMeteoDevice> getMeteoDevices() {
         return meteo.getDevices();
     }
+
+    /**
+     * Get meteo device by name
+     * @param name Name of device
+     * @return Meteo device
+     */
+    public IMeteoDevice getMeteoDevice(String name) { return meteo.getDevice(name); }
 
     /**
      * Get meteo data from sensor by date
@@ -211,8 +229,63 @@ public class Controller implements IController {
         try {
             secure.saveStates();
         } catch (Exception e) {
-            log.error("Fail to save states to DB: " + e.getMessage(), "CTRL");
+            log.error("Fail to save secure states to DB: " + e.getMessage(), "CTRL");
         }
+    }
+
+    /**
+     * Save "Man In Home" subsystem states
+     */
+    public void saveMIHStates() {
+        try {
+            mih.saveData();
+        } catch (Exception e) {
+            log.error("Fail to save MIH states to DB: " + e.getMessage(), "CTRL");
+        }
+    }
+
+    public void setMIHStatus(boolean status) {
+        mih.setStatus(status);
+    }
+
+    public void setMIHRadio(boolean status) {
+        mih.setStatus(status);
+    }
+
+    public void setMIHLamp(boolean status) {
+        mih.setStatus(status);
+    }
+
+    public void setMIHTimeOn(boolean status) {
+        mih.setStatus(status);
+    }
+
+    public void setMIHTimeOn(int time) {
+        mih.setTimeOn(time);
+    }
+
+    public void setMIHTimeOff(int time) {
+        mih.setTimeOff(time);
+    }
+
+    public boolean isMIHStatus() {
+        return mih.isStatus();
+    }
+
+    public boolean isMIHRadio() {
+        return mih.isRadio();
+    }
+
+    public boolean isMIHLamp() {
+        return mih.isLamp();
+    }
+
+    public int getMIHTimeOn() {
+        return mih.getTimeOn();
+    }
+
+    public int getMIHTimeOff() {
+        return mih.getTimeOff();
     }
 
     /**

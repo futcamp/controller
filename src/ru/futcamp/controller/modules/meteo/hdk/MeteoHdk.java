@@ -27,11 +27,24 @@ public class MeteoHdk {
     private String ip;
     private int channel;
     private String type;
+    private int id;
+    private int value;
 
     public MeteoHdk(String ip, String type, int chan) {
         this.ip = ip;
         this.channel = chan;
         this.type = type;
+    }
+
+    public MeteoHdk(String ip, int id, int value, String type) {
+        this.ip = ip;
+        this.id = id;
+        this.value = value;
+        this.type = type;
+    }
+
+    public MeteoHdk(String ip) {
+        this.ip = ip;
     }
 
     /**
@@ -47,5 +60,23 @@ public class MeteoHdk {
         data = JSON.parseObject(response, HdkMeteoData.class);
 
         return data;
+    }
+
+    /**
+     * Update meteo data on lcd module
+     * @throws Exception If fail to update data
+     */
+    public void updateMeteoLcd() throws Exception {
+        HttpClient client = new HttpClient("http://" + ip + "/update?type=" + type + "&id=" + id + "&value=" + value);
+        client.getRequest(2000);
+    }
+
+    /**
+     * Show data on screen
+     * @throws Exception If fail to show data
+     */
+    public void displayMeteoLcd() throws Exception {
+        HttpClient client = new HttpClient("http://" + ip + "/display");
+        String response = client.getRequest(2000);
     }
 }

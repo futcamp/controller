@@ -24,6 +24,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.controller.IController;
+import ru.futcamp.controller.modules.meteo.IMeteoDevice;
 import ru.futcamp.controller.modules.therm.IThermDevice;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.configs.settings.TelegramThermSettings;
@@ -60,6 +61,7 @@ public class ThermMenu implements IMenu {
             txt += "<b>" + device.getAlias() + "</b>\n";
             txt += "Статус: <b>" + (device.isStatus() ? "Работает" : "Отключен") + "</b>\n";
             txt += "Обогреватель: <b>" + (device.isHeater() ? "Работает" : "Отключен") + "</b>\n";
+            txt += "Текущая температура: <b>" + ctrl.getMeteoDevice(device.getSensor()).getTemp() + "°</b>\n";
             txt += "Держать температуру: <b>" + device.getThreshold() + "°</b>\n\n";
         }
 

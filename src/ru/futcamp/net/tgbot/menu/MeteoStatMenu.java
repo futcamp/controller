@@ -82,6 +82,8 @@ public class MeteoStatMenu implements IMenu {
     private SendMessage printData(Update upd, String date, List<MeteoDBData> data) {
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
         String txt = "Место: <b>" + upd.getMessage().getText() + "</b> Дата: <b>" + date + "</b>\n\n";
+        int tMin = data.get(0).getTemp();
+        int tMax = data.get(0).getTemp();
 
         for (MeteoDBData datum : data) {
             txt += "Время: <b>";
@@ -90,7 +92,16 @@ public class MeteoStatMenu implements IMenu {
             }
             txt += datum.getHour() + ":00</b> Темп: <b>" + datum.getTemp() + "°";
             txt += "</b> Влажн: <b>" + datum.getHum() + "%</b>\n";
+            if (datum.getTemp() < tMin) {
+                tMin = datum.getTemp();
+            }
+            if (datum.getTemp() > tMax) {
+                tMax = datum.getTemp();
+            }
         }
+
+        txt += "\nМинимальная t: <b>" + tMin + "°</b>\n";
+        txt += "Максимальная t: <b>" + tMax + "°</b>\n";
 
         msg.enableHtml(true);
         msg.setText(txt);

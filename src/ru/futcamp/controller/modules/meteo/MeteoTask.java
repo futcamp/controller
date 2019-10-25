@@ -19,6 +19,8 @@ package ru.futcamp.controller.modules.meteo;
 
 import ru.futcamp.utils.TimeControl;
 import ru.futcamp.utils.configs.IConfigs;
+import ru.futcamp.utils.configs.settings.LcdDeviceSettings;
+import ru.futcamp.utils.configs.settings.LcdSettings;
 import ru.futcamp.utils.configs.settings.MeteoSettings;
 import ru.futcamp.utils.log.ILogger;
 
@@ -31,20 +33,62 @@ public class MeteoTask extends TimerTask {
     private ILogger log;
     private IMeteoStation meteo;
     private IConfigs cfg;
+    private IMeteoDisplay lcd;
 
     private int dbCounter = 0;
-    private int meteoCounter;
+    private int meteoCounter = 0;
+    private int lcdCounter = 0;
 
     private static int MaxSensorRetries = 3;
 
-    public MeteoTask(ILogger log, IMeteoStation meteo, IConfigs cfg) {
+    public MeteoTask(ILogger log, IMeteoStation meteo, IConfigs cfg, IMeteoDisplay lcd) {
         this.log = log;
         this.meteo = meteo;
         this.cfg = cfg;
+        this.lcd = lcd;
     }
 
     @Override
     public void run() {
+        processMeteo();
+        processDisplay();
+    }
+
+    private void processDisplay() {
+        MeteoSettings mCfg = cfg.getMeteoCfg();
+        lcdCounter++;
+
+        if (lcdCounter != mCfg.getLcdInterval())
+            return;
+        lcdCounter = 0;
+
+        for (LcdSettings display : mCfg.getDisplays()) {
+            for (LcdDeviceSettings device : display.getSensors()) {
+                try {
+                    int value = 0;
+
+                    if (device.getType().equals("temp")) {
+                        value = meteo.getDevice(device.getSensor()).getTemp();
+                    } else if (device.getType().equals("hum")) {
+                        value = meteo.getDevice(device.getSensor()).getHumidity();
+                    }
+
+                    lcd.updateData(display.getIp(), device.getId(), value, device.getType());
+                } catch (Exception e) {
+                    log.error("Fail to update meteo data on lcd \"" + display.getName() + "\": " + e.getMessage(),
+                            "METEOTASK");
+                }
+            }
+            try {
+                lcd.showData(display.getIp());
+            } catch (Exception e) {
+                log.error("Fail to display meteo data on \"" + display.getName() + "\": " + e.getMessage(),
+                        "METEOTASK");
+            }
+        }
+    }
+
+    private void processMeteo() {
         MeteoSettings mCfg = cfg.getMeteoCfg();
         dbCounter++;
         meteoCounter++;
@@ -73,7 +117,6 @@ public class MeteoTask extends TimerTask {
                                     "METEOTASK");
                             device.setFail(true);
                         }
-                        continue;
                     }
                 }
             }

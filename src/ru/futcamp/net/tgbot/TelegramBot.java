@@ -44,13 +44,15 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
     private IMenu meteoStatMenu;
     private IMenu thermMenu;
     private IMenu thermCtrlMenu;
+    private IMenu mihMenu;
 
     private String key;
     private String login;
     private Map<String, IBotMenu> level = new HashMap<>();
 
     public TelegramBot(ILogger log, IConfigs cfg, IMenu mainMenu, IMenu meteoMenu, IMenu camMenu,
-                       IMenu secMenu, IMenu meteoStatMenu, IMenu thermMenu, IMenu thermCtrlMenu) {
+                       IMenu secMenu, IMenu meteoStatMenu, IMenu thermMenu, IMenu thermCtrlMenu,
+                       IMenu mihMenu) {
         this.cfg = cfg;
         this.log = log;
         this.mainMenu = mainMenu;
@@ -60,6 +62,7 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
         this.meteoStatMenu = meteoStatMenu;
         this.thermMenu = thermMenu;
         this.thermCtrlMenu = thermCtrlMenu;
+        this.mihMenu = mihMenu;
     }
 
     /**
@@ -135,6 +138,10 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
                     thermCtrlMenu.updateMessage(this, upd, menu);
                     break;
 
+                case MIH_MENU:
+                    mihMenu.updateMessage(this, upd, menu);
+                    break;
+
                 default:
                     mainMenu.updateMessage(this, upd, menu);
                     break;
@@ -167,7 +174,7 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
                 level.get(user).setLevel(CAM_MENU);
                 return;
             }
-            if (msg.equals("Сигналка"))  {
+            if (msg.equals("Охрана"))  {
                 level.get(user).setLevel(SECURE_MENU);
                 return;
             }
@@ -213,6 +220,16 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
         if (level.get(user).getLevel().equals(SECURE_MENU)) {
             if (msg.equals("Назад")) {
                 level.get(user).setLevel(MAIN_MENU);
+                return;
+            }
+            if (msg.equals("Человек в Доме")) {
+                level.get(user).setLevel(MIH_MENU);
+                return;
+            }
+        }
+        if (level.get(user).getLevel().equals(MIH_MENU)) {
+            if (msg.equals("Назад")) {
+                level.get(user).setLevel(SECURE_MENU);
                 return;
             }
         }

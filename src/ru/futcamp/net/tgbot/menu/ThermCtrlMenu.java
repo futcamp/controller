@@ -66,6 +66,7 @@ public class ThermCtrlMenu implements IMenu {
         txt += "<b>" + device.getAlias() + "</b>\n";
         txt += "Статус: <b>" + (device.isStatus() ? "Работает" : "Отключен") + "</b>\n";
         txt += "Обогреватель: <b>" + (device.isHeater() ? "Работает" : "Отключен") + "</b>\n";
+        txt += "Текущая температура: <b>" + ctrl.getMeteoDevice(device.getSensor()).getTemp() + "°</b>\n";
         txt += "Держать температуру: <b>" + device.getThreshold() + "°</b>\n\n";
 
         msg.setText(txt);

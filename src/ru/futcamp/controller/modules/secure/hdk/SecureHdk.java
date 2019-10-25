@@ -38,4 +38,15 @@ public class SecureHdk {
         HttpClient client = new HttpClient("http://" + ip + "/alarm?state=" + state);
         client.getRequest(2000);
     }
+
+    /**
+     * Sync states with device
+     * @param radio Radio state
+     * @param lamp Lamp state
+     * @throws Exception If fail to send states
+     */
+    public void setMIHStates(boolean radio, boolean lamp) throws Exception {
+        HttpClient client = new HttpClient("http://" + ip + "/alarm?radio=" + radio + "&lamp=" + lamp);
+        client.getRequest(2000);
+    }
 }

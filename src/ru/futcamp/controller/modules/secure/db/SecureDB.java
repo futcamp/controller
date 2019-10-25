@@ -84,6 +84,41 @@ public class SecureDB implements ISecureDB {
     }
 
     /**
+     * Save Man In Home states to db
+     * @param data MIH data
+     * @throws SQLException If fail to save states
+     */
+    public void saveMIHStatus(MIHDBData data) throws SQLException {
+        PreparedStatement statement = conn.prepareStatement("UPDATE mih SET status = ?, tmon = ?, tmoff = ?");
+        statement.setObject(1, data.isStatus());
+        statement.setObject(2, data.getTimeOn());
+        statement.setObject(3, data.getTimeOff());
+        statement.execute();
+        statement.close();
+    }
+
+    /**
+     * Get Man In Home subsystem data from db
+     * @return States
+     * @throws SQLException If fail to read states
+     */
+    public MIHDBData loadMIHData() throws SQLException {
+        MIHDBData data = new MIHDBData();
+        Statement statement = conn.createStatement();
+        ResultSet resultSet = statement.executeQuery("SELECT * FROM mih");
+
+        while (resultSet.next()) {
+            data.setStatus(resultSet.getBoolean("status"));
+            data.setTimeOn(resultSet.getInt("tmon"));
+            data.setTimeOff(resultSet.getInt("tmoff"));
+        }
+        statement.close();
+        resultSet.close();
+
+        return data;
+    }
+
+    /**
      * Close db connection
      * @throws SQLException If fail to close
      */

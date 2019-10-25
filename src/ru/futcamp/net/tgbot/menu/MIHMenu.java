@@ -33,10 +33,10 @@ import java.util.List;
 /**
  * Cams menu of tg bot
  */
-public class SecureMenu implements IMenu {
+public class MIHMenu implements IMenu {
     private IController ctrl;
 
-    public SecureMenu(IController ctrl) {
+    public MIHMenu(IController ctrl) {
         this.ctrl = ctrl;
     }
 
@@ -50,28 +50,28 @@ public class SecureMenu implements IMenu {
         startAction(upd);
 
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
-        String txt = "Состояние\n\n";
+        String txt = "Система \"Человек в доме\"\n\n";
 
-        txt += "Сигнализация: ";
-        if (ctrl.isSecureStatus())
+        txt += "Имитация присутствия: ";
+        if (ctrl.isMIHStatus())
             txt += "<b>Работает</b>\n";
         else
             txt += "<b>Отключена</b>\n";
 
-        txt += "Сирена: ";
-        if (ctrl.isSecureAlarm())
+        txt += "Время включения: <b>" + ctrl.getMIHTimeOn() + ":00</b>\n";
+        txt += "Время отключения: <b>" + ctrl.getMIHTimeOff() + ":00</b>\n";
+
+        txt += "Радио: ";
+        if (ctrl.isMIHRadio())
             txt += "<b>Работает</b>\n";
         else
             txt += "<b>Отключена</b>\n";
 
-        msg.setText(txt);
-        msg.enableHtml(true);
-        bot.execute(msg);
-
-        txt = "Датчики\n\n";
-        for (ISecureDevice device : ctrl.getSecureDevices()) {
-            txt += device.getAlias() + ": <b>" + stateToStr(device.isState(), device.getType()) + "</b>\n";
-        }
+        txt += "Лампа: ";
+        if (ctrl.isMIHLamp())
+            txt += "<b>Работает</b>\n";
+        else
+            txt += "<b>Отключена</b>\n";
 
         msg.setText(txt);
         msg.enableHtml(true);
@@ -106,12 +106,32 @@ public class SecureMenu implements IMenu {
      */
     private void startAction(Update upd) {
         if (upd.getMessage().getText().equals("Включить")) {
-            ctrl.setSecureStatus(true);
-            ctrl.saveSecureStates();
+            ctrl.setMIHStatus(true);
+            ctrl.saveMIHStates();
         }
         if (upd.getMessage().getText().equals("Отключить")) {
-            ctrl.setSecureStatus(false);
-            ctrl.saveSecureStates();
+            ctrl.setMIHStatus(false);
+            ctrl.saveMIHStates();
+        }
+        if (upd.getMessage().getText().equals("+ Вкл")) {
+            int time = ctrl.getMIHTimeOn();
+            ctrl.setMIHTimeOn(time + 1);
+            ctrl.saveMIHStates();
+        }
+        if (upd.getMessage().getText().equals("- Вкл")) {
+            int time = ctrl.getMIHTimeOn();
+            ctrl.setMIHTimeOn(time - 1);
+            ctrl.saveMIHStates();
+        }
+        if (upd.getMessage().getText().equals("+ Откл")) {
+            int time = ctrl.getMIHTimeOff();
+            ctrl.setMIHTimeOff(time + 1);
+            ctrl.saveMIHStates();
+        }
+        if (upd.getMessage().getText().equals("- Откл")) {
+            int time = ctrl.getMIHTimeOff();
+            ctrl.setMIHTimeOff(time - 1);
+            ctrl.saveMIHStates();
         }
     }
 
@@ -131,19 +151,19 @@ public class SecureMenu implements IMenu {
          * Add buttons to menu
          */
         List<String> ctrlButtons = new LinkedList<>();
-        if (ctrl.isSecureStatus()) {
+        if (ctrl.isMIHStatus()) {
             ctrlButtons.add("Отключить");
         } else {
             ctrlButtons.add("Включить");
         }
         addButtonsRow(ctrlButtons, keyboard);
 
-        /*
-         * Add buttons to menu
-         */
-        List<String> mihButtons = new LinkedList<>();
-        mihButtons.add("Человек в Доме");
-        addButtonsRow(mihButtons, keyboard);
+        List<String> mihButtons2 = new LinkedList<>();
+        mihButtons2.add("+ Вкл");
+        mihButtons2.add("- Вкл");
+        mihButtons2.add("+ Откл");
+        mihButtons2.add("- Откл");
+        addButtonsRow(mihButtons2, keyboard);
 
         /*
          * Add back button to menu

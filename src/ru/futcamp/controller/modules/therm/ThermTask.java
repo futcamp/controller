@@ -68,7 +68,6 @@ public class ThermTask extends TimerTask {
              */
             try {
                 device.syncStates();
-                break;
             } catch (Exception e) {
                 log.error("Fail to sync therm device " + device.getName(), "THERMTASK");
             }

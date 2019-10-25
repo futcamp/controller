@@ -44,7 +44,7 @@ public class HttpClient {
         }
         if (urlConn != null && urlConn.getInputStream() != null) {
             InputStreamReader in = new InputStreamReader(urlConn.getInputStream(),
-                    Charset.defaultCharset());
+                                    Charset.defaultCharset());
             BufferedReader bufferedReader = new BufferedReader(in);
             int cp;
             while ((cp = bufferedReader.read()) != -1) {
