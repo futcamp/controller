@@ -21,6 +21,7 @@ public class SecureSettings {
     private int interval;
     private String db;
     private String mih;
+    private String[] lamps;
     private SecureDeviceSettings[] devices;
 
     public int getInterval() {
@@ -53,5 +54,13 @@ public class SecureSettings {
 
     public void setMih(String mih) {
         this.mih = mih;
+    }
+
+    public String[] getLamps() {
+        return lamps;
+    }
+
+    public void setLamps(String[] lamps) {
+        this.lamps = lamps;
     }
 }

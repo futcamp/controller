@@ -27,6 +27,7 @@ import ru.futcamp.controller.IController;
 import ru.futcamp.controller.modules.meteo.db.MeteoDBData;
 import ru.futcamp.utils.TimeControl;
 import ru.futcamp.utils.configs.IConfigs;
+import ru.futcamp.utils.log.ILogger;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -38,10 +39,12 @@ import java.util.List;
 public class MeteoStatMenu implements IMenu {
     private IController ctrl;
     private IConfigs cfg;
+    private ILogger log;
 
-    public MeteoStatMenu(IController ctrl, IConfigs cfg) {
+    public MeteoStatMenu(IController ctrl, IConfigs cfg, ILogger log) {
         this.ctrl = ctrl;
         this.cfg = cfg;
+        this.log = log;
     }
 
     /**
@@ -55,11 +58,19 @@ public class MeteoStatMenu implements IMenu {
             TimeControl.getPrevDate();
             List<MeteoDBData> prevData = ctrl.getMeteoDataByDate(inMsg, TimeControl.getPrevDate());
             if (prevData != null) {
-                bot.execute(printData(upd, "Вчера", prevData));
+                try {
+                    bot.execute(printData(upd, "Вчера", prevData));
+                } catch (Exception e) {
+                    log.error("Fail to print statistics: " + e.getMessage(), "METEOSTATMENU");
+                }
             }
             List<MeteoDBData> curData = ctrl.getMeteoDataByDate(inMsg, TimeControl.getCurDate());
             if (curData != null) {
-                bot.execute(printData(upd, "Сегодня", curData));
+                try {
+                    bot.execute(printData(upd, "Сегодня", curData));
+                } catch (Exception e) {
+                    log.error("Fail to print statistics: " + e.getMessage(), "METEOSTATMENU");
+                }
             }
         } else {
             SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());

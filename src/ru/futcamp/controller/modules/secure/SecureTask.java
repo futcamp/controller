@@ -133,6 +133,14 @@ public class SecureTask extends TimerTask {
         int curTime = TimeControl.getCurHour();
 
         if (mih.isStatus()) {
+            /*
+             * Switch on street lamps
+             */
+            for (String lamp : cfg.getSecureCfg().getLamps()) {
+                ILightDevice lightDev = light.getDevice(lamp);
+                lightDev.setStatus(true);
+            }
+
             if (curTime >= mih.getTimeOn() &&
                     curTime < mih.getTimeOff()) {
 
@@ -146,6 +154,14 @@ public class SecureTask extends TimerTask {
                     mih.setRadio(true);
                 }
             } else {
+                /*
+                 * Switch off street lamps
+                 */
+                for (String lamp : cfg.getSecureCfg().getLamps()) {
+                    ILightDevice lightDev = light.getDevice(lamp);
+                    lightDev.setStatus(false);
+                }
+
                 mih.setLamp(false);
                 mih.setRadio(false);
             }

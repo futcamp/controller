@@ -143,7 +143,7 @@ class ServiceBuilder {
                 return new MeteoDB();
 
             case TG_BOT_METEO_STAT_MENU_SRV:
-                return new MeteoStatMenu((IController)sc[0], (IConfigs)sc[1]);
+                return new MeteoStatMenu((IController)sc[0], (IConfigs)sc[1], (ILogger)sc[2]);
 
             case THERM_DB_SRV:
                 return new ThermDB();

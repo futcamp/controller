@@ -79,7 +79,7 @@ public class Main {
         IMenu meteoMenu = (IMenu)builder.makeService(TG_BOT_METEO_MENU_SRV, ctrl);
         IMenu camMenu = (IMenu)builder.makeService(TG_BOT_CAM_MENU_SRV, cfg, ctrl, log);
         IMenu secMenu = (IMenu)builder.makeService(TG_BOT_SECURE_MENU_SRV, ctrl);
-        IMenu meteoStatMenu = (IMenu)builder.makeService(TG_BOT_METEO_STAT_MENU_SRV, ctrl, cfg);
+        IMenu meteoStatMenu = (IMenu)builder.makeService(TG_BOT_METEO_STAT_MENU_SRV, ctrl, cfg, log);
         IMenu thermMenu = (IMenu)builder.makeService(THERM_MENU_SRV, ctrl, cfg);
         IMenu thermCtrlMenu = (IMenu)builder.makeService(TG_BOT_THERM_CTRL_MENU_SRV, ctrl, log);
         IMenu lightMenu = (IMenu)builder.makeService(LIGHT_MENU_SRV);
