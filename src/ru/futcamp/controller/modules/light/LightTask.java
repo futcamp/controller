@@ -15,9 +15,8 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.modules.therm;
+package ru.futcamp.controller.modules.light;
 
-import ru.futcamp.controller.modules.meteo.IMeteoStation;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.log.ILogger;
 
@@ -26,18 +25,16 @@ import java.util.TimerTask;
 /**
  * Therm task
  */
-public class ThermTask extends TimerTask {
+public class LightTask extends TimerTask {
     private ILogger log;
-    private IThermControl therm;
-    private IMeteoStation meteo;
     private IConfigs cfg;
+    private ILightControl light;
 
     private int counter = 0;
 
-    public ThermTask(ILogger log, IThermControl therm, IMeteoStation meteo, IConfigs cfg) {
+    public LightTask(ILogger log, IConfigs cfg, ILightControl light) {
         this.log = log;
-        this.therm = therm;
-        this.meteo = meteo;
+        this.light = light;
         this.cfg = cfg;
     }
 
@@ -45,31 +42,18 @@ public class ThermTask extends TimerTask {
     public void run() {
         counter++;
 
-        if (counter != cfg.getThermCfg().getInterval())
+        if (counter != cfg.getLightCfg().getInterval())
             return;
         counter = 0;
 
-        for (IThermDevice device : therm.getDevices()) {
-            if (device.isStatus()) {
-                int curTemp = meteo.getDevice(device.getSensor()).getTemp();
-
-                if (curTemp <= device.getThreshold()) {
-                    device.setHeater(true);
-                }
-                if (curTemp > device.getThreshold()) {
-                    device.setHeater(false);
-                }
-            } else {
-                device.setHeater(false);
-            }
-
+        for (ILightDevice device : light.getDevices()) {
             /*
              * Syncing states with device
              */
             try {
                 device.syncStates();
             } catch (Exception e) {
-                log.error("Fail to sync therm device " + device.getName(), "THERMTASK");
+                log.error("Fail to sync light device: " + device.getName(), "LIGHTTASK");
             }
         }
     }

@@ -17,7 +17,7 @@
 
 package ru.futcamp.controller.modules.meteo;
 
-import ru.futcamp.controller.modules.meteo.hdk.MeteoHdk;
+import ru.futcamp.controller.modules.meteo.mod.MeteoModule;
 
 /**
  * Displaying meteo data on LCD
@@ -32,7 +32,7 @@ public class MeteoDisplay implements IMeteoDisplay {
      * @throws Exception If fail to update data
      */
     public void updateData(String ip, int id, int value, String type) throws Exception {
-        MeteoHdk hdk = new MeteoHdk(ip, id, value, type);
+        MeteoModule hdk = new MeteoModule(ip, id, value, type);
 
         hdk.updateMeteoLcd();
     }
@@ -43,7 +43,7 @@ public class MeteoDisplay implements IMeteoDisplay {
      * @throws Exception If fail to show data
      */
     public void showData(String ip) throws Exception {
-        MeteoHdk hdk = new MeteoHdk(ip);
+        MeteoModule hdk = new MeteoModule(ip);
 
         hdk.displayMeteoLcd();
     }

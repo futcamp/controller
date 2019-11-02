@@ -15,16 +15,15 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.controller.modules.light.db;
 
-public class TelegramMenuItemSettings {
-    private String[] buttons;
+import java.sql.SQLException;
+import java.util.List;
 
-    public String[] getButtons() {
-        return buttons;
-    }
-
-    public void setButtons(String[] buttons) {
-        this.buttons = buttons;
-    }
+public interface ILightDB {
+    void setFileName(String fileName);
+    void connect() throws SQLException;
+    List<LightDBData> loadLightStates() throws SQLException;
+    void saveStates(LightDBData data) throws SQLException;
+    void close() throws SQLException;
 }

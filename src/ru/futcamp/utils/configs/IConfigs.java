@@ -28,4 +28,5 @@ public interface IConfigs {
     boolean getModCfg(String name);
     CtrlSettings getCtrlCfg();
     ThermSettings getThermCfg();
+    LightSettings getLightCfg();
 }

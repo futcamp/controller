@@ -15,17 +15,20 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.net.tgbot.menu;
+package ru.futcamp.controller.modules.light;
 
-public enum LevelMenu {
-    MAIN_MENU,
-    METEO_MENU,
-    METEO_STAT_MENU,
-    CAM_MENU,
-    SECURE_MENU,
-    MIH_MENU,
-    THERM_MENU,
-    THERM_CTRL_MENU,
-    LIGHT_MENU,
-    LIGHT_STREET_MENU
+public interface ILightDevice {
+    String getIp();
+    void setIp(String ip);
+    String getName();
+    void setName(String name);
+    String getAlias();
+    void setAlias(String alias);
+    int getChannel();
+    void setChannel(int channel);
+    String getGroup();
+    void setGroup(String group);
+    boolean isStatus();
+    void setStatus(boolean status);
+    void syncStates() throws Exception;
 }

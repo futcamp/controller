@@ -24,7 +24,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.utils.configs.IConfigs;
-import ru.futcamp.utils.configs.settings.TelegramMenuItemSettings;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -69,9 +68,9 @@ public class MainMenu implements IMenu {
         /*
          * Add back button to menu
          */
-        for (TelegramMenuItemSettings item : cfg.getTelegramCfg().getMain()) {
+        for (String[] row : cfg.getTelegramCfg().getMenu().getMain()) {
             List<String> buttons = new LinkedList<>();
-            for (String button : item.getButtons()) {
+            for (String button : row) {
                 buttons.add(button);
             }
             addButtonsRow(buttons, keyboard);

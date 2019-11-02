@@ -17,7 +17,7 @@
 
 package ru.futcamp.controller.modules.therm;
 
-import ru.futcamp.controller.modules.therm.hdk.ThermHdk;
+import ru.futcamp.controller.modules.therm.mod.ThermModule;
 
 /**
  * Therm control device
@@ -40,7 +40,7 @@ public class ThermDevice extends ThermData implements IThermDevice {
      * @throws Exception If fail to sync state
      */
     public void syncStates() throws Exception {
-        ThermHdk hdk = new ThermHdk(this.ip);
+        ThermModule hdk = new ThermModule(this.ip);
         hdk.syncStates(isStatus(), isHeater());
     }
 

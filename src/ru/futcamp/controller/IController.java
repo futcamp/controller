@@ -17,6 +17,7 @@
 
 package ru.futcamp.controller;
 
+import ru.futcamp.controller.modules.light.ILightDevice;
 import ru.futcamp.controller.modules.meteo.IMeteoDevice;
 import ru.futcamp.controller.modules.meteo.db.MeteoDBData;
 import ru.futcamp.controller.modules.secure.ISecureDevice;
@@ -50,4 +51,9 @@ public interface IController {
     boolean isMIHLamp();
     int getMIHTimeOn();
     int getMIHTimeOff();
+    ILightDevice getLightDeviceByAlias(String alias);
+    ILightDevice getLightDevice(String name);
+    List<ILightDevice> getLightDevices();
+    void saveLightState(ILightDevice device);
+    List<ILightDevice> getLightDevicesGroup(String group);
 }

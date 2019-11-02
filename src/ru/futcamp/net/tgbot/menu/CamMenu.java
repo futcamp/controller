@@ -25,11 +25,12 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.meteo.IMeteoDevice;
+import ru.futcamp.controller.modules.light.ILightDevice;
 import ru.futcamp.net.web.HttpClient;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.configs.settings.TelegramCamGroupSettings;
 import ru.futcamp.utils.configs.settings.TelegramCamSettings;
+import ru.futcamp.utils.log.ILogger;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -41,9 +42,13 @@ import java.util.List;
  */
 public class CamMenu implements IMenu {
     private IConfigs cfg;
+    private IController ctrl;
+    private ILogger log;
 
-    public CamMenu(IConfigs cfg) {
+    public CamMenu(IConfigs cfg, IController ctrl, ILogger log) {
         this.cfg = cfg;
+        this.ctrl = ctrl;
+        this.log = log;
     }
 
     /**
@@ -53,10 +58,14 @@ public class CamMenu implements IMenu {
      */
     public void updateMessage(TelegramLongPollingBot bot, Update upd, IBotMenu menu) throws Exception {
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
+        String inMsg = upd.getMessage().getText();
 
-        if (!upd.getMessage().getText().equals("Список камер") &&
-                !upd.getMessage().getText().equals("Камеры")) {
-            if (savePhotoToFile(upd.getMessage().getText())) {
+        if (inMsg.equals("Подсветка")) {
+            menu.setLight(true);
+        } else if (inMsg.equals("Без света")) {
+            menu.setLight(false);
+        } else if (!inMsg.equals("Список камер") && !inMsg.equals("Камеры")) {
+            if (savePhotoToFile(upd.getMessage().getText(), menu)) {
                 SendPhoto ph = new SendPhoto().setChatId(upd.getMessage().getChatId());
                 ph.setPhoto(new File("/tmp/photo.jpg"));
                 bot.execute(ph);
@@ -67,7 +76,7 @@ public class CamMenu implements IMenu {
         }
 
         msg.setText("Список камер");
-        setButtons(msg);
+        setButtons(msg, menu);
         bot.execute(msg);
     }
 
@@ -76,15 +85,32 @@ public class CamMenu implements IMenu {
      * @param camName Camera name
      * @return Status
      */
-    private boolean savePhotoToFile(String camName) {
+    private boolean savePhotoToFile(String camName, IBotMenu menu) {
         for (TelegramCamGroupSettings camGroup : cfg.getTelegramCfg().getCamgroups()) {
             for (TelegramCamSettings cam : camGroup.getCams()) {
                 if (camName.equals(cam.getName())) {
+                    /*
+                     * Switch on lamps
+                     */
+                    if (menu.isLight()) {
+                        switchLamps(cam.getLamps(), true);
+                    }
+
+                    /*
+                     * GetPhoto
+                     */
                     HttpClient client = new HttpClient("http://" + cam.getIp() + "/camera?dev=" + cam.getChannel());
                     try {
                         client.saveImage("/tmp/photo.jpg");
                     } catch (Exception e) {
                         return false;
+                    }
+
+                    /*
+                     * Switch off lamps
+                     */
+                    if (menu.isLight()) {
+                        switchLamps(cam.getLamps(), false);
                     }
                     return true;
                 }
@@ -94,10 +120,27 @@ public class CamMenu implements IMenu {
     }
 
     /**
+     * Switch lamp states before and after snapshot
+     * @param lamps List of lamps
+     * @param status Status of lamp
+     */
+    private void switchLamps(String[] lamps, boolean status) {
+        for (String lamp : lamps) {
+            ILightDevice lampDev = ctrl.getLightDevice(lamp);
+            lampDev.setStatus(status);
+            try {
+                lampDev.syncStates();
+            } catch (Exception e) {
+                log.error("Fail to sync lamp status for photo: " + e.getMessage(), "CAMMENU");
+            }
+        }
+    }
+
+    /**
      * Set buttons for response
      * @param sendMessage Sending message
      */
-    private void setButtons(SendMessage sendMessage) {
+    private void setButtons(SendMessage sendMessage, IBotMenu menu) {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
         replyKeyboardMarkup.setSelective(true);
@@ -122,6 +165,10 @@ public class CamMenu implements IMenu {
          * Add back button to menu
          */
         List<String> backButton = new LinkedList<>();
+        if (menu.isLight())
+            backButton.add("Без света");
+        else
+            backButton.add("Подсветка");
         backButton.add("Назад");
         addButtonsRow(backButton, keyboard);
 

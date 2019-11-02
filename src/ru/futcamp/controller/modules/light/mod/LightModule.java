@@ -15,29 +15,30 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.modules.therm.hdk;
+package ru.futcamp.controller.modules.light.mod;
 
 import ru.futcamp.net.web.HttpClient;
 
 /**
  * Therm control communication
  */
-public class ThermHdk {
+public class LightModule {
     private String ip;
+    private int channel;
 
-    public ThermHdk(String ip) {
+    public LightModule(String ip, int chan) {
         this.ip = ip;
+        this.channel = chan;
     }
 
     /**
      * Sync states with device
      * @param status Therm control status
-     * @param heater Heater state
      * @throws Exception If fail to sync with device
      */
-    public void syncStates(boolean status, boolean heater) throws Exception {
-        HttpClient client = new HttpClient("http://" + ip + "/therm?status=" + status +
-                                            "&heater=" + heater);
+    public void syncStates(boolean status) throws Exception {
+        HttpClient client = new HttpClient("http://" + ip + "/light?state=" + status +
+                                            "&chan=" + channel);
         client.getRequest(2000);
     }
 }

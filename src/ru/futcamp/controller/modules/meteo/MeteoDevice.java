@@ -17,8 +17,8 @@
 
 package ru.futcamp.controller.modules.meteo;
 
-import ru.futcamp.controller.modules.meteo.hdk.HdkMeteoData;
-import ru.futcamp.controller.modules.meteo.hdk.MeteoHdk;
+import ru.futcamp.controller.modules.meteo.mod.MeteoModuleData;
+import ru.futcamp.controller.modules.meteo.mod.MeteoModule;
 
 public class MeteoDevice extends MeteoData implements IMeteoDevice {
     private String name;
@@ -44,8 +44,8 @@ public class MeteoDevice extends MeteoData implements IMeteoDevice {
      * @throws Exception If fail to sync data
      */
     public void syncMeteoData() throws Exception {
-        MeteoHdk hdk = new MeteoHdk(this.address, this.type, this.channel);
-        HdkMeteoData data = hdk.getMeteoData();
+        MeteoModule hdk = new MeteoModule(this.address, this.type, this.channel);
+        MeteoModuleData data = hdk.getMeteoData();
         setTemp(data.getTemp());
         setHumidity(data.getHum());
         setPressure(data.getPres());

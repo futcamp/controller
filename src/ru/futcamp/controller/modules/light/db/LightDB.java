@@ -15,7 +15,7 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.modules.therm.db;
+package ru.futcamp.controller.modules.light.db;
 
 import org.sqlite.JDBC;
 import sun.awt.Mutex;
@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Database management class
  */
-public class ThermDB implements IThermDB {
+public class LightDB implements ILightDB {
     private String fileName;
     private Connection conn;
     private Mutex mtx = new Mutex();
@@ -54,19 +54,18 @@ public class ThermDB implements IThermDB {
 
     /**
      * Get status and alarm states from db
-     * @return States All devices states
+     * @return All devices states
      * @throws SQLException If fail to read states
      */
-    public List<ThermDBData> loadThermData() throws SQLException {
-        List<ThermDBData> data = new LinkedList<>();
+    public List<LightDBData> loadLightStates() throws SQLException {
+        List<LightDBData> data = new LinkedList<>();
         Statement statement = conn.createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT * FROM therm");
+        ResultSet resultSet = statement.executeQuery("SELECT * FROM light");
 
         while (resultSet.next()) {
-            ThermDBData states = new ThermDBData();
+            LightDBData states = new LightDBData();
             states.setName(resultSet.getString("name"));
             states.setStatus(resultSet.getBoolean("status"));
-            states.setThreshold(resultSet.getInt("threshold"));
             data.add(states);
         }
         statement.close();
@@ -80,11 +79,10 @@ public class ThermDB implements IThermDB {
      * @param data States data
      * @throws SQLException If fail to save states
      */
-    public void saveStates(ThermDBData data) throws SQLException {
-        PreparedStatement statement = conn.prepareStatement("UPDATE therm SET status = ?, threshold = ? WHERE name = '" +
+    public void saveStates(LightDBData data) throws SQLException {
+        PreparedStatement statement = conn.prepareStatement("UPDATE light SET status = ? WHERE name = '" +
                                                             data.getName() + "'");
         statement.setObject(1, data.isStatus());
-        statement.setObject(2, data.getThreshold());
         statement.execute();
         statement.close();
     }

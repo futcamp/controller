@@ -15,7 +15,7 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.modules.meteo.hdk;
+package ru.futcamp.controller.modules.meteo.mod;
 
 import com.alibaba.fastjson.JSON;
 import ru.futcamp.net.web.HttpClient;
@@ -23,27 +23,27 @@ import ru.futcamp.net.web.HttpClient;
 /**
  * Meteo Hardware Communication
  */
-public class MeteoHdk {
+public class MeteoModule {
     private String ip;
     private int channel;
     private String type;
     private int id;
     private int value;
 
-    public MeteoHdk(String ip, String type, int chan) {
+    public MeteoModule(String ip, String type, int chan) {
         this.ip = ip;
         this.channel = chan;
         this.type = type;
     }
 
-    public MeteoHdk(String ip, int id, int value, String type) {
+    public MeteoModule(String ip, int id, int value, String type) {
         this.ip = ip;
         this.id = id;
         this.value = value;
         this.type = type;
     }
 
-    public MeteoHdk(String ip) {
+    public MeteoModule(String ip) {
         this.ip = ip;
     }
 
@@ -52,12 +52,12 @@ public class MeteoHdk {
      * @return Meteo data
      * @throws Exception If fail to get data
      */
-    public HdkMeteoData getMeteoData() throws Exception {
-        HdkMeteoData data;
+    public MeteoModuleData getMeteoData() throws Exception {
+        MeteoModuleData data;
 
         HttpClient client = new HttpClient("http://" + ip + "/meteo?type=" + type + "&chan=" + channel);
         String response = client.getRequest(2000);
-        data = JSON.parseObject(response, HdkMeteoData.class);
+        data = JSON.parseObject(response, MeteoModuleData.class);
 
         return data;
     }

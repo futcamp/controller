@@ -49,5 +49,10 @@ public enum Services {
     THERM_TASK_SRV,
     THERM_MENU_SRV,
     TG_BOT_THERM_CTRL_MENU_SRV,
-    MIH_SRV
+    MIH_SRV,
+    LIGHT_DB_SRV,
+    LIGHT_CTRL_SRV,
+    LIGHT_TASK_SRV,
+    LIGHT_MENU_SRV,
+    LIGHT_STR_MENU_SRV
 }

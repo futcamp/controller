@@ -15,38 +15,27 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.net.tgbot.menu;
+package ru.futcamp.controller.modules.light;
 
-public class BotMenu implements IBotMenu {
-    private LevelMenu level;
-    private String device;
-    private boolean light;
+import sun.awt.Mutex;
 
-    public BotMenu() {
-        level = LevelMenu.MAIN_MENU;
+public class LightData {
+    private boolean status;
+    private Mutex statMtx = new Mutex();
+
+    public boolean isStatus() {
+        boolean stat;
+
+        statMtx.lock();
+        stat = status;
+        statMtx.unlock();
+
+        return stat;
     }
 
-    public LevelMenu getLevel() {
-        return level;
-    }
-
-    public void setLevel(LevelMenu level) {
-        this.level = level;
-    }
-
-    public String getDevice() {
-        return device;
-    }
-
-    public void setDevice(String device) {
-        this.device = device;
-    }
-
-    public boolean isLight() {
-        return light;
-    }
-
-    public void setLight(boolean light) {
-        this.light = light;
+    public void setStatus(boolean status) {
+        statMtx.lock();
+        this.status = status;
+        statMtx.unlock();
     }
 }

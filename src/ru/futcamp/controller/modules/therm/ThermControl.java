@@ -76,7 +76,7 @@ public class ThermControl implements IThermControl {
 
         try {
             db.connect();
-            data = db.loadThermDataAll();
+            data = db.loadThermData();
         } catch (SQLException e) {
             throw new Exception(e.getMessage());
         } finally {

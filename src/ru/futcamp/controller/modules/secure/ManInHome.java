@@ -19,7 +19,7 @@ package ru.futcamp.controller.modules.secure;
 
 import ru.futcamp.controller.modules.secure.db.ISecureDB;
 import ru.futcamp.controller.modules.secure.db.MIHDBData;
-import ru.futcamp.controller.modules.secure.hdk.SecureHdk;
+import ru.futcamp.controller.modules.secure.mod.SecureModule;
 
 import java.sql.SQLException;
 
@@ -42,7 +42,7 @@ public class ManInHome extends MIHData implements IMainInHome {
      * Sync states with device
      */
     public void syncStates() throws Exception {
-        SecureHdk hdk = new SecureHdk(ip);
+        SecureModule hdk = new SecureModule(ip);
         hdk.setMIHStates(isRadio(), isLamp());
     }
 

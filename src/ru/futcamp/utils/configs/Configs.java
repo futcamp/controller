@@ -35,6 +35,7 @@ public class Configs implements IConfigs {
     private ModulesSettings modCfg;
     private CtrlSettings ctrlCfg;
     private ThermSettings thermCfg;
+    private LightSettings lightCfg;
 
     /**
      * Reading and parsing configs
@@ -81,6 +82,10 @@ public class Configs implements IConfigs {
 
             case THERM_SET:
                 thermCfg = JSON.parseObject(data, ThermSettings.class);
+                break;
+
+            case LIGHT_SET:
+                lightCfg = JSON.parseObject(data, LightSettings.class);
                 break;
         }
     }
@@ -142,5 +147,13 @@ public class Configs implements IConfigs {
      */
     public ThermSettings getThermCfg() {
         return thermCfg;
+    }
+
+    /**
+     * Get light configs
+     * @return Light control configs
+     */
+    public LightSettings getLightCfg() {
+        return lightCfg;
     }
 }

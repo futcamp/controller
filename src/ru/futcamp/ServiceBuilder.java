@@ -20,6 +20,11 @@ package ru.futcamp;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import ru.futcamp.controller.Controller;
 import ru.futcamp.controller.IController;
+import ru.futcamp.controller.modules.light.ILightControl;
+import ru.futcamp.controller.modules.light.LightControl;
+import ru.futcamp.controller.modules.light.LightTask;
+import ru.futcamp.controller.modules.light.db.ILightDB;
+import ru.futcamp.controller.modules.light.db.LightDB;
 import ru.futcamp.controller.modules.meteo.*;
 import ru.futcamp.controller.modules.meteo.db.IMeteoDB;
 import ru.futcamp.controller.modules.meteo.db.MeteoDB;
@@ -72,8 +77,7 @@ class ServiceBuilder {
     Object makeService(Services name, Object... sc) {
         switch (name) {
             case APP_SRV:
-                return new App((ILogger)sc[0],(IConfigs)sc[1],
-                        (ITelegramBot)sc[2],(TelegramBotsApi)sc[3],
+                return new App((ILogger)sc[0],(IConfigs)sc[1], (ITelegramBot)sc[2],(TelegramBotsApi)sc[3],
                         (IHttpServer)sc[4], (IController)sc[5]);
 
             case CFG_SRV:
@@ -84,7 +88,8 @@ class ServiceBuilder {
 
             case TG_BOT_SRV:
                 return new TelegramBot((ILogger)sc[0], (IConfigs)sc[1], (IMenu)sc[2], (IMenu)sc[3], (IMenu)sc[4],
-                                        (IMenu)sc[5], (IMenu)sc[6], (IMenu)sc[7], (IMenu)sc[8], (IMenu)sc[9]);
+                        (IMenu)sc[5], (IMenu)sc[6], (IMenu)sc[7], (IMenu)sc[8], (IMenu)sc[9], (IMenu)sc[10],
+                        (IMenu)sc[11]);
 
             case TG_BOT_API_SRV:
                 return new TelegramBotsApi();
@@ -100,8 +105,8 @@ class ServiceBuilder {
 
             case CTRL_SRV:
                 return new Controller((ILogger)sc[0], (IConfigs)sc[1], (IMeteoStation)sc[2], (Runnable)sc[3],
-                                        (ISecurity) sc[4], (Runnable)sc[5], (IThermControl)sc[6], (Runnable)sc[7],
-                                        (IMainInHome)sc[8]);
+                        (ISecurity) sc[4], (Runnable)sc[5], (IThermControl)sc[6], (Runnable)sc[7],
+                        (IMainInHome)sc[8], (ILightControl)sc[9], (Runnable)sc[10]);
 
             case METEO_SRV:
                 return new MeteoStation((IMeteoDB)sc[0]);
@@ -116,13 +121,14 @@ class ServiceBuilder {
                 return new MeteoMenu((IController)sc[0]);
 
             case TG_BOT_CAM_MENU_SRV:
-                return new CamMenu((IConfigs)sc[0]);
+                return new CamMenu((IConfigs)sc[0], (IController)sc[1], (ILogger)sc[2]);
 
             case SECURE_SRV:
                 return new Security((ISecureDB)sc[0]);
 
             case SECURE_TASK_SRV:
-                return new SecureTask((ILogger)sc[0], (ISecurity)sc[1], (INotifier)sc[2], (IConfigs)sc[3], (IMainInHome)sc[4]);
+                return new SecureTask((ILogger)sc[0], (ISecurity)sc[1], (INotifier)sc[2], (IConfigs)sc[3],
+                        (IMainInHome)sc[4], (ILightControl)sc[5]);
 
             case TG_BOT_SECURE_MENU_SRV:
                 return new SecureMenu((IController)sc[0]);
@@ -146,7 +152,8 @@ class ServiceBuilder {
                 return new ThermControl((IThermDB)sc[0]);
 
             case THERM_TASK_SRV:
-                return new ThermTask((ILogger)sc[0], (IThermControl)sc[1], (IMeteoStation)sc[2], (IConfigs)sc[3]);
+                return new ThermTask((ILogger)sc[0], (IThermControl)sc[1], (IMeteoStation)sc[2],
+                        (IConfigs)sc[3]);
 
             case THERM_MENU_SRV:
                 return new ThermMenu((IController)sc[0], (IConfigs)sc[1]);
@@ -162,6 +169,21 @@ class ServiceBuilder {
 
             case METEO_LCD_SRV:
                 return new MeteoDisplay();
+
+            case LIGHT_DB_SRV:
+                return new LightDB();
+
+            case LIGHT_CTRL_SRV:
+                return new LightControl((ILightDB)sc[0]);
+
+            case LIGHT_TASK_SRV:
+                return new LightTask((ILogger)sc[0], (IConfigs)sc[1], (ILightControl)sc[2]);
+
+            case LIGHT_MENU_SRV:
+                return new LightMenu();
+
+            case LIGHT_STR_MENU_SRV:
+                return new LightStreetMenu((IConfigs)sc[0], (IController)sc[1]);
         }
         return null;
     }

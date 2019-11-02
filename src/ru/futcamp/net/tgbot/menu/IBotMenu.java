@@ -22,4 +22,6 @@ public interface IBotMenu {
     void setLevel(LevelMenu level);
     String getDevice();
     void setDevice(String device);
+    boolean isLight();
+    void setLight(boolean light);
 }
