@@ -23,8 +23,7 @@ import java.util.List;
 public interface IThermDB {
     void setFileName(String fileName);
     void connect() throws SQLException;
-    List<ThermDBData> loadThermDataAll() throws SQLException;
-    ThermDBData loadThermData(String device) throws SQLException;
+    List<ThermDBData> loadThermData() throws SQLException;
     void saveStates(ThermDBData data) throws SQLException;
     void close() throws SQLException;
 }

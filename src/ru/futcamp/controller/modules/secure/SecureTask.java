@@ -17,6 +17,8 @@
 
 package ru.futcamp.controller.modules.secure;
 
+import ru.futcamp.controller.modules.light.ILightControl;
+import ru.futcamp.controller.modules.light.ILightDevice;
 import ru.futcamp.net.INotifier;
 import ru.futcamp.utils.TimeControl;
 import ru.futcamp.utils.configs.IConfigs;
@@ -33,15 +35,17 @@ public class SecureTask extends TimerTask {
     private INotifier notify;
     private IConfigs cfg;
     private IMainInHome mih;
+    private ILightControl light;
 
     private int counter = 0;
 
-    public SecureTask(ILogger log, ISecurity secure, INotifier notify, IConfigs cfg, IMainInHome mih) {
+    public SecureTask(ILogger log, ISecurity secure, INotifier notify, IConfigs cfg, IMainInHome mih, ILightControl light) {
         this.log = log;
         this.secure = secure;
         this.notify = notify;
         this.cfg = cfg;
         this.mih = mih;
+        this.light = light;
     }
 
     @Override
@@ -65,6 +69,17 @@ public class SecureTask extends TimerTask {
                 if (device.isState()) {
                     if (!secure.isAlarm()) {
                         log.warning("Security sensor " + device.getName() + " detected!", "SECURETASK");
+                        /*
+                         * Turn on all street lamps
+                         */
+                        for (ILightDevice lightDev : light.getDevicesGroup("street")) {
+                            lightDev.setStatus(true);
+                            try {
+                                lightDev.syncStates();
+                            } catch (Exception e) {
+                                log.error("Fail to sync with light device \"" + lightDev.getName() + "\"", "SECURETASK");
+                            }
+                        }
                         /*
                          * Send notification to telegram
                          */
@@ -119,7 +134,7 @@ public class SecureTask extends TimerTask {
 
         if (mih.isStatus()) {
             if (curTime >= mih.getTimeOn() &&
-                    curTime <= mih.getTimeOff()) {
+                    curTime < mih.getTimeOff()) {
 
                 mih.setLamp(true);
                 /*

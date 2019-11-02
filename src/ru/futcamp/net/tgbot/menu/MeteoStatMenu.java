@@ -24,11 +24,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.meteo.IMeteoDevice;
 import ru.futcamp.controller.modules.meteo.db.MeteoDBData;
 import ru.futcamp.utils.TimeControl;
 import ru.futcamp.utils.configs.IConfigs;
-import ru.futcamp.utils.configs.settings.TelegramMeteoStatSettings;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -52,7 +50,6 @@ public class MeteoStatMenu implements IMenu {
      */
     public void updateMessage(TelegramLongPollingBot bot, Update upd, IBotMenu menu) throws Exception {
         String inMsg = upd.getMessage().getText();
-
 
         if (!inMsg.equals("Обновить") && !inMsg.equals("Статистика") && !inMsg.equals("Метео статистика")) {
             TimeControl.getPrevDate();
@@ -122,11 +119,11 @@ public class MeteoStatMenu implements IMenu {
         replyKeyboardMarkup.setOneTimeKeyboard(false);
         List<KeyboardRow> keyboard = new ArrayList<>();
 
-        for (TelegramMeteoStatSettings stat : cfg.getTelegramCfg().getMeteostat()) {
+        for (String[] row : cfg.getTelegramCfg().getMenu().getMeteostat()) {
             List<String> statGroup = new LinkedList<>();
 
-            for (String sensor : stat.getSensors()) {
-                statGroup.add(sensor);
+            for (String btn : row) {
+                statGroup.add(btn);
             }
 
             addButtonsRow(statGroup, keyboard);

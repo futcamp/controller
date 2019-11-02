@@ -15,38 +15,34 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.net.tgbot.menu;
+package ru.futcamp.utils.configs.settings;
 
-public class BotMenu implements IBotMenu {
-    private LevelMenu level;
-    private String device;
-    private boolean light;
+public class LightSettings {
+    private int interval;
+    private String db;
+    private LightDeviceSettings[] devices;
 
-    public BotMenu() {
-        level = LevelMenu.MAIN_MENU;
+    public LightDeviceSettings[] getDevices() {
+        return devices;
     }
 
-    public LevelMenu getLevel() {
-        return level;
+    public void setDevices(LightDeviceSettings[] devices) {
+        this.devices = devices;
     }
 
-    public void setLevel(LevelMenu level) {
-        this.level = level;
+    public int getInterval() {
+        return interval;
     }
 
-    public String getDevice() {
-        return device;
+    public void setInterval(int interval) {
+        this.interval = interval;
     }
 
-    public void setDevice(String device) {
-        this.device = device;
+    public String getDb() {
+        return db;
     }
 
-    public boolean isLight() {
-        return light;
-    }
-
-    public void setLight(boolean light) {
-        this.light = light;
+    public void setDb(String db) {
+        this.db = db;
     }
 }

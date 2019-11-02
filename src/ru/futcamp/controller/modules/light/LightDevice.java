@@ -15,38 +15,44 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.modules.secure;
+package ru.futcamp.controller.modules.light;
 
-import ru.futcamp.controller.modules.secure.mod.SecureModule;
+import ru.futcamp.controller.modules.light.mod.LightModule;
 
 /**
- * Security device
+ * Light control device
  */
-public class SecureDevice extends SecureData implements ISecureDevice {
+public class LightDevice extends LightData implements ILightDevice {
     private String name;
     private String alias;
+    private String group;
     private String ip;
     private int channel;
-    private String type;
-    private String group;
 
-    public SecureDevice(String name, String alias, String ip, int chan, String type, String group) {
+    public LightDevice(String name, String alias, String group, String ip, int chan) {
         this.name = name;
         this.alias = alias;
         this.ip = ip;
         this.channel = chan;
-        this.type = type;
         this.group = group;
     }
 
     /**
-     * Syncing alarm state with device
-     * @param state State of alarm
-     * @throws Exception If fail to sync state
+     * Syncing states with light device
+     * @throws Exception If fail to sync states
      */
-    public void syncSecureAlarm(boolean state) throws Exception {
-        SecureModule hdk = new SecureModule(ip);
-        hdk.setSecureAlarm(state);
+    public void syncStates() throws Exception {
+        LightModule hdk = new LightModule(ip, channel);
+
+        hdk.syncStates(isStatus());
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
     public String getName() {
@@ -65,14 +71,6 @@ public class SecureDevice extends SecureData implements ISecureDevice {
         this.alias = alias;
     }
 
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
     public int getChannel() {
         return channel;
     }
@@ -87,13 +85,5 @@ public class SecureDevice extends SecureData implements ISecureDevice {
 
     public void setGroup(String group) {
         this.group = group;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 }

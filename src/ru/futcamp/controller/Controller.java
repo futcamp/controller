@@ -17,6 +17,9 @@
 
 package ru.futcamp.controller;
 
+import ru.futcamp.controller.modules.light.ILightControl;
+import ru.futcamp.controller.modules.light.ILightDevice;
+import ru.futcamp.controller.modules.light.LightDevice;
 import ru.futcamp.controller.modules.meteo.IMeteoDevice;
 import ru.futcamp.controller.modules.meteo.IMeteoStation;
 import ru.futcamp.controller.modules.meteo.MeteoDevice;
@@ -49,10 +52,13 @@ public class Controller implements IController {
     private IThermControl thermCtrl;
     private Runnable thermTask;
     private IMainInHome mih;
+    private ILightControl light;
+    private Runnable lightTask;
 
     public Controller(ILogger log, IConfigs cfg, IMeteoStation meteo, Runnable meteoTask,
                       ISecurity secure, Runnable secureTask, IThermControl thermCtrl,
-                      Runnable thermTask, IMainInHome mih) {
+                      Runnable thermTask, IMainInHome mih, ILightControl light,
+                      Runnable lightTask) {
         this.log = log;
         this.cfg = cfg;
         this.meteo = meteo;
@@ -62,6 +68,8 @@ public class Controller implements IController {
         this.thermCtrl = thermCtrl;
         this.thermTask = thermTask;
         this.mih = mih;
+        this.light = light;
+        this.lightTask = lightTask;
     }
 
     /**
@@ -71,6 +79,8 @@ public class Controller implements IController {
         MeteoSettings meteoCfg = cfg.getMeteoCfg();
         SecureSettings secCfg = cfg.getSecureCfg();
         ThermSettings thermCfg = cfg.getThermCfg();
+        LightSettings lightCfg = cfg.getLightCfg();
+
         /*
          * Prepare db
          */
@@ -101,8 +111,8 @@ public class Controller implements IController {
                 MeteoDevice device = new MeteoDevice(dev.getName(), dev.getAlias(), dev.getType(), dev.getIp(),
                         dev.getChannel(), dev.getDelta());
                 meteo.addDevice(device);
-                log.info("Add new meteo device name: " + dev.getName() + " ip: " + dev.getIp() + " chan: " +
-                        dev.getChannel(), "CONTROLLER");
+                log.info("Add new meteo device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\" chan \"" +
+                        dev.getChannel() + "\"", "CTRL");
             }
         }
         if (cfg.getModCfg("security")) {
@@ -110,8 +120,8 @@ public class Controller implements IController {
                 SecureDevice device = new SecureDevice(dev.getName(), dev.getAlias(), dev.getIp(),
                         dev.getChannel(), dev.getType(), dev.getGroup());
                 secure.addDevice(device);
-                log.info("Add new secure device name: " + dev.getName() + " ip: " + dev.getIp() + " chan: " +
-                        dev.getChannel(), "CONTROLLER");
+                log.info("Add new secure device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\" chan \"" +
+                        dev.getChannel() + "\"", "CTRL");
             }
             mih.setIp(secCfg.getMih());
         }
@@ -119,7 +129,7 @@ public class Controller implements IController {
             for (ThermDeviceSettings dev : thermCfg.getDevices()) {
                 IThermDevice device = new ThermDevice(dev.getName(), dev.getAlias(), dev.getIp(), dev.getSensor());
                 thermCtrl.addDevice(device);
-                log.info("Add new therm device name: " + dev.getName() + " ip: " + dev.getIp(), "CTRL");
+                log.info("Add new therm device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\"", "CTRL");
             }
 
             thermCtrl.setDBFileName(thermCfg.getDb());
@@ -127,6 +137,22 @@ public class Controller implements IController {
                 thermCtrl.loadStates();
             } catch (Exception e) {
                 log.error("Fail to load therm states from db: " + e.getMessage(), "CTRL");
+                return;
+            }
+        }
+        if (cfg.getModCfg("light")) {
+            for (LightDeviceSettings dev : lightCfg.getDevices()) {
+                ILightDevice device = new LightDevice(dev.getName(), dev.getAlias(), dev.getGroup(), dev.getIp(), dev.getChannel());
+                light.addDevice(device);
+                log.info("Add new light device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\" chan \"" +
+                        device.getChannel() + "\"", "CTRL");
+            }
+
+            light.setDBFileName(lightCfg.getDb());
+            try {
+                light.loadStates();
+            } catch (Exception e) {
+                log.error("Fail to load light states from db: " + e.getMessage(), "CTRL");
                 return;
             }
         }
@@ -146,6 +172,10 @@ public class Controller implements IController {
         if (cfg.getModCfg("therm")) {
             Timer thermTmr = new Timer(true);
             thermTmr.scheduleAtFixedRate((TimerTask)thermTask, 0, 1000);
+        }
+        if (cfg.getModCfg("light")) {
+            Timer lightTmr = new Timer(true);
+            lightTmr.scheduleAtFixedRate((TimerTask)lightTask, 0, 1000);
         }
     }
 
@@ -312,5 +342,52 @@ public class Controller implements IController {
      */
     public void saveThermState(IThermDevice device) throws Exception {
         thermCtrl.saveState(device);
+    }
+
+    /**
+     * Get light device by alias
+     * @param alias Alias of light device
+     * @return Light device
+     */
+    public ILightDevice getLightDeviceByAlias(String alias) {
+        return light.getDeviceByAlias(alias);
+    }
+
+    /**
+     * Get Light device by name
+     * @param name Name of light device
+     * @return Light device
+     */
+    public ILightDevice getLightDevice(String name) {
+        return light.getDevice(name);
+    }
+
+    /**
+     * Get all light devices list
+     * @return Light devices list
+     */
+    public List<ILightDevice> getLightDevices() {
+        return light.getDevices();
+    }
+
+    /**
+     * Get list of light devices in group
+     * @param group Group name
+     * @return Devices list
+     */
+    public List<ILightDevice> getLightDevicesGroup(String group) {
+        return light.getDevicesGroup(group);
+    }
+
+    /**
+     * Save light state to db
+     * @param device Device pointer
+     */
+    public void saveLightState(ILightDevice device) {
+        try {
+            light.saveState(device);
+        } catch (Exception e) {
+            log.error("Fail to save light save to db: " + e.getMessage(), "CTRL");
+        }
     }
 }

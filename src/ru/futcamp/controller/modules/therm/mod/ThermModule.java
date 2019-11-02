@@ -15,38 +15,29 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.modules.secure.hdk;
+package ru.futcamp.controller.modules.therm.mod;
 
 import ru.futcamp.net.web.HttpClient;
 
 /**
- * Security communication
+ * Therm control communication
  */
-public class SecureHdk {
+public class ThermModule {
     private String ip;
 
-    public SecureHdk(String ip) {
+    public ThermModule(String ip) {
         this.ip = ip;
     }
 
     /**
-     * Send secure alarm update state to device
-     * @param state Alarm state
-     * @throws Exception If fail to send request
-     */
-    public void setSecureAlarm(boolean state) throws Exception {
-        HttpClient client = new HttpClient("http://" + ip + "/alarm?state=" + state);
-        client.getRequest(2000);
-    }
-
-    /**
      * Sync states with device
-     * @param radio Radio state
-     * @param lamp Lamp state
-     * @throws Exception If fail to send states
+     * @param status Therm control status
+     * @param heater Heater state
+     * @throws Exception If fail to sync with device
      */
-    public void setMIHStates(boolean radio, boolean lamp) throws Exception {
-        HttpClient client = new HttpClient("http://" + ip + "/alarm?radio=" + radio + "&lamp=" + lamp);
+    public void syncStates(boolean status, boolean heater) throws Exception {
+        HttpClient client = new HttpClient("http://" + ip + "/therm?status=" + status +
+                                            "&heater=" + heater);
         client.getRequest(2000);
     }
 }

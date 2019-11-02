@@ -15,16 +15,17 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.controller.modules.light;
 
-public class TelegramThermSettings {
-    private String[] devices;
+import java.util.List;
 
-    public String[] getDevices() {
-        return devices;
-    }
-
-    public void setDevices(String[] devices) {
-        this.devices = devices;
-    }
+public interface ILightControl {
+    void saveState(ILightDevice device) throws Exception;
+    void loadStates() throws Exception;
+    List<ILightDevice> getDevicesGroup(String group);
+    List<ILightDevice> getDevices();
+    ILightDevice getDevice(String name);
+    ILightDevice getDeviceByAlias(String alias);
+    void addDevice(ILightDevice device);
+    void setDBFileName(String fileName);
 }

@@ -34,15 +34,14 @@ public class HttpClient {
      * @return Response
      * @throws Exception If fail to get request
      */
-    public String getRequest(int timeout) throws Exception {
+    private String getReq(int timeout) throws Exception {
         StringBuilder sb = new StringBuilder();
         URL url = new URL(request);
 
         URLConnection urlConn = url.openConnection();
-        if (urlConn != null) {
-            urlConn.setReadTimeout(timeout);
-        }
-        if (urlConn != null && urlConn.getInputStream() != null) {
+        urlConn.setConnectTimeout(timeout);
+        urlConn.setReadTimeout(timeout);
+        if (urlConn.getInputStream() != null) {
             InputStreamReader in = new InputStreamReader(urlConn.getInputStream(),
                                     Charset.defaultCharset());
             BufferedReader bufferedReader = new BufferedReader(in);
@@ -54,6 +53,28 @@ public class HttpClient {
             in.close();
         }
         return sb.toString();
+    }
+
+    /**
+     * Get request
+     * @return Response
+     * @throws Exception If fail to get request
+     */
+    public String getRequest(int timeout) throws Exception {
+        String resp;
+
+        for (int i = 0; i < 4; i++) {
+            try {
+                resp = getReq(timeout);
+                return resp;
+            } catch (Exception e) {
+                if (i == 3)
+                    throw new Exception(e.getMessage());
+            }
+            Thread.sleep(1000);
+        }
+
+        return "";
     }
 
     /**

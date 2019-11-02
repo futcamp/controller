@@ -24,25 +24,16 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.therm.IThermDevice;
-import ru.futcamp.utils.configs.IConfigs;
+import ru.futcamp.controller.modules.secure.ISecureDevice;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Cams menu of tg bot
+ * Light menu of tg bot
  */
-public class ThermMenu implements IMenu {
-    private IController ctrl;
-    private IConfigs cfg;
-
-    public ThermMenu(IController ctrl, IConfigs cfg) {
-        this.ctrl = ctrl;
-        this.cfg = cfg;
-    }
-
+public class LightMenu implements IMenu {
     /**
      * Update telegram message
      * @param bot Telegram bot
@@ -51,15 +42,7 @@ public class ThermMenu implements IMenu {
      */
     public void updateMessage(TelegramLongPollingBot bot, Update upd, IBotMenu menu) throws Exception {
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
-        String txt = "Обогрев помещений\n\n";
-
-        for (IThermDevice device : ctrl.getThermDevices()) {
-            txt += "<b>" + device.getAlias() + "</b>\n";
-            txt += "Статус: <b>" + (device.isStatus() ? "Работает" : "Отключен") + "</b>\n";
-            txt += "Обогреватель: <b>" + (device.isHeater() ? "Работает" : "Отключен") + "</b>\n";
-            txt += "Текущая температура: <b>" + ctrl.getMeteoDevice(device.getSensor()).getTemp() + "°</b>\n";
-            txt += "Держать температуру: <b>" + device.getThreshold() + "°</b>\n\n";
-        }
+        String txt = "Выбор освещения\n\n";
 
         msg.setText(txt);
         msg.enableHtml(true);
@@ -79,21 +62,17 @@ public class ThermMenu implements IMenu {
         replyKeyboardMarkup.setOneTimeKeyboard(false);
         List<KeyboardRow> keyboard = new ArrayList<>();
 
-        for (String[] row : cfg.getTelegramCfg().getMenu().getTherm()) {
-            List<String> thermGroup = new LinkedList<>();
-
-            for (String btn : row) {
-                thermGroup.add(btn);
-            }
-
-            addButtonsRow(thermGroup, keyboard);
-        }
+        /*
+         * Add buttons to menu
+         */
+        List<String> groupButton = new LinkedList<>();
+        groupButton.add("Улица");
+        addButtonsRow(groupButton, keyboard);
 
         /*
          * Add back button to menu
          */
         List<String> backButton = new LinkedList<>();
-        backButton.add("Обновить");
         backButton.add("Назад");
         addButtonsRow(backButton, keyboard);
 

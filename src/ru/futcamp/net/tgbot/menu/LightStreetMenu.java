@@ -24,7 +24,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.therm.IThermDevice;
+import ru.futcamp.controller.modules.light.ILightDevice;
 import ru.futcamp.utils.configs.IConfigs;
 
 import java.util.ArrayList;
@@ -34,35 +34,59 @@ import java.util.List;
 /**
  * Cams menu of tg bot
  */
-public class ThermMenu implements IMenu {
-    private IController ctrl;
+public class LightStreetMenu implements IMenu {
     private IConfigs cfg;
+    private IController ctrl;
 
-    public ThermMenu(IController ctrl, IConfigs cfg) {
-        this.ctrl = ctrl;
+    public LightStreetMenu(IConfigs cfg, IController ctrl) {
         this.cfg = cfg;
+        this.ctrl = ctrl;
     }
 
     /**
      * Update telegram message
      * @param bot Telegram bot
      * @param upd Update message
-     * @param menu Telegram menu pointer
      */
     public void updateMessage(TelegramLongPollingBot bot, Update upd, IBotMenu menu) throws Exception {
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
-        String txt = "Обогрев помещений\n\n";
+        String txt = "";
+        String inMsg = upd.getMessage().getText();
 
-        for (IThermDevice device : ctrl.getThermDevices()) {
-            txt += "<b>" + device.getAlias() + "</b>\n";
-            txt += "Статус: <b>" + (device.isStatus() ? "Работает" : "Отключен") + "</b>\n";
-            txt += "Обогреватель: <b>" + (device.isHeater() ? "Работает" : "Отключен") + "</b>\n";
-            txt += "Текущая температура: <b>" + ctrl.getMeteoDevice(device.getSensor()).getTemp() + "°</b>\n";
-            txt += "Держать температуру: <b>" + device.getThreshold() + "°</b>\n\n";
+        if (!inMsg.equals("Уличное освещение") && !inMsg.equals("Обновить") && !inMsg.equals("Улица")) {
+
+            if (inMsg.equals("Вкл все")) {
+                for (ILightDevice device : ctrl.getLightDevicesGroup("street")) {
+                    device.setStatus(true);
+                    device.syncStates();
+                }
+            } else if (inMsg.equals("Откл все")) {
+                for (ILightDevice device : ctrl.getLightDevicesGroup("street")) {
+                    device.setStatus(false);
+                    device.syncStates();
+                }
+            } else {
+                ILightDevice device = ctrl.getLightDeviceByAlias(inMsg);
+
+                boolean status = device.isStatus();
+                device.setStatus(!status);
+                ctrl.saveLightState(device);
+
+                device.syncStates();
+            }
         }
 
-        msg.setText(txt);
+        txt += "Уличное освещение\n\n";
+        for (ILightDevice device : ctrl.getLightDevices()) {
+            txt += device.getAlias() + ": ";
+            if (device.isStatus())
+                txt += "<b>Работает</b>\n";
+            else
+                txt += "<b>Отключен</b>\n";
+        }
+
         msg.enableHtml(true);
+        msg.setText(txt);
         setButtons(msg);
         bot.execute(msg);
     }
@@ -79,20 +103,25 @@ public class ThermMenu implements IMenu {
         replyKeyboardMarkup.setOneTimeKeyboard(false);
         List<KeyboardRow> keyboard = new ArrayList<>();
 
-        for (String[] row : cfg.getTelegramCfg().getMenu().getTherm()) {
-            List<String> thermGroup = new LinkedList<>();
+        /*
+         * Add buttons to menu
+         */
+        for (String[] row : cfg.getTelegramCfg().getMenu().getLight()) {
+            List<String> lamps = new LinkedList<>();
 
             for (String btn : row) {
-                thermGroup.add(btn);
+                lamps.add(btn);
             }
 
-            addButtonsRow(thermGroup, keyboard);
+            addButtonsRow(lamps, keyboard);
         }
 
         /*
          * Add back button to menu
          */
         List<String> backButton = new LinkedList<>();
+        backButton.add("Вкл все");
+        backButton.add("Откл все");
         backButton.add("Обновить");
         backButton.add("Назад");
         addButtonsRow(backButton, keyboard);

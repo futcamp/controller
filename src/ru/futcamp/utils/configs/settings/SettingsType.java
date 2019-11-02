@@ -24,5 +24,6 @@ public enum SettingsType {
     SECURE_SET,
     MOD_SET,
     CTRL_SET,
-    THERM_SET
+    THERM_SET,
+    LIGHT_SET
 }

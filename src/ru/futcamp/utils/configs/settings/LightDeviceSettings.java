@@ -17,11 +17,12 @@
 
 package ru.futcamp.utils.configs.settings;
 
-public class TelegramCamSettings {
+public class LightDeviceSettings {
     private String name;
+    private String alias;
+    private String group;
     private String ip;
     private int channel;
-    private String[] lamps;
 
     public String getName() {
         return name;
@@ -29,6 +30,22 @@ public class TelegramCamSettings {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 
     public String getIp() {
@@ -45,13 +62,5 @@ public class TelegramCamSettings {
 
     public void setChannel(int channel) {
         this.channel = channel;
-    }
-
-    public String[] getLamps() {
-        return lamps;
-    }
-
-    public void setLamps(String[] lamp) {
-        this.lamps = lamp;
     }
 }

@@ -15,9 +15,9 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.modules.meteo.hdk;
+package ru.futcamp.controller.modules.meteo.mod;
 
-public class HdkMeteoData {
+public class MeteoModuleData {
     private int temp;
     private int hum;
     private int pres;
