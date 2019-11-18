@@ -17,14 +17,18 @@
 
 package ru.futcamp.controller.modules.therm;
 
+import ru.futcamp.controller.ActMgmt;
+import ru.futcamp.controller.modules.light.LightInfo;
+
 import java.util.List;
 
 public interface IThermControl {
-    IThermDevice getDevice(String name);
-    List<IThermDevice> getDevices();
-    void saveState(IThermDevice device) throws Exception;
+    List<ThermInfo> getThermInfo();
+    ThermInfo getThermInfo(String alias) throws Exception;
+    void switchStatus(String alias) throws Exception;
+    void changeThreshold(String alias, ActMgmt action) throws Exception;
+    void loadStates() throws Exception;
     void addDevice(IThermDevice device);
     void setDBFileName(String fileName);
-    void loadStates() throws Exception;
-    IThermDevice getDeviceByAlias(String alias);
+    void update();
 }

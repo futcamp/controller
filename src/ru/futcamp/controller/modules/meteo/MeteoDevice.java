@@ -17,9 +17,18 @@
 
 package ru.futcamp.controller.modules.meteo;
 
+import ru.futcamp.controller.modules.meteo.db.IMeteoDB;
+import ru.futcamp.controller.modules.meteo.db.MeteoDBData;
 import ru.futcamp.controller.modules.meteo.mod.MeteoModuleData;
 import ru.futcamp.controller.modules.meteo.mod.MeteoModule;
+import ru.futcamp.utils.TimeControl;
 
+import java.sql.SQLException;
+import java.util.List;
+
+/**
+ * Meteo station sensor
+ */
 public class MeteoDevice extends MeteoData implements IMeteoDevice {
     private String name;
     private String alias;
@@ -27,7 +36,6 @@ public class MeteoDevice extends MeteoData implements IMeteoDevice {
     private String address;
     private int channel;
     private int delta;
-    private boolean fail;
 
     public MeteoDevice(String name, String alias, String type, String addr, int chan, int delta) {
         this.name = name;
@@ -36,7 +44,6 @@ public class MeteoDevice extends MeteoData implements IMeteoDevice {
         this.address = addr;
         this.channel = chan;
         this.delta = delta;
-        this.fail = false;
     }
 
     /**
@@ -94,13 +101,5 @@ public class MeteoDevice extends MeteoData implements IMeteoDevice {
 
     public void setChannel(int channel) {
         this.channel = channel;
-    }
-
-    public boolean isFail() {
-        return fail;
-    }
-
-    public void setFail(boolean fail) {
-        this.fail = fail;
     }
 }

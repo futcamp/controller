@@ -71,6 +71,9 @@ public class TimeControl {
             return "";
         }
 
-        return day + "." + parts[1] + "." + parts[2];
+        String out = day + "." + parts[1] + "." + parts[2];
+        if (day < 10)
+            out = "0" + out;
+        return out;
     }
 }

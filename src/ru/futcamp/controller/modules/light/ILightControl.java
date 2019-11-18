@@ -20,12 +20,13 @@ package ru.futcamp.controller.modules.light;
 import java.util.List;
 
 public interface ILightControl {
-    void saveState(ILightDevice device) throws Exception;
     void loadStates() throws Exception;
-    List<ILightDevice> getDevicesGroup(String group);
-    List<ILightDevice> getDevices();
-    ILightDevice getDevice(String name);
-    ILightDevice getDeviceByAlias(String alias);
     void addDevice(ILightDevice device);
     void setDBFileName(String fileName);
+    void switchStatus(String alias) throws Exception;
+    List<LightInfo> getLightInfo();
+    LightInfo getLightInfo(String alias) throws Exception;
+    List<LightInfo> getLightGroupInfo(String group);
+    void setGroupStatus(String group, boolean status) throws Exception;
+    void setLightStatus(String alias, boolean status) throws Exception;
 }

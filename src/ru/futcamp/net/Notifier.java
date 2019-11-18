@@ -17,6 +17,7 @@
 
 package ru.futcamp.net;
 
+import ru.futcamp.IAppModule;
 import ru.futcamp.net.web.HttpClient;
 import ru.futcamp.utils.configs.IConfigs;
 
@@ -25,11 +26,14 @@ import java.net.URLEncoder;
 /**
  * Telegram notifier
  */
-public class Notifier implements INotifier {
+public class Notifier implements INotifier, IAppModule {
     private IConfigs cfg;
 
-    public Notifier(IConfigs cfg) {
-        this.cfg = cfg;
+    private String modName;
+
+    public Notifier(String name, IAppModule ...dep) {
+        this.modName = name;
+        this.cfg = (IConfigs) dep[0];
     }
 
     /**
@@ -44,5 +48,9 @@ public class Notifier implements INotifier {
                                                 URLEncoder.encode(message, "UTF-8"));
             client.getRequest(2000);
         }
+    }
+
+    public String getModName() {
+        return modName;
     }
 }

@@ -17,43 +17,37 @@
 
 package ru.futcamp.controller;
 
-import ru.futcamp.controller.modules.light.ILightDevice;
-import ru.futcamp.controller.modules.meteo.IMeteoDevice;
-import ru.futcamp.controller.modules.meteo.db.MeteoDBData;
-import ru.futcamp.controller.modules.secure.ISecureDevice;
-import ru.futcamp.controller.modules.therm.IThermDevice;
+import ru.futcamp.controller.modules.light.LightInfo;
+import ru.futcamp.controller.modules.meteo.MeteoInfo;
+import ru.futcamp.controller.modules.secure.MIHInfo;
+import ru.futcamp.controller.modules.secure.SecureInfo;
+import ru.futcamp.controller.modules.therm.ThermInfo;
 
 import java.util.List;
 
 public interface IController {
-    void startModules();
-    List<IMeteoDevice> getMeteoDevices();
-    IMeteoDevice getMeteoDevice(String name);
-    void setSecureState(String ip, int channel, boolean state);
-    void setSecureStatus(boolean status);
-    boolean isSecureStatus();
-    boolean isSecureAlarm();
-    List<ISecureDevice> getSecureDevices();
-    List<MeteoDBData> getMeteoDataByDate(String sensor, String date);
-    void saveSecureStates();
-    List<IThermDevice> getThermDevices();
-    IThermDevice getThermDeviceByAlias(String alias);
-    void saveThermState(IThermDevice device) throws Exception;
-    void saveMIHStates();
-    void setMIHStatus(boolean status);
-    void setMIHRadio(boolean status);
-    void setMIHLamp(boolean status);
-    void setMIHTimeOn(boolean status);
-    void setMIHTimeOn(int time);
-    void setMIHTimeOff(int time);
-    boolean isMIHStatus();
-    boolean isMIHRadio();
-    boolean isMIHLamp();
-    int getMIHTimeOn();
-    int getMIHTimeOff();
-    ILightDevice getLightDeviceByAlias(String alias);
-    ILightDevice getLightDevice(String name);
-    List<ILightDevice> getLightDevices();
-    void saveLightState(ILightDevice device);
-    List<ILightDevice> getLightDevicesGroup(String group);
+    boolean startModules();
+
+    List<MeteoInfo> getMeteoInfo();
+    MeteoInfo getMeteoInfo(String alias);
+    List<MeteoInfo> getMeteoInfoByDate(String alias, String date) throws Exception;
+
+    List<ThermInfo> getThermInfo();
+    ThermInfo getThermInfo(String alias) throws Exception;
+    void switchThermStatus(String alias) throws Exception;
+    void changeThermThreshold(String alias, ActMgmt action) throws Exception;
+
+    void switchMIHStatus() throws Exception;
+    MIHInfo getMIHInfo();
+    void changeMIHTime(TimeMgmt time, ActMgmt action) throws Exception;
+    SecureInfo getSecureInfo();
+    void switchSecureStatus() throws Exception;
+    void newSecureAction(String ip, int chan);
+
+    void switchLightStatus(String alias) throws Exception;
+    LightInfo getLightInfo(String alias) throws Exception;
+    List<LightInfo> getLightInfo();
+    List<LightInfo> getLightGroupInfo(String group);
+    void setGroupStatus(String group, boolean status) throws Exception;
+    void setLightStatus(String alias, boolean status) throws Exception;
 }

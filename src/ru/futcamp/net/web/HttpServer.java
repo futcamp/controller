@@ -17,20 +17,26 @@
 
 package ru.futcamp.net.web;
 
-import ru.futcamp.net.web.handlers.IHandlersBuilder;
+import com.sun.net.httpserver.HttpHandler;
+import ru.futcamp.IAppModule;
 import ru.futcamp.net.web.server.IWebServer;
 
 import java.io.IOException;
 
 import static ru.futcamp.net.web.handlers.Handlers.*;
 
-public class HttpServer implements IHttpServer {
+public class HttpServer implements IHttpServer, IAppModule {
     private IWebServer server;
-    private IHandlersBuilder builder;
+    private HttpHandler idxHandler;
+    private HttpHandler secHandler;
 
-    public HttpServer(IWebServer server, IHandlersBuilder builder) {
-        this.server = server;
-        this.builder = builder;
+    private String modName;
+
+    public HttpServer(String name, IAppModule ...dep) {
+        this.modName = name;
+        this.server = (IWebServer) dep[0];
+        this.idxHandler = (HttpHandler) dep[1];
+        this.secHandler = (HttpHandler) dep[2];
     }
 
     /**
@@ -39,8 +45,8 @@ public class HttpServer implements IHttpServer {
      */
     public void prepare(String api) throws IOException {
         server.init();
-        server.addHandler("/", builder.makeHandler(INDEX_HDL));
-        server.addHandler("/api/" + api + "/security", builder.makeHandler(SECURE_HDL));
+        server.addHandler("/", idxHandler);
+        server.addHandler("/api/" + api + "/security", secHandler);
     }
 
     /**
@@ -52,5 +58,9 @@ public class HttpServer implements IHttpServer {
      */
     public void start(int port, int queue, int threads) throws IOException {
         server.start(port, queue, threads);
+    }
+
+    public String getModName() {
+        return modName;
     }
 }

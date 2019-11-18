@@ -19,6 +19,7 @@ package ru.futcamp.net.web.server;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import ru.futcamp.IAppModule;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -28,8 +29,14 @@ import java.util.concurrent.Executors;
 /**
  * Application web server
  */
-public class WebServer implements IWebServer {
+public class WebServer implements IWebServer, IAppModule {
     private HttpServer server;
+
+    private String modName;
+
+    public WebServer(String name, IAppModule ...dep) {
+        this.modName = name;
+    }
 
     /**
      * Server initialization
@@ -60,5 +67,9 @@ public class WebServer implements IWebServer {
         server.bind(new InetSocketAddress(port), queue);
         server.setExecutor(executor);
         server.start();
+    }
+
+    public String getModName() {
+        return modName;
     }
 }

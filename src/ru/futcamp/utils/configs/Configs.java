@@ -18,6 +18,7 @@
 package ru.futcamp.utils.configs;
 
 import com.alibaba.fastjson.JSON;
+import ru.futcamp.IAppModule;
 import ru.futcamp.utils.configs.settings.*;
 
 import java.io.BufferedReader;
@@ -27,7 +28,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class Configs implements IConfigs {
+public class Configs implements IConfigs, IAppModule {
     private TelegramSettings tgCfg;
     private HttpSettings httpCfg;
     private MeteoSettings meteoCfg;
@@ -36,6 +37,12 @@ public class Configs implements IConfigs {
     private CtrlSettings ctrlCfg;
     private ThermSettings thermCfg;
     private LightSettings lightCfg;
+
+    private String modName;
+
+    public Configs(String name, IAppModule ...dep) {
+        this.modName = name;
+    }
 
     /**
      * Reading and parsing configs
@@ -155,5 +162,9 @@ public class Configs implements IConfigs {
      */
     public LightSettings getLightCfg() {
         return lightCfg;
+    }
+
+    public String getModName() {
+        return modName;
     }
 }

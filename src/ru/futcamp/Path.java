@@ -34,33 +34,33 @@ class Path {
      * @param path Path alias
      * @return Path string
      */
-    String getPath(DefaultPath path) {
+    String getPath(String path) {
         switch (path) {
-            case LOG_PATH:
+            case "log":
                 return "/var/log/futcamp/";
 
-            case TG_CFG_PATH:
+            case "tgbot":
                 return "/etc/futcamp/tgbot.conf";
 
-            case HTTP_PATH:
+            case "http":
                 return "/etc/futcamp/http.conf";
 
-            case METEO_PATH:
+            case "meteo":
                 return "/etc/futcamp/meteo.conf";
 
-            case SECURE_PATH:
+            case "secure":
                 return "/etc/futcamp/secure.conf";
 
-            case MOD_PATH:
+            case "modules":
                 return "/etc/futcamp/modules.conf";
 
-            case CTRL_PATH:
+            case "ctrl":
                 return "/etc/futcamp/controller.conf";
 
-            case THERM_PATH:
+            case "therm":
                 return "/etc/futcamp/therm.conf";
 
-            case LIGHT_PATH:
+            case "light":
                 return "/etc/futcamp/light.conf";
         }
         return null;

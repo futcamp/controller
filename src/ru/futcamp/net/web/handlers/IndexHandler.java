@@ -19,14 +19,26 @@ package ru.futcamp.net.web.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import ru.futcamp.IAppModule;
 
 /**
  * Index request handler
  */
-public class IndexHandler implements HttpHandler {
+public class IndexHandler implements HttpHandler, IAppModule {
+    private String modName;
+
+    public IndexHandler(String name, IAppModule ...dep) {
+        modName = name;
+    }
+
     @Override
     public void handle(HttpExchange ex) {
         System.out.println(ex.getRequestURI());
         System.out.println(ex.getRemoteAddress().getAddress().toString());
+    }
+
+    @Override
+    public String getModName() {
+        return modName;
     }
 }

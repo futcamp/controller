@@ -17,7 +17,9 @@
 
 package ru.futcamp.controller.modules.therm;
 
+import ru.futcamp.IAppModule;
 import ru.futcamp.controller.modules.meteo.IMeteoStation;
+import ru.futcamp.controller.modules.therm.db.IThermDB;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.log.ILogger;
 
@@ -26,19 +28,17 @@ import java.util.TimerTask;
 /**
  * Therm task
  */
-public class ThermTask extends TimerTask {
-    private ILogger log;
+public class ThermTask extends TimerTask implements IAppModule {
     private IThermControl therm;
-    private IMeteoStation meteo;
     private IConfigs cfg;
 
     private int counter = 0;
+    private String modName;
 
-    public ThermTask(ILogger log, IThermControl therm, IMeteoStation meteo, IConfigs cfg) {
-        this.log = log;
-        this.therm = therm;
-        this.meteo = meteo;
-        this.cfg = cfg;
+    public ThermTask(String name, IAppModule ...dep) {
+        this.modName = name;
+        this.therm = (IThermControl) dep[0];
+        this.cfg = (IConfigs) dep[1];
     }
 
     @Override
@@ -49,28 +49,10 @@ public class ThermTask extends TimerTask {
             return;
         counter = 0;
 
-        for (IThermDevice device : therm.getDevices()) {
-            if (device.isStatus()) {
-                int curTemp = meteo.getDevice(device.getSensor()).getTemp();
+        therm.update();
+    }
 
-                if (curTemp <= device.getThreshold()) {
-                    device.setHeater(true);
-                }
-                if (curTemp > device.getThreshold()) {
-                    device.setHeater(false);
-                }
-            } else {
-                device.setHeater(false);
-            }
-
-            /*
-             * Syncing states with device
-             */
-            try {
-                device.syncStates();
-            } catch (Exception e) {
-                log.error("Fail to sync therm device " + device.getName(), "THERMTASK");
-            }
-        }
+    public String getModName() {
+        return modName;
     }
 }

@@ -32,6 +32,4 @@ public interface IMeteoDevice {
     int getHumidity();
     int getPressure();
     int getTemp();
-    boolean isFail();
-    void setFail(boolean fail);
 }
