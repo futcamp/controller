@@ -17,17 +17,11 @@
 
 package ru.futcamp.controller.modules.secure;
 
-import java.util.List;
-
 public interface ISecurity {
-    boolean isStatus();
-    void setStatus(boolean status);
-    boolean isAlarm();
-    void setAlarm(boolean alarm);
-    void saveStates() throws Exception;
-    List<ISecureDevice> getDevices();
     void addDevice(ISecureDevice device);
     void setDBFileName(String fileName);
     void loadStates() throws Exception;
-    void setDeviceState(String ip, int channel, boolean state);
+    void switchStatus() throws Exception;
+    SecureInfo getSecureInfo();
+    void newAction(String ip, int chan);
 }

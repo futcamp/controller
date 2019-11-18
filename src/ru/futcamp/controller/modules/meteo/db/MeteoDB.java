@@ -18,6 +18,7 @@
 package ru.futcamp.controller.modules.meteo.db;
 
 import org.sqlite.JDBC;
+import ru.futcamp.IAppModule;
 import sun.awt.Mutex;
 
 import java.sql.*;
@@ -27,10 +28,16 @@ import java.util.List;
 /**
  * Database management class
  */
-public class MeteoDB implements IMeteoDB {
+public class MeteoDB implements IMeteoDB, IAppModule {
     private String fileName;
     private Connection conn;
     private Mutex mtx = new Mutex();
+
+    private String modName;
+
+    public MeteoDB(String name, IAppModule ...dep) {
+        this.modName = name;
+    }
 
     /**
      * Set path to database file
@@ -125,5 +132,9 @@ public class MeteoDB implements IMeteoDB {
     public void close() throws SQLException {
         this.conn.close();
         mtx.unlock();
+    }
+
+    public String getModName() {
+        return modName;
     }
 }

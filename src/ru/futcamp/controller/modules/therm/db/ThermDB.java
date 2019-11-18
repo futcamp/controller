@@ -18,6 +18,8 @@
 package ru.futcamp.controller.modules.therm.db;
 
 import org.sqlite.JDBC;
+import ru.futcamp.IAppModule;
+import ru.futcamp.controller.modules.therm.ThermDevice;
 import sun.awt.Mutex;
 
 import java.sql.*;
@@ -27,10 +29,16 @@ import java.util.List;
 /**
  * Database management class
  */
-public class ThermDB implements IThermDB {
+public class ThermDB implements IThermDB, IAppModule {
     private String fileName;
     private Connection conn;
     private Mutex mtx = new Mutex();
+
+    private String modName;
+
+    public ThermDB(String name, IAppModule ...dep) {
+        this.modName = name;
+    }
 
     /**
      * Set path to database file
@@ -96,5 +104,9 @@ public class ThermDB implements IThermDB {
     public void close() throws SQLException {
         this.conn.close();
         mtx.unlock();
+    }
+
+    public String getModName() {
+        return modName;
     }
 }

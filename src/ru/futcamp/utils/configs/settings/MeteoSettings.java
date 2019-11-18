@@ -18,20 +18,10 @@
 package ru.futcamp.utils.configs.settings;
 
 public class MeteoSettings {
-    private int interval;
-    private int dbInterval;
-    private int lcdInterval;
+    private MeteoTimersSettings timers;
     private String db;
     private MeteoDeviceSettings[] devices;
     private LcdSettings[] displays;
-
-    public int getInterval() {
-        return interval;
-    }
-
-    public void setInterval(int interval) {
-        this.interval = interval;
-    }
 
     public MeteoDeviceSettings[] getDevices() {
         return devices;
@@ -49,14 +39,6 @@ public class MeteoSettings {
         this.db = db;
     }
 
-    public int getDbInterval() {
-        return dbInterval;
-    }
-
-    public void setDbInterval(int dbInterval) {
-        this.dbInterval = dbInterval;
-    }
-
     public LcdSettings[] getDisplays() {
         return displays;
     }
@@ -65,11 +47,11 @@ public class MeteoSettings {
         this.displays = displays;
     }
 
-    public int getLcdInterval() {
-        return lcdInterval;
+    public MeteoTimersSettings getTimers() {
+        return timers;
     }
 
-    public void setLcdInterval(int lcdInterval) {
-        this.lcdInterval = lcdInterval;
+    public void setTimers(MeteoTimersSettings timers) {
+        this.timers = timers;
     }
 }

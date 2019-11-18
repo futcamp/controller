@@ -17,6 +17,7 @@
 
 package ru.futcamp.controller.modules.meteo;
 
+import ru.futcamp.IAppModule;
 import ru.futcamp.utils.TimeControl;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.configs.settings.LcdDeviceSettings;
@@ -29,23 +30,25 @@ import java.util.TimerTask;
 /**
  * Meteo task
  */
-public class MeteoTask extends TimerTask {
+public class MeteoTask extends TimerTask implements IAppModule {
     private ILogger log;
     private IMeteoStation meteo;
     private IConfigs cfg;
     private IMeteoDisplay lcd;
 
-    private int dbCounter = 0;
     private int meteoCounter = 0;
     private int lcdCounter = 0;
 
     private static int MaxSensorRetries = 3;
 
-    public MeteoTask(ILogger log, IMeteoStation meteo, IConfigs cfg, IMeteoDisplay lcd) {
-        this.log = log;
-        this.meteo = meteo;
-        this.cfg = cfg;
-        this.lcd = lcd;
+    private String modName;
+
+    public MeteoTask(String name, IAppModule ...dep) {
+        this.modName = name;
+        this.log = (ILogger) dep[0];
+        this.meteo = (IMeteoStation) dep[1];
+        this.cfg = (IConfigs) dep[2];
+        this.lcd = (IMeteoDisplay) dep[3];
     }
 
     @Override
@@ -58,7 +61,7 @@ public class MeteoTask extends TimerTask {
         MeteoSettings mCfg = cfg.getMeteoCfg();
         lcdCounter++;
 
-        if (lcdCounter != mCfg.getLcdInterval())
+        if (lcdCounter != mCfg.getTimers().getLcd())
             return;
         lcdCounter = 0;
 
@@ -68,78 +71,35 @@ public class MeteoTask extends TimerTask {
                     int value = 0;
 
                     if (device.getType().equals("temp")) {
-                        value = meteo.getDevice(device.getSensor()).getTemp();
+                        value = meteo.getMeteoInfo(device.getSensor()).getTemp();
                     } else if (device.getType().equals("hum")) {
-                        value = meteo.getDevice(device.getSensor()).getHumidity();
+                        value = meteo.getMeteoInfo(device.getSensor()).getHum();
                     }
 
                     lcd.updateData(display.getIp(), device.getId(), value, device.getType());
                 } catch (Exception e) {
-                    log.error("Fail to update meteo data on lcd \"" + display.getName() + "\": " + e.getMessage(),
-                            "METEOTASK");
+                    log.error("Fail to update meteo data on lcd \"" + display.getName() + "\": " + e.getMessage(), "METEOTASK");
                 }
             }
             try {
                 lcd.showData(display.getIp());
             } catch (Exception e) {
-                log.error("Fail to display meteo data on \"" + display.getName() + "\": " + e.getMessage(),
-                        "METEOTASK");
+                log.error("Fail to display meteo data on \"" + display.getName() + "\": " + e.getMessage(), "METEOTASK");
             }
         }
     }
 
     private void processMeteo() {
         MeteoSettings mCfg = cfg.getMeteoCfg();
-        dbCounter++;
         meteoCounter++;
 
-        if (meteoCounter == mCfg.getInterval()) {
+        if (meteoCounter == mCfg.getTimers().getSensors()) {
             meteoCounter = 0;
-            for (IMeteoDevice device : meteo.getDevices()) {
-                for (int i = 0; i < MaxSensorRetries; i++) {
-                    try {
-                        device.syncMeteoData();
-
-                        if (device.isFail()) {
-                            device.setFail(false);
-                            log.info("Meteo sensor " + device.getName() + " is online", "METEOTASK");
-                        }
-
-                        try {
-                            saveToDb();
-                        } catch (Exception e) {
-                            log.error("Fail to save meteo data to db: " + e.getMessage(), "METEOTASK");
-                        }
-                        break;
-                    } catch (Exception e) {
-                        if (!device.isFail() && (i == (MaxSensorRetries - 1))) {
-                            log.error("Fail to sync meteo data with " + device.getName() + " : " + e.getMessage(),
-                                    "METEOTASK");
-                            device.setFail(true);
-                        }
-                    }
-                }
-            }
+            meteo.update();
         }
     }
 
-    /**
-     * Save meteo data from sensor to db
-     * @throws Exception
-     */
-    private void saveToDb() throws Exception {
-        if (dbCounter != cfg.getMeteoCfg().getDbInterval())
-            return;
-
-        dbCounter = 0;
-
-        for (IMeteoDevice device : meteo.getDevices()) {
-            int lastHour = meteo.getLastHour(device.getAlias());
-            int curHour = TimeControl.getCurHour();
-
-            if (curHour != lastHour) {
-                meteo.saveMeteoData(device);
-            }
-        }
+    public String getModName() {
+        return modName;
     }
 }

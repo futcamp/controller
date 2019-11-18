@@ -21,6 +21,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import ru.futcamp.IAppModule;
 import ru.futcamp.controller.IController;
 import ru.futcamp.net.web.HttpResponse;
 import ru.futcamp.utils.log.ILogger;
@@ -29,13 +30,16 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.List;
 
-public class SecureHandler implements HttpHandler {
+public class SecureHandler implements HttpHandler, IAppModule {
     private ILogger log;
     private IController ctrl;
 
-    SecureHandler(ILogger log, IController ctrl) {
-        this.log = log;
-        this.ctrl = ctrl;
+    private String modName;
+
+    public SecureHandler(String name, IAppModule... dep) {
+        modName = name;
+        this.log = (ILogger) dep[0];
+        this.ctrl = (IController) dep[1];
     }
 
     @Override
@@ -62,12 +66,16 @@ public class SecureHandler implements HttpHandler {
             return;
         }
 
-        ctrl.setSecureState(inIP, channel, true);
+        ctrl.newSecureAction(inIP, channel);
 
         try {
             resp.simpleResult(true);
         } catch (Exception exc) {
             log.error("Fail to send secure response: " + exc.getMessage(), "SECUREHDL");
         }
+    }
+
+    public String getModName() {
+        return modName;
     }
 }

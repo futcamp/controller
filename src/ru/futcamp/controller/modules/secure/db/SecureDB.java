@@ -18,6 +18,7 @@
 package ru.futcamp.controller.modules.secure.db;
 
 import org.sqlite.JDBC;
+import ru.futcamp.IAppModule;
 import sun.awt.Mutex;
 
 import java.sql.*;
@@ -25,10 +26,16 @@ import java.sql.*;
 /**
  * Database management class
  */
-public class SecureDB implements ISecureDB {
+public class SecureDB implements ISecureDB, IAppModule {
     private String fileName;
     private Connection conn;
     private Mutex mtx = new Mutex();
+
+    private String modName;
+
+    public SecureDB(String name, IAppModule ...dep) {
+        this.modName = name;
+    }
 
     /**
      * Set path to database file
@@ -125,5 +132,9 @@ public class SecureDB implements ISecureDB {
     public void close() throws SQLException {
         this.conn.close();
         mtx.unlock();
+    }
+
+    public String getModName() {
+        return modName;
     }
 }

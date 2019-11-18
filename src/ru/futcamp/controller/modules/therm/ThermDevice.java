@@ -35,6 +35,16 @@ public class ThermDevice extends ThermData implements IThermDevice {
         this.sensor = sensor;
     }
 
+    @Override
+    public void setStatus(boolean status) {
+        super.setStatus(status);
+    }
+
+    @Override
+    public void setThreshold(int threshold) {
+        super.setThreshold(threshold);
+    }
+
     /**
      * Sync states with device
      * @throws Exception If fail to sync state

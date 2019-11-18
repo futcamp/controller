@@ -17,6 +17,8 @@
 
 package ru.futcamp.utils.log;
 
+import ru.futcamp.IAppModule;
+
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -28,8 +30,13 @@ import java.util.regex.Pattern;
 /**
  * Application logger
  */
-public class Logger implements ILogger {
+public class Logger implements ILogger, IAppModule {
     private String path;
+    private String modName;
+
+    public Logger(String name, IAppModule...dep) {
+        this.modName = name;
+    }
 
     /**
      * Save log message to file
@@ -58,7 +65,7 @@ public class Logger implements ILogger {
      */
     private void makeMessage(String message, String module, LogType type) {
         Date date = new Date();
-        SimpleDateFormat dtm = new SimpleDateFormat("[HH:mm]");
+        SimpleDateFormat dtm = new SimpleDateFormat("[HH:mm:ss]");
 
         String out = dtm.format(date) + "[";
 
@@ -138,5 +145,9 @@ public class Logger implements ILogger {
      */
     public void error(String message, String module) {
         makeMessage(message, module, LogType.LOG_ERROR);
+    }
+
+    public String getModName() {
+        return modName;
     }
 }

@@ -17,12 +17,19 @@
 
 package ru.futcamp.controller.modules.meteo;
 
+import ru.futcamp.IAppModule;
 import ru.futcamp.controller.modules.meteo.mod.MeteoModule;
 
 /**
  * Displaying meteo data on LCD
  */
-public class MeteoDisplay implements IMeteoDisplay {
+public class MeteoDisplay implements IMeteoDisplay, IAppModule {
+    private String modName;
+
+    public MeteoDisplay(String name, IAppModule ...dep) {
+        this.modName = name;
+    }
+
     /**
      * Update meteo data on lcd
      * @param ip Address of device
@@ -46,5 +53,9 @@ public class MeteoDisplay implements IMeteoDisplay {
         MeteoModule hdk = new MeteoModule(ip);
 
         hdk.displayMeteoLcd();
+    }
+
+    public String getModName() {
+        return modName;
     }
 }

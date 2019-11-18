@@ -17,20 +17,19 @@
 
 package ru.futcamp.controller;
 
+import ru.futcamp.IAppModule;
 import ru.futcamp.controller.modules.light.ILightControl;
 import ru.futcamp.controller.modules.light.ILightDevice;
 import ru.futcamp.controller.modules.light.LightDevice;
-import ru.futcamp.controller.modules.meteo.IMeteoDevice;
+import ru.futcamp.controller.modules.light.LightInfo;
 import ru.futcamp.controller.modules.meteo.IMeteoStation;
 import ru.futcamp.controller.modules.meteo.MeteoDevice;
-import ru.futcamp.controller.modules.meteo.db.MeteoDBData;
-import ru.futcamp.controller.modules.secure.IMainInHome;
-import ru.futcamp.controller.modules.secure.ISecureDevice;
-import ru.futcamp.controller.modules.secure.ISecurity;
-import ru.futcamp.controller.modules.secure.SecureDevice;
+import ru.futcamp.controller.modules.meteo.MeteoInfo;
+import ru.futcamp.controller.modules.secure.*;
 import ru.futcamp.controller.modules.therm.IThermControl;
 import ru.futcamp.controller.modules.therm.IThermDevice;
 import ru.futcamp.controller.modules.therm.ThermDevice;
+import ru.futcamp.controller.modules.therm.ThermInfo;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.configs.settings.*;
 import ru.futcamp.utils.log.ILogger;
@@ -42,352 +41,344 @@ import java.util.TimerTask;
 /**
  * Smart home controller
  */
-public class Controller implements IController {
+public class Controller implements IController, IAppModule {
     private ILogger log;
     private IConfigs cfg;
     private IMeteoStation meteo;
     private Runnable meteoTask;
     private ISecurity secure;
     private Runnable secureTask;
-    private IThermControl thermCtrl;
+    private IThermControl therm;
     private Runnable thermTask;
     private IMainInHome mih;
     private ILightControl light;
-    private Runnable lightTask;
 
-    public Controller(ILogger log, IConfigs cfg, IMeteoStation meteo, Runnable meteoTask,
-                      ISecurity secure, Runnable secureTask, IThermControl thermCtrl,
-                      Runnable thermTask, IMainInHome mih, ILightControl light,
-                      Runnable lightTask) {
-        this.log = log;
-        this.cfg = cfg;
-        this.meteo = meteo;
-        this.meteoTask = meteoTask;
-        this.secure = secure;
-        this.secureTask = secureTask;
-        this.thermCtrl = thermCtrl;
-        this.thermTask = thermTask;
-        this.mih = mih;
-        this.light = light;
-        this.lightTask = lightTask;
+    private String modName;
+
+    public Controller(String name, IAppModule ...dep) {
+        modName = name;
+        this.log = (ILogger) dep[0];
+        this.cfg = (IConfigs) dep[1];
+        this.meteo = (IMeteoStation) dep[2];
+        this.meteoTask = (Runnable) dep[3];
+        this.secure = (ISecurity) dep[4];
+        this.secureTask = (Runnable) dep[5];
+        this.therm = (IThermControl) dep[6];
+        this.thermTask = (Runnable) dep[7];
+        this.mih = (IMainInHome) dep[8];
+        this.light = (ILightControl) dep[9];
+    }
+
+    private boolean startMeteoModule() {
+        MeteoSettings meteoCfg = cfg.getMeteoCfg();
+        meteo.setDBFileName(meteoCfg.getDb());
+
+        /*
+         * Add devices from configs
+         */
+        for (MeteoDeviceSettings dev : meteoCfg.getDevices()) {
+            MeteoDevice device = new MeteoDevice(dev.getName(), dev.getAlias(), dev.getType(), dev.getIp(),
+                    dev.getChannel(), dev.getDelta());
+            meteo.addDevice(device);
+            log.info("Add new meteo device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\" chan \"" +
+                    dev.getChannel() + "\"", "CTRL");
+        }
+
+        /*
+         * Run task
+         */
+        Timer meteoTmr = new Timer(true);
+        meteoTmr.scheduleAtFixedRate((TimerTask)meteoTask, 0, 1000);
+        return true;
+    }
+
+    private boolean startSecureModule() {
+        SecureSettings secCfg = cfg.getSecureCfg();
+
+        /*
+         * Add devices from configs
+         */
+        for (SecureDeviceSettings dev : secCfg.getDevices()) {
+            SecureDevice device = new SecureDevice(dev.getName(), dev.getAlias(), dev.getIp(),
+                    dev.getChannel(), dev.getType(), dev.getGroup());
+            secure.addDevice(device);
+            log.info("Add new secure device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\" chan \"" +
+                    dev.getChannel() + "\"", "CTRL");
+        }
+
+        mih.setIp(secCfg.getMih());
+        secure.setDBFileName(secCfg.getDb());
+
+        /*
+         * Loading states from DB
+         */
+        try {
+            secure.loadStates();
+        } catch (Exception e) {
+            log.error("Fail to load secure states from db: " + e.getMessage(), "CTRL");
+            return false;
+        }
+
+        mih.setDBFileName(secCfg.getDb());
+
+        /*
+         * Loading states from DB
+         */
+        try {
+            mih.loadDataFromDb();
+        } catch (Exception e) {
+            log.error("Fail to load ManInHome states from db: " + e.getMessage(), "CTRL");
+            return false;
+        }
+
+        /*
+         * Run task
+         */
+        Timer secureTmr = new Timer(true);
+        secureTmr.scheduleAtFixedRate((TimerTask)secureTask, 0, 1000);
+        return true;
+    }
+
+    private boolean startThermModule() {
+        ThermSettings thermCfg = cfg.getThermCfg();
+
+        /*
+         * Add devices from cfg
+         */
+        for (ThermDeviceSettings dev : thermCfg.getDevices()) {
+            IThermDevice device = new ThermDevice(dev.getName(), dev.getAlias(), dev.getIp(), dev.getSensor());
+            therm.addDevice(device);
+            log.info("Add new therm device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\"", "CTRL");
+        }
+
+        therm.setDBFileName(thermCfg.getDb());
+
+        /*
+         * Loading states from DB
+         */
+        try {
+            therm.loadStates();
+        } catch (Exception e) {
+            log.error("Fail to load therm states from db: " + e.getMessage(), "CTRL");
+            return false;
+        }
+
+        /*
+         * Run task
+         */
+        Timer thermTmr = new Timer(true);
+        thermTmr.scheduleAtFixedRate((TimerTask)thermTask, 0, 1000);
+        return true;
+    }
+
+    private boolean startLightModule() {
+        LightSettings lightCfg = cfg.getLightCfg();
+
+        /*
+         * Add devices from cfg
+         */
+        for (LightDeviceSettings dev : lightCfg.getDevices()) {
+            ILightDevice device = new LightDevice(dev.getName(), dev.getAlias(), dev.getGroup(), dev.getIp(), dev.getChannel());
+            light.addDevice(device);
+            log.info("Add new light device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\" chan \"" +
+                    device.getChannel() + "\"", "CTRL");
+        }
+
+        light.setDBFileName(lightCfg.getDb());
+
+        /*
+         * Loading states from DB
+         */
+        try {
+            light.loadStates();
+        } catch (Exception e) {
+            log.error("Fail to load light states from db: " + e.getMessage(), "CTRL");
+            return false;
+        }
+        return true;
     }
 
     /**
      * Start meteo modules
      */
-    public void startModules() {
-        MeteoSettings meteoCfg = cfg.getMeteoCfg();
-        SecureSettings secCfg = cfg.getSecureCfg();
-        ThermSettings thermCfg = cfg.getThermCfg();
-        LightSettings lightCfg = cfg.getLightCfg();
-
-        /*
-         * Prepare db
-         */
-        log.info("Loading controller databases", "CTRL");
-        meteo.setDBFileName(meteoCfg.getDb());
-        if (cfg.getModCfg("security")) {
-            secure.setDBFileName(secCfg.getDb());
-            try {
-                secure.loadStates();
-            } catch (Exception e) {
-                log.error("Fail to load secure states from db: " + e.getMessage(), "CTRL");
-                return;
-            }
-            mih.setDBFileName(secCfg.getDb());
-            try {
-                mih.loadDataFromDb();
-            } catch (Exception e) {
-                log.error("Fail to load ManInHome states from db: " + e.getMessage(), "CTRL");
-                return;
-            }
-        }
-
-        /*
-         * Prepare modules
-         */
+    public boolean startModules() {
         if (cfg.getModCfg("meteo")) {
-            for (MeteoDeviceSettings dev : meteoCfg.getDevices()) {
-                MeteoDevice device = new MeteoDevice(dev.getName(), dev.getAlias(), dev.getType(), dev.getIp(),
-                        dev.getChannel(), dev.getDelta());
-                meteo.addDevice(device);
-                log.info("Add new meteo device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\" chan \"" +
-                        dev.getChannel() + "\"", "CTRL");
-            }
+            if (!startMeteoModule())
+                return false;
         }
         if (cfg.getModCfg("security")) {
-            for (SecureDeviceSettings dev : secCfg.getDevices()) {
-                SecureDevice device = new SecureDevice(dev.getName(), dev.getAlias(), dev.getIp(),
-                        dev.getChannel(), dev.getType(), dev.getGroup());
-                secure.addDevice(device);
-                log.info("Add new secure device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\" chan \"" +
-                        dev.getChannel() + "\"", "CTRL");
-            }
-            mih.setIp(secCfg.getMih());
+            if (!startSecureModule())
+                return false;
         }
         if (cfg.getModCfg("therm")) {
-            for (ThermDeviceSettings dev : thermCfg.getDevices()) {
-                IThermDevice device = new ThermDevice(dev.getName(), dev.getAlias(), dev.getIp(), dev.getSensor());
-                thermCtrl.addDevice(device);
-                log.info("Add new therm device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\"", "CTRL");
-            }
-
-            thermCtrl.setDBFileName(thermCfg.getDb());
-            try {
-                thermCtrl.loadStates();
-            } catch (Exception e) {
-                log.error("Fail to load therm states from db: " + e.getMessage(), "CTRL");
-                return;
-            }
+            if (!startThermModule())
+                return false;
         }
         if (cfg.getModCfg("light")) {
-            for (LightDeviceSettings dev : lightCfg.getDevices()) {
-                ILightDevice device = new LightDevice(dev.getName(), dev.getAlias(), dev.getGroup(), dev.getIp(), dev.getChannel());
-                light.addDevice(device);
-                log.info("Add new light device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\" chan \"" +
-                        device.getChannel() + "\"", "CTRL");
-            }
-
-            light.setDBFileName(lightCfg.getDb());
-            try {
-                light.loadStates();
-            } catch (Exception e) {
-                log.error("Fail to load light states from db: " + e.getMessage(), "CTRL");
-                return;
-            }
+            if (!startLightModule())
+                return false;
         }
-
-        /*
-         * Starting all timers
-         */
-        log.info("Starting controller tasks", "CTRL");
-        if (cfg.getModCfg("meteo")) {
-            Timer meteoTmr = new Timer(true);
-            meteoTmr.scheduleAtFixedRate((TimerTask)meteoTask, 0, 1000);
-        }
-        if (cfg.getModCfg("security")) {
-            Timer secureTmr = new Timer(true);
-            secureTmr.scheduleAtFixedRate((TimerTask)secureTask, 0, 1000);
-        }
-        if (cfg.getModCfg("therm")) {
-            Timer thermTmr = new Timer(true);
-            thermTmr.scheduleAtFixedRate((TimerTask)thermTask, 0, 1000);
-        }
-        if (cfg.getModCfg("light")) {
-            Timer lightTmr = new Timer(true);
-            lightTmr.scheduleAtFixedRate((TimerTask)lightTask, 0, 1000);
-        }
+        return true;
     }
 
     /**
-     * Get all list of meteo devices
-     * @return Meteo devices list
+     * Get all meteo info
+     * @return Meteo info list
      */
-    public List<IMeteoDevice> getMeteoDevices() {
-        return meteo.getDevices();
+    public List<MeteoInfo> getMeteoInfo() {
+        return meteo.getMeteoInfo();
     }
 
     /**
      * Get meteo device by name
-     * @param name Name of device
-     * @return Meteo device
+     * @param alias Alias of device
+     * @return Meteo info
      */
-    public IMeteoDevice getMeteoDevice(String name) { return meteo.getDevice(name); }
+    public MeteoInfo getMeteoInfo(String alias) { return meteo.getMeteoInfo(alias); }
 
     /**
-     * Get meteo data from sensor by date
-     * @param sensor Meteo sensor name
+     * Get meteo info from sensor by date
+     * @param alias Meteo sensor name
      * @param date Date
      * @return List of meteo data
      */
-    public List<MeteoDBData> getMeteoDataByDate(String sensor, String date) {
-        List<MeteoDBData> data = null;
-
-        try {
-            data = meteo.getDataByDate(sensor, date);
-        } catch (Exception e) {
-            log.error("Fail to get meteo data by date from sensor " + sensor + ": " + e.getMessage(), "CTRL");
-        }
-
-        return data;
+    public List<MeteoInfo> getMeteoInfoByDate(String alias, String date) throws Exception {
+        return meteo.getMeteoInfoByDate(alias, date);
     }
 
     /**
-     * Set action detection state
-     * @param ip IP of device
-     * @param channel Channel of device
-     * @param state New state of device
+     * Switch current therm status
+     * @param alias Alias of device
+     * @throws Exception If fail to set new status
      */
-    public void setSecureState(String ip, int channel, boolean state) { secure.setDeviceState(ip, channel, state); }
+    public void switchThermStatus(String alias) throws Exception {
+        therm.switchStatus(alias);
+    }
 
     /**
-     * Set main status for security module
-     * @param status New status
+     * Get therm control info from all devices
+     * @return Info list
      */
-    public void setSecureStatus(boolean status) {
-        secure.setStatus(status);
-    }
+    public List<ThermInfo> getThermInfo() { return therm.getThermInfo(); }
 
     /**
-     * Get main status of security module
-     * @return Secure status
+     * Get therm control info from one device
+     * @param alias Alias of device
+     * @return Therm info
      */
-    public boolean isSecureStatus() {
-        return secure.isStatus();
-    }
+    public ThermInfo getThermInfo(String alias) throws Exception { return therm.getThermInfo(alias); }
 
     /**
-     * Get alarm state of security
-     * @return Alarm state
+     * Change current threshold value
+     * @param alias Alias of device
+     * @param action Action of threshold
+     * @throws Exception If fail to set new value
      */
-    public boolean isSecureAlarm() {
-        return secure.isAlarm();
+    public void changeThermThreshold(String alias, ActMgmt action) throws Exception {
+        therm.changeThreshold(alias, action);
     }
 
     /**
-     * Get all list of secure devices
-     * @return Secure devices list
+     * Switch current MIH status
+     * @throws Exception If fail to switch status
      */
-    public List<ISecureDevice> getSecureDevices() {
-        return secure.getDevices();
+    public void switchMIHStatus() throws Exception {
+        mih.switchStatus();
     }
 
     /**
-     * Save security states
+     * Change current on/off time
+     * @param time Type of time
+     * @param action Action of time
+     * @throws Exception If fail to set new time
      */
-    public void saveSecureStates() {
-        try {
-            secure.saveStates();
-        } catch (Exception e) {
-            log.error("Fail to save secure states to DB: " + e.getMessage(), "CTRL");
-        }
+    public void changeMIHTime(TimeMgmt time, ActMgmt action) throws Exception {
+        mih.changeTime(time, action);
     }
 
     /**
-     * Save "Man In Home" subsystem states
+     * Get Man In Home information
+     * @return Information
      */
-    public void saveMIHStates() {
-        try {
-            mih.saveData();
-        } catch (Exception e) {
-            log.error("Fail to save MIH states to DB: " + e.getMessage(), "CTRL");
-        }
-    }
-
-    public void setMIHStatus(boolean status) {
-        mih.setStatus(status);
-    }
-
-    public void setMIHRadio(boolean status) {
-        mih.setStatus(status);
-    }
-
-    public void setMIHLamp(boolean status) {
-        mih.setStatus(status);
-    }
-
-    public void setMIHTimeOn(boolean status) {
-        mih.setStatus(status);
-    }
-
-    public void setMIHTimeOn(int time) {
-        mih.setTimeOn(time);
-    }
-
-    public void setMIHTimeOff(int time) {
-        mih.setTimeOff(time);
-    }
-
-    public boolean isMIHStatus() {
-        return mih.isStatus();
-    }
-
-    public boolean isMIHRadio() {
-        return mih.isRadio();
-    }
-
-    public boolean isMIHLamp() {
-        return mih.isLamp();
-    }
-
-    public int getMIHTimeOn() {
-        return mih.getTimeOn();
-    }
-
-    public int getMIHTimeOff() {
-        return mih.getTimeOff();
+    public MIHInfo getMIHInfo() {
+        return mih.getMIHInfo();
     }
 
     /**
-     * Get devices list
+     * Get security information
+     * @return Security information
+     */
+    public SecureInfo getSecureInfo() { return secure.getSecureInfo(); }
+
+    /**
+     * Switch current security status
+     * @throws Exception If fail to save new status to DB
+     */
+    public void switchSecureStatus() throws Exception { secure.switchStatus(); }
+
+    /**
+     * New security action from remote sensor
+     * @param ip Address of sensor
+     * @param chan Device channel
+     */
+    public void newSecureAction(String ip, int chan) { secure.newAction(ip, chan); }
+
+    /**
+     * Switch light device status
+     * @param alias Alias of device
+     * @throws Exception If fail to switch status
+     */
+    public void switchLightStatus(String alias) throws Exception {
+        light.switchStatus(alias);
+    }
+
+    /**
+     * Get light info list
      * @return Devices list
      */
-    public List<IThermDevice> getThermDevices() {
-        return thermCtrl.getDevices();
+    public List<LightInfo> getLightInfo() {
+        return light.getLightInfo();
     }
 
     /**
-     * Get therm device by alias
-     * @param alias Alias of device
-     * @return Device pointer
-     */
-    public IThermDevice getThermDeviceByAlias(String alias) {
-        return thermCtrl.getDeviceByAlias(alias);
-    }
-
-    /**
-     * Save therm state to db
-     * @param device Device pointer
-     * @throws Exception If fail to save state
-     */
-    public void saveThermState(IThermDevice device) throws Exception {
-        thermCtrl.saveState(device);
-    }
-
-    /**
-     * Get light device by alias
-     * @param alias Alias of light device
-     * @return Light device
-     */
-    public ILightDevice getLightDeviceByAlias(String alias) {
-        return light.getDeviceByAlias(alias);
-    }
-
-    /**
-     * Get Light device by name
-     * @param name Name of light device
-     * @return Light device
-     */
-    public ILightDevice getLightDevice(String name) {
-        return light.getDevice(name);
-    }
-
-    /**
-     * Get all light devices list
+     * Get light devices by group
+     * @param group Light devices group
      * @return Light devices list
      */
-    public List<ILightDevice> getLightDevices() {
-        return light.getDevices();
+    public List<LightInfo> getLightGroupInfo(String group) {
+        return light.getLightGroupInfo(group);
     }
 
     /**
-     * Get list of light devices in group
-     * @param group Group name
-     * @return Devices list
+     * Set new status to light group
+     * @param group Light devices group
+     * @param status New status
      */
-    public List<ILightDevice> getLightDevicesGroup(String group) {
-        return light.getDevicesGroup(group);
+    public void setGroupStatus(String group, boolean status) throws Exception {
+        light.setGroupStatus(group, status);
     }
 
     /**
-     * Save light state to db
-     * @param device Device pointer
+     * Set light status by alias
+     * @param alias Alias of device
+     * @param status New status
+     * @throws Exception If fail to set new status
      */
-    public void saveLightState(ILightDevice device) {
-        try {
-            light.saveState(device);
-        } catch (Exception e) {
-            log.error("Fail to save light save to db: " + e.getMessage(), "CTRL");
-        }
+    public void setLightStatus(String alias, boolean status) throws Exception {
+        light.setLightStatus(alias, status);
+    }
+
+    /**
+     * Get light info
+     * @param alias Alias of device
+     * @return Light device
+     * @throws Exception If fail to get light device
+     */
+    public LightInfo getLightInfo(String alias) throws Exception {
+        return light.getLightInfo(alias);
+    }
+
+    public String getModName() {
+        return modName;
     }
 }

@@ -18,6 +18,8 @@
 package ru.futcamp.controller.modules.light.db;
 
 import org.sqlite.JDBC;
+import ru.futcamp.IAppModule;
+import ru.futcamp.controller.modules.light.LightDevice;
 import sun.awt.Mutex;
 
 import java.sql.*;
@@ -27,10 +29,16 @@ import java.util.List;
 /**
  * Database management class
  */
-public class LightDB implements ILightDB {
+public class LightDB implements ILightDB, IAppModule {
     private String fileName;
     private Connection conn;
     private Mutex mtx = new Mutex();
+
+    private String modName;
+
+    public LightDB(String name, IAppModule ...dep) {
+        this.modName = name;
+    }
 
     /**
      * Set path to database file
@@ -94,5 +102,9 @@ public class LightDB implements ILightDB {
     public void close() throws SQLException {
         this.conn.close();
         mtx.unlock();
+    }
+
+    public String getModName() {
+        return modName;
     }
 }

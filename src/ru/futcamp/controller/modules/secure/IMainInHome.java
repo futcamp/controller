@@ -17,21 +17,16 @@
 
 package ru.futcamp.controller.modules.secure;
 
+import ru.futcamp.controller.ActMgmt;
+import ru.futcamp.controller.TimeMgmt;
+
 public interface IMainInHome {
-    void setStatus(boolean status);
-    boolean isStatus();
-    void setLamp(boolean lamp);
-    boolean isLamp();
-    void setRadio(boolean radio);
-    boolean isRadio();
-    void saveData() throws Exception;
     void loadDataFromDb() throws Exception;
     void setDBFileName(String fileName);
-    void setTimeOn(int timeOn);
-    int getTimeOn();
-    void setTimeOff(int timeOff);
-    int getTimeOff();
     void syncStates() throws Exception;
-    String getIp();
     void setIp(String ip);
+    void switchStatus() throws Exception;
+    void changeTime(TimeMgmt time, ActMgmt action) throws Exception;
+    MIHInfo getMIHInfo();
+    void update();
 }

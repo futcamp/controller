@@ -23,10 +23,9 @@ import java.util.List;
 
 public interface IMeteoStation {
     void addDevice(IMeteoDevice device);
-    IMeteoDevice getDevice(String name);
-    List<IMeteoDevice> getDevices();
     void setDBFileName(String fileName);
-    void saveMeteoData(IMeteoDevice device) throws Exception;
-    int getLastHour(String sensor) throws Exception;
-    List<MeteoDBData> getDataByDate(String sensor, String date) throws Exception;
+    List<MeteoInfo> getMeteoInfo();
+    MeteoInfo getMeteoInfo(String alias);
+    List<MeteoInfo> getMeteoInfoByDate(String alias, String date) throws Exception;
+    void update();
 }
