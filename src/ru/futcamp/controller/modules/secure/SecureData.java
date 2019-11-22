@@ -17,25 +17,14 @@
 
 package ru.futcamp.controller.modules.secure;
 
-import sun.awt.Mutex;
-
 public class SecureData {
-    private boolean state;
-    private Mutex mtx = new Mutex();
+    private boolean status;
 
-    public boolean isState() {
-        boolean s;
-
-        mtx.lock();
-        s = state;
-        mtx.unlock();
-
-        return s;
+    public synchronized boolean isStatus() {
+        return status;
     }
 
-    public void setState(boolean state) {
-        mtx.lock();
-        this.state = state;
-        mtx.unlock();
+    public synchronized void setStatus(boolean status) {
+        this.status = status;
     }
 }

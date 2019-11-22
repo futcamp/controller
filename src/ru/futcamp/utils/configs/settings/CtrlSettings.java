@@ -19,6 +19,7 @@ package ru.futcamp.utils.configs.settings;
 
 public class CtrlSettings {
     private String timezone;
+    private ModSettings[] modules;
 
     public String getTimezone() {
         return timezone;
@@ -26,5 +27,13 @@ public class CtrlSettings {
 
     public void setTimezone(String timezone) {
         this.timezone = timezone;
+    }
+
+    public ModSettings[] getModules() {
+        return modules;
+    }
+
+    public void setModules(ModSettings[] modules) {
+        this.modules = modules;
     }
 }

@@ -10,5 +10,6 @@
     <orderEntry type="library" name="com.alibaba:fastjson:1.2.17" level="project" />
     <orderEntry type="library" name="telegrambots-4.0.0-jar-with-dependencies" level="project" />
     <orderEntry type="library" name="sqlite-jdbc-3.27.2.1" level="project" />
+    <orderEntry type="library" name="com.github.sazzad16:jedis:2.10.1" level="project" />
   </component>
 </module>

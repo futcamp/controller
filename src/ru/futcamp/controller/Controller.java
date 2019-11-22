@@ -30,8 +30,20 @@ import ru.futcamp.controller.modules.therm.IThermControl;
 import ru.futcamp.controller.modules.therm.IThermDevice;
 import ru.futcamp.controller.modules.therm.ThermDevice;
 import ru.futcamp.controller.modules.therm.ThermInfo;
+import ru.futcamp.controller.modules.vision.CamDevice;
+import ru.futcamp.controller.modules.vision.ICamDevice;
+import ru.futcamp.controller.modules.vision.IVision;
 import ru.futcamp.utils.configs.IConfigs;
-import ru.futcamp.utils.configs.settings.*;
+import ru.futcamp.utils.configs.settings.light.LightDeviceSettings;
+import ru.futcamp.utils.configs.settings.light.LightSettings;
+import ru.futcamp.utils.configs.settings.meteo.MeteoDeviceSettings;
+import ru.futcamp.utils.configs.settings.meteo.MeteoSettings;
+import ru.futcamp.utils.configs.settings.secure.SecureDeviceSettings;
+import ru.futcamp.utils.configs.settings.secure.SecureSettings;
+import ru.futcamp.utils.configs.settings.therm.ThermDeviceSettings;
+import ru.futcamp.utils.configs.settings.therm.ThermSettings;
+import ru.futcamp.utils.configs.settings.vision.VisionDeviceSettings;
+import ru.futcamp.utils.configs.settings.vision.VisionSettings;
 import ru.futcamp.utils.log.ILogger;
 
 import java.util.List;
@@ -52,6 +64,9 @@ public class Controller implements IController, IAppModule {
     private Runnable thermTask;
     private IMainInHome mih;
     private ILightControl light;
+    private Runnable lightTask;
+    private IVision vision;
+    private Runnable visionTask;
 
     private String modName;
 
@@ -67,6 +82,9 @@ public class Controller implements IController, IAppModule {
         this.thermTask = (Runnable) dep[7];
         this.mih = (IMainInHome) dep[8];
         this.light = (ILightControl) dep[9];
+        this.lightTask = (Runnable) dep[10];
+        this.vision = (IVision) dep[11];
+        this.visionTask = (Runnable) dep[12];
     }
 
     private boolean startMeteoModule() {
@@ -106,9 +124,6 @@ public class Controller implements IController, IAppModule {
                     dev.getChannel() + "\"", "CTRL");
         }
 
-        mih.setIp(secCfg.getMih());
-        secure.setDBFileName(secCfg.getDb());
-
         /*
          * Loading states from DB
          */
@@ -118,8 +133,6 @@ public class Controller implements IController, IAppModule {
             log.error("Fail to load secure states from db: " + e.getMessage(), "CTRL");
             return false;
         }
-
-        mih.setDBFileName(secCfg.getDb());
 
         /*
          * Loading states from DB
@@ -150,8 +163,6 @@ public class Controller implements IController, IAppModule {
             therm.addDevice(device);
             log.info("Add new therm device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\"", "CTRL");
         }
-
-        therm.setDBFileName(thermCfg.getDb());
 
         /*
          * Loading states from DB
@@ -184,8 +195,6 @@ public class Controller implements IController, IAppModule {
                     device.getChannel() + "\"", "CTRL");
         }
 
-        light.setDBFileName(lightCfg.getDb());
-
         /*
          * Loading states from DB
          */
@@ -195,6 +204,33 @@ public class Controller implements IController, IAppModule {
             log.error("Fail to load light states from db: " + e.getMessage(), "CTRL");
             return false;
         }
+
+        /*
+         * Run task
+         */
+        Timer lightTmr = new Timer(true);
+        lightTmr.scheduleAtFixedRate((TimerTask)lightTask, 0, 1000);
+        return true;
+    }
+
+    private boolean startVisionModule() {
+        VisionSettings visionCfg = cfg.getVisionCfg();
+
+        /*
+         * Add devices from cfg
+         */
+        for (VisionDeviceSettings dev : visionCfg.getDevices()) {
+            ICamDevice device = new CamDevice(dev.getName(), dev.getAlias(), dev.getIp(), dev.getChannel(), dev.isWarming(), dev.getLamps());
+            vision.addCamera(device);
+            log.info("Add new vision device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\" chan \"" +
+                    dev.getChannel() + "\"", "CTRL");
+        }
+
+        /*
+         * Run task
+         */
+        Timer visionTmr = new Timer(true);
+        visionTmr.scheduleAtFixedRate((TimerTask)visionTask, 0, 1000);
         return true;
     }
 
@@ -216,6 +252,10 @@ public class Controller implements IController, IAppModule {
         }
         if (cfg.getModCfg("light")) {
             if (!startLightModule())
+                return false;
+        }
+        if (cfg.getModCfg("vision")) {
+            if (!startVisionModule())
                 return false;
         }
         return true;
@@ -376,6 +416,27 @@ public class Controller implements IController, IAppModule {
      */
     public LightInfo getLightInfo(String alias) throws Exception {
         return light.getLightInfo(alias);
+    }
+
+    /**
+     * Get photo from camera
+     * @param alias Alias of camera
+     * @param fileName Path to photo
+     * @throws Exception if fail to get photo
+     */
+    public void getVisionPhoto(String alias, String fileName) throws Exception {
+        vision.getPhoto(alias, fileName);
+    }
+
+    /**
+     * Get photo from cams with light module support
+     * @param alias Alias of camera
+     * @param fileName Path to photo
+     * @param isLight Switch on/off light
+     * @throws Exception If fail to get photo
+     */
+    public void getVisionPhoto(String alias, String fileName, boolean isLight) throws Exception {
+        vision.getPhoto(alias, fileName, isLight);
     }
 
     public String getModName() {

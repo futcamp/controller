@@ -67,7 +67,6 @@ public class Application implements IApplication, IAppModule {
          */
         try {
             log.info("Loading configs", "APP");
-            cfg.readFromFile(path.getPath("modules"), MOD_SET);
             cfg.readFromFile(path.getPath("ctrl"), CTRL_SET);
             cfg.readFromFile(path.getPath("tgbot"), TGBOT_SET);
             cfg.readFromFile(path.getPath("http"), HTTP_SET);
@@ -82,6 +81,9 @@ public class Application implements IApplication, IAppModule {
             }
             if (cfg.getModCfg("light")) {
                 cfg.readFromFile(path.getPath("light"), LIGHT_SET);
+            }
+            if (cfg.getModCfg("vision")) {
+                cfg.readFromFile(path.getPath("vision"), VISION_SET);
             }
         } catch (Exception e) {
             log.error("Fail to read configs: " + e.getMessage(), "APP");

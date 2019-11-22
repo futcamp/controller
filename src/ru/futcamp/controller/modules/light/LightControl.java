@@ -19,8 +19,10 @@ package ru.futcamp.controller.modules.light;
 
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.modules.light.db.ILightDB;
-import ru.futcamp.controller.modules.light.db.LightDBData;
-import ru.futcamp.controller.modules.therm.IThermDevice;
+import ru.futcamp.controller.modules.light.db.LightDB;
+import ru.futcamp.utils.configs.IConfigs;
+import ru.futcamp.utils.configs.settings.RedisSettings;
+import ru.futcamp.utils.log.ILogger;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -32,7 +34,8 @@ import java.util.Map;
  * Light control class
  */
 public class LightControl implements ILightControl, IAppModule {
-    private ILightDB db;
+    private IConfigs cfg;
+    private ILogger log;
 
     private Map<String, ILightDevice> devices = new HashMap<>();
 
@@ -40,38 +43,29 @@ public class LightControl implements ILightControl, IAppModule {
 
     public LightControl(String name, IAppModule ...dep) {
         this.modName = name;
-        this.db = (ILightDB) dep[0];
+        this.cfg = (IConfigs) dep[0];
+        this.log = (ILogger) dep[1];
     }
 
     /**
-     * Save status to db
+     * Save new status to database
      * @param device Light device
-     * @throws Exception If fail tio save states
+     * @throws Exception If fail to save status
      */
-    private void saveStates(ILightDevice device) throws Exception {
+    private void saveStatus(ILightDevice device) throws Exception {
+        RedisSettings set = cfg.getLightCfg().getDb();
+        ILightDB db = null;
+
         try {
-            db.connect();
-            db.saveStates(new LightDBData(device.getName(), device.isStatus()));
+            db = new LightDB(set.getIp(), set.getTable());
+            db.saveStatus(device.getName(), device.isStatus());
         } catch (SQLException e) {
             throw new Exception(e.getMessage());
         } finally {
-            db.close();
-        }
-    }
-
-    /**
-     * Get device by name
-     * @param name Name of device
-     * @return Light device
-     */
-    private ILightDevice getDeviceByName(String name) {
-        for (Map.Entry<String, ILightDevice> entry : devices.entrySet()) {
-            ILightDevice device = entry.getValue();
-            if (device.getName().equals(name)) {
-                return device;
+            if (db != null) {
+                db.close();
             }
         }
-        return null;
     }
 
     /**
@@ -79,20 +73,22 @@ public class LightControl implements ILightControl, IAppModule {
      * @throws Exception If fail to load states
      */
     public void loadStates() throws Exception {
-        List<LightDBData> states;
+        RedisSettings set = cfg.getLightCfg().getDb();
+        ILightDB db = null;
 
         try {
-            db.connect();
-            states = db.loadLightStates();
+            db = new LightDB(set.getIp(), set.getTable());
+            for (Map.Entry<String, ILightDevice> entry : devices.entrySet()) {
+                ILightDevice device = entry.getValue();
+                device.setStatus(db.getStatus(device.getName()));
+                device.syncStates();
+            }
         } catch (SQLException e) {
             throw new Exception(e.getMessage());
         } finally {
-            db.close();
-        }
-
-        for (LightDBData datum : states) {
-            ILightDevice device = getDeviceByName(datum.getName());
-            device.setStatus(datum.isStatus());
+            if (db != null) {
+                db.close();
+            }
         }
     }
 
@@ -105,7 +101,7 @@ public class LightControl implements ILightControl, IAppModule {
         ILightDevice device = devices.get(alias);
         device.setStatus(!device.isStatus());
         device.syncStates();
-        saveStates(device);
+        saveStatus(device);
     }
 
     /**
@@ -178,9 +174,12 @@ public class LightControl implements ILightControl, IAppModule {
         for (Map.Entry<String, ILightDevice> entry : devices.entrySet()) {
             ILightDevice device = entry.getValue();
             if (device.getGroup().equals(group)) {
+                if (device.isStatus() == status)
+                    continue;
+
                 device.setStatus(status);
                 device.syncStates();
-                saveStates(device);
+                saveStatus(device);
             }
         }
     }
@@ -197,17 +196,12 @@ public class LightControl implements ILightControl, IAppModule {
             throw new Exception("Device \""+alias+"\" not found");
         }
 
+        if (device.isStatus() == status)
+            return;
+
         device.setStatus(status);
         device.syncStates();
-        saveStates(device);
-    }
-
-    /**
-     * Set database file name
-     * @param fileName Path to db file
-     */
-    public void setDBFileName(String fileName) {
-        db.setFileName(fileName);
+        saveStatus(device);
     }
 
     /**
@@ -216,6 +210,20 @@ public class LightControl implements ILightControl, IAppModule {
      */
     public void addDevice(ILightDevice device) {
         devices.put(device.getAlias(), device);
+    }
+
+    /**
+     * Update light devices status
+     */
+    public void update() {
+        for (Map.Entry<String, ILightDevice> entry : devices.entrySet()) {
+            ILightDevice device = entry.getValue();
+            try {
+                device.syncStates();
+            } catch (Exception e) {
+                log.error("Fail to update light device status: " + e.getMessage(), "LIGHT");
+            }
+        }
     }
 
     public String getModName() {

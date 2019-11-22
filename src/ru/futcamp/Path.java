@@ -51,9 +51,6 @@ class Path {
             case "secure":
                 return "/etc/futcamp/secure.conf";
 
-            case "modules":
-                return "/etc/futcamp/modules.conf";
-
             case "ctrl":
                 return "/etc/futcamp/controller.conf";
 
@@ -62,6 +59,9 @@ class Path {
 
             case "light":
                 return "/etc/futcamp/light.conf";
+
+            case "vision":
+                return "/etc/futcamp/vision.conf";
         }
         return null;
     }

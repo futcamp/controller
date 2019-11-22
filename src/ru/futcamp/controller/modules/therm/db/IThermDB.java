@@ -18,12 +18,9 @@
 package ru.futcamp.controller.modules.therm.db;
 
 import java.sql.SQLException;
-import java.util.List;
 
 public interface IThermDB {
-    void setFileName(String fileName);
-    void connect() throws SQLException;
-    List<ThermDBData> loadThermData() throws SQLException;
-    void saveStates(ThermDBData data) throws SQLException;
+    void saveData(String name, ThermDBData data);
+    ThermDBData loadData(String name);
     void close() throws SQLException;
 }

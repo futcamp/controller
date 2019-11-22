@@ -20,23 +20,26 @@ package ru.futcamp.utils.configs;
 import com.alibaba.fastjson.JSON;
 import ru.futcamp.IAppModule;
 import ru.futcamp.utils.configs.settings.*;
+import ru.futcamp.utils.configs.settings.light.LightSettings;
+import ru.futcamp.utils.configs.settings.meteo.MeteoSettings;
+import ru.futcamp.utils.configs.settings.secure.SecureSettings;
+import ru.futcamp.utils.configs.settings.therm.ThermSettings;
+import ru.futcamp.utils.configs.settings.vision.VisionSettings;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class Configs implements IConfigs, IAppModule {
     private TelegramSettings tgCfg;
     private HttpSettings httpCfg;
     private MeteoSettings meteoCfg;
     private SecureSettings secureCfg;
-    private ModulesSettings modCfg;
     private CtrlSettings ctrlCfg;
     private ThermSettings thermCfg;
     private LightSettings lightCfg;
+    private VisionSettings visionCfg;
 
     private String modName;
 
@@ -79,10 +82,6 @@ public class Configs implements IConfigs, IAppModule {
                 secureCfg = JSON.parseObject(data, SecureSettings.class);
                 break;
 
-            case MOD_SET:
-                modCfg = JSON.parseObject(data, ModulesSettings.class);
-                break;
-
             case CTRL_SET:
                 ctrlCfg = JSON.parseObject(data, CtrlSettings.class);
                 break;
@@ -93,6 +92,10 @@ public class Configs implements IConfigs, IAppModule {
 
             case LIGHT_SET:
                 lightCfg = JSON.parseObject(data, LightSettings.class);
+                break;
+
+            case VISION_SET:
+                visionCfg = JSON.parseObject(data, VisionSettings.class);
                 break;
         }
     }
@@ -133,7 +136,7 @@ public class Configs implements IConfigs, IAppModule {
      * @return State
      */
     public boolean getModCfg(String name) {
-        for (ModSettings mod : modCfg.getModules()) {
+        for (ModSettings mod : ctrlCfg.getModules()) {
             if (mod.getName().equals(name))
                 return mod.isEnable();
         }
@@ -166,5 +169,13 @@ public class Configs implements IConfigs, IAppModule {
 
     public String getModName() {
         return modName;
+    }
+
+    /**
+     * Get vision configs
+     * @return Vision configs
+     */
+    public VisionSettings getVisionCfg() {
+        return visionCfg;
     }
 }

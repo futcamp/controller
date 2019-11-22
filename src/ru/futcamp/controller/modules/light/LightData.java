@@ -17,25 +17,14 @@
 
 package ru.futcamp.controller.modules.light;
 
-import sun.awt.Mutex;
-
 public class LightData {
     private boolean status;
-    private Mutex statMtx = new Mutex();
 
-    public boolean isStatus() {
-        boolean stat;
-
-        statMtx.lock();
-        stat = status;
-        statMtx.unlock();
-
-        return stat;
+    public synchronized boolean isStatus() {
+        return status;
     }
 
-    public void setStatus(boolean status) {
-        statMtx.lock();
+    public synchronized void setStatus(boolean status) {
         this.status = status;
-        statMtx.unlock();
     }
 }

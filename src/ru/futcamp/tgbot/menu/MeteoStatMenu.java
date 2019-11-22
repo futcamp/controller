@@ -32,6 +32,7 @@ import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.log.ILogger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -94,17 +95,17 @@ public class MeteoStatMenu implements IMenu, IAppModule {
      */
     private SendMessage printData(Update upd, String date, List<MeteoInfo> infoList) {
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
-        String txt = "Место: <b>" + upd.getMessage().getText() + "</b> Дата: <b>" + date + "</b>\n\n";
+        StringBuilder txt = new StringBuilder("Место: <b>" + upd.getMessage().getText() + "</b> Дата: <b>" + date + "</b>\n\n");
         int tMin = infoList.get(0).getTemp();
         int tMax = infoList.get(0).getTemp();
 
         for (MeteoInfo info : infoList) {
-            txt += "Время: <b>";
+            txt.append("Время: <b>");
             if (info.getHour() < 10) {
-                txt += " ";
+                txt.append(" ");
             }
-            txt += info.getHour() + ":00</b> Темп: <b>" + info.getTemp() + "°";
-            txt += "</b> Влажн: <b>" + info.getHum() + "%</b>\n";
+            txt.append(info.getHour()).append(":00</b> Темп: <b>").append(info.getTemp()).append("°");
+            txt.append("</b> Влажн: <b>").append(info.getHum()).append("%</b>\n");
             if (info.getTemp() < tMin) {
                 tMin = info.getTemp();
             }
@@ -113,11 +114,11 @@ public class MeteoStatMenu implements IMenu, IAppModule {
             }
         }
 
-        txt += "\nМинимальная t: <b>" + tMin + "°</b>\n";
-        txt += "Максимальная t: <b>" + tMax + "°</b>\n";
+        txt.append("\nМинимальная t: <b>").append(tMin).append("°</b>\n");
+        txt.append("Максимальная t: <b>").append(tMax).append("°</b>\n");
 
         msg.enableHtml(true);
-        msg.setText(txt);
+        msg.setText(txt.toString());
         setButtons(msg);
 
         return msg;
@@ -137,21 +138,9 @@ public class MeteoStatMenu implements IMenu, IAppModule {
 
         for (String[] row : cfg.getTelegramCfg().getMenu().getMeteostat()) {
             List<String> statGroup = new LinkedList<>();
-
-            for (String btn : row) {
-                statGroup.add(btn);
-            }
-
+            statGroup.addAll(Arrays.asList(row));
             addButtonsRow(statGroup, keyboard);
         }
-
-        /*
-         * Add update and back button to menu
-         */
-        List<String> backButton = new LinkedList<>();
-        backButton.add("Обновить");
-        backButton.add("Назад");
-        addButtonsRow(backButton, keyboard);
 
         replyKeyboardMarkup.setKeyboard(keyboard);
     }

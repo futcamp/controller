@@ -17,61 +17,32 @@
 
 package ru.futcamp.controller.modules.therm;
 
-import sun.awt.Mutex;
-
 public class ThermData {
     private boolean status;
     private boolean heater;
     private int threshold;
-    private Mutex mtxStat = new Mutex();
-    private Mutex mtxHeat = new Mutex();
-    private Mutex mtxThresh = new Mutex();
 
-    public boolean isStatus() {
-        boolean stat;
-
-        mtxStat.lock();
-        stat = status;
-        mtxStat.unlock();
-
-        return stat;
+    public synchronized boolean isStatus() {
+        return status;
     }
 
-    public void setStatus(boolean status) {
-        mtxStat.lock();
+    public synchronized void setStatus(boolean status) {
         this.status = status;
-        mtxStat.unlock();
     }
 
-    public boolean isHeater() {
-        boolean heat;
-
-        mtxHeat.lock();
-        heat = heater;
-        mtxHeat.unlock();
-
-        return heat;
+    public synchronized boolean isHeater() {
+        return heater;
     }
 
-    public void setHeater(boolean heater) {
-        mtxHeat.lock();
+    public synchronized void setHeater(boolean heater) {
         this.heater = heater;
-        mtxHeat.unlock();
     }
 
-    public int getThreshold() {
-        int th;
-
-        mtxThresh.lock();
-        th = threshold;
-        mtxThresh.unlock();
-
-        return th;
+    public synchronized int getThreshold() {
+        return threshold;
     }
 
-    public void setThreshold(int threshold) {
-        mtxThresh.lock();
+    public synchronized void setThreshold(int threshold) {
         this.threshold = threshold;
-        mtxThresh.unlock();
     }
 }

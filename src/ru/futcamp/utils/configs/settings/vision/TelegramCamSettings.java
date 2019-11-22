@@ -15,32 +15,16 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.modules.light.db;
+package ru.futcamp.utils.configs.settings.vision;
 
-public class LightDBData {
-    private String name;
-    private boolean status;
+public class TelegramCamSettings {
+    private String[][] list;
 
-    public LightDBData() { }
-
-    public LightDBData(String name, boolean status) {
-        this.name = name;
-        this.status = status;
+    public String[][] getList() {
+        return list;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
-        this.status = status;
+    public void setList(String[][] list) {
+        this.list = list;
     }
 }

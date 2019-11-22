@@ -29,6 +29,5 @@ public interface IThermControl {
     void changeThreshold(String alias, ActMgmt action) throws Exception;
     void loadStates() throws Exception;
     void addDevice(IThermDevice device);
-    void setDBFileName(String fileName);
     void update();
 }

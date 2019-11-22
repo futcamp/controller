@@ -27,21 +27,23 @@ import ru.futcamp.IAppModule;
 import ru.futcamp.controller.IController;
 import ru.futcamp.controller.modules.light.LightInfo;
 import ru.futcamp.utils.configs.IConfigs;
+import ru.futcamp.utils.configs.settings.light.LightGroupSettings;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Light street menu of tg bot
+ * Light group menu of tg bot
  */
-public class LightStreetMenu implements IMenu, IAppModule {
+public class LightGroupMenu implements IMenu, IAppModule {
     private IConfigs cfg;
     private IController ctrl;
 
     private String modName;
 
-    public LightStreetMenu(String name, IAppModule...dep) {
+    public LightGroupMenu(String name, IAppModule...dep) {
         modName = name;
         this.cfg = (IConfigs) dep[0];
         this.ctrl = (IController) dep[1];
@@ -54,40 +56,51 @@ public class LightStreetMenu implements IMenu, IAppModule {
      */
     public void updateMessage(TelegramLongPollingBot bot, Update upd, IBotMenu menu) throws Exception {
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
-        String txt = "";
+        StringBuilder txt = new StringBuilder();
         String inMsg = upd.getMessage().getText();
+        LightGroupSettings lightGroup = getLightGroup(menu.getGroup());
 
-        if (!inMsg.equals("Уличное освещение") && !inMsg.equals("Обновить") && !inMsg.equals("Улица")) {
+        if (!inMsg.equals(menu.getGroup()) && !inMsg.equals("Обновить")) {
 
             if (inMsg.equals("Вкл все")) {
-                ctrl.setGroupStatus("street", true);
+                ctrl.setGroupStatus(lightGroup.getGroup(), true);
             } else if (inMsg.equals("Откл все")) {
-                ctrl.setGroupStatus("street", false);
+                ctrl.setGroupStatus(lightGroup.getGroup(), false);
             } else {
                 ctrl.switchLightStatus(inMsg);
             }
         }
 
-        txt += "Уличное освещение\n\n";
-        for (LightInfo info : ctrl.getLightGroupInfo("street")) {
-            txt += info.getAlias() + ": ";
+        txt.append("Управление освещением\n\n");
+
+        for (LightInfo info : ctrl.getLightGroupInfo(lightGroup.getGroup())) {
+            txt.append(info.getAlias()).append(": ");
             if (info.isStatus())
-                txt += "<b>Работает</b>\n";
+                txt.append("<b>Работает</b>\n");
             else
-                txt += "<b>Отключен</b>\n";
+                txt.append("<b>Отключен</b>\n");
         }
 
         msg.enableHtml(true);
-        msg.setText(txt);
-        setButtons(msg);
+        msg.setText(txt.toString());
+        setButtons(msg, menu.getGroup());
         bot.execute(msg);
+    }
+
+    private LightGroupSettings getLightGroup(String group) {
+        for (LightGroupSettings grp : cfg.getTelegramCfg().getMenu().getLight().getGroups()) {
+            if (group.equals(grp.getCaption())) {
+                return grp;
+            }
+        }
+        return null;
     }
 
     /**
      * Set buttons for response
      * @param sendMessage Sending message
      */
-    private void setButtons(SendMessage sendMessage) {
+    private void setButtons(SendMessage sendMessage, String group) {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
         replyKeyboardMarkup.setSelective(true);
@@ -98,25 +111,10 @@ public class LightStreetMenu implements IMenu, IAppModule {
         /*
          * Add buttons to menu
          */
-        for (String[] row : cfg.getTelegramCfg().getMenu().getLight()) {
-            List<String> lamps = new LinkedList<>();
-
-            for (String btn : row) {
-                lamps.add(btn);
-            }
-
+        for (String[] btnGrp : getLightGroup(group).getDevice()) {
+            List<String> lamps = new LinkedList<>(Arrays.asList(btnGrp));
             addButtonsRow(lamps, keyboard);
         }
-
-        /*
-         * Add back button to menu
-         */
-        List<String> backButton = new LinkedList<>();
-        backButton.add("Вкл все");
-        backButton.add("Откл все");
-        backButton.add("Обновить");
-        backButton.add("Назад");
-        addButtonsRow(backButton, keyboard);
 
         replyKeyboardMarkup.setKeyboard(keyboard);
     }

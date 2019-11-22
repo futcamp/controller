@@ -24,8 +24,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.IAppModule;
+import ru.futcamp.utils.configs.IConfigs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -35,8 +37,11 @@ import java.util.List;
 public class LightMenu implements IMenu, IAppModule {
     private String modName;
 
+    private IConfigs cfg;
+
     public LightMenu(String name, IAppModule ...dep) {
         modName = name;
+        cfg = (IConfigs) dep[0];
     }
 
     /**
@@ -70,16 +75,11 @@ public class LightMenu implements IMenu, IAppModule {
         /*
          * Add buttons to menu
          */
-        List<String> groupButton = new LinkedList<>();
-        groupButton.add("Улица");
-        addButtonsRow(groupButton, keyboard);
-
-        /*
-         * Add back button to menu
-         */
-        List<String> backButton = new LinkedList<>();
-        backButton.add("Назад");
-        addButtonsRow(backButton, keyboard);
+        for (String[] btnGrp : cfg.getTelegramCfg().getMenu().getLight().getList()) {
+            List<String> groupButton = new LinkedList<>();
+            groupButton.addAll(Arrays.asList(btnGrp));
+            addButtonsRow(groupButton, keyboard);
+        }
 
         replyKeyboardMarkup.setKeyboard(keyboard);
     }

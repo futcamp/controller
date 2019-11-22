@@ -15,14 +15,15 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.utils.configs.settings.secure;
 
-public class LightDeviceSettings {
+public class SecureDeviceSettings {
     private String name;
     private String alias;
-    private String group;
     private String ip;
     private int channel;
+    private String type;
+    private String group;
 
     public String getName() {
         return name;
@@ -40,14 +41,6 @@ public class LightDeviceSettings {
         this.alias = alias;
     }
 
-    public String getGroup() {
-        return group;
-    }
-
-    public void setGroup(String group) {
-        this.group = group;
-    }
-
     public String getIp() {
         return ip;
     }
@@ -62,5 +55,21 @@ public class LightDeviceSettings {
 
     public void setChannel(int channel) {
         this.channel = channel;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 }

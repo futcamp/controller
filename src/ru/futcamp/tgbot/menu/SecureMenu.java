@@ -61,30 +61,30 @@ public class SecureMenu implements IMenu, IAppModule {
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
         SecureInfo info = ctrl.getSecureInfo();
 
-        String txt = "Состояние\n\n";
+        StringBuilder txt = new StringBuilder("Состояние\n\n");
 
-        txt += "Сигнализация: ";
+        txt.append("Сигнализация: ");
         if (info.isStatus())
-            txt += "<b>Работает</b>\n";
+            txt.append("<b>Работает</b>\n");
         else
-            txt += "<b>Отключена</b>\n";
+            txt.append("<b>Отключена</b>\n");
 
-        txt += "Сирена: ";
+        txt.append("Сирена: ");
         if (info.isAlarm())
-            txt += "<b>Работает</b>\n";
+            txt.append("<b>Работает</b>\n");
         else
-            txt += "<b>Отключена</b>\n";
+            txt.append("<b>Отключена</b>\n");
 
-        msg.setText(txt);
+        msg.setText(txt.toString());
         msg.enableHtml(true);
         bot.execute(msg);
 
-        txt = "Датчики\n\n";
+        txt = new StringBuilder("Датчики\n\n");
         for (SecureModInfo modInf : info.getModules()) {
-            txt += modInf.getAlias() + ": <b>" + stateToStr(modInf.isState()) + "</b>\n";
+            txt.append(modInf.getAlias()).append(": <b>").append(stateToStr(modInf.isState())).append("</b>\n");
         }
 
-        msg.setText(txt);
+        msg.setText(txt.toString());
         msg.enableHtml(true);
         setButtons(msg);
         bot.execute(msg);

@@ -23,7 +23,7 @@ import ru.futcamp.IAppModule;
 public class FcBotApi extends TelegramBotsApi implements IAppModule {
     private String modName;
 
-    public FcBotApi(String name, IAppModule ...dep) {
+    FcBotApi(String name, IAppModule... dep) {
         modName = name;
     }
 

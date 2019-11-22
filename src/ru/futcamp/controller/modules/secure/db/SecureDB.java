@@ -17,124 +17,59 @@
 
 package ru.futcamp.controller.modules.secure.db;
 
-import org.sqlite.JDBC;
-import ru.futcamp.IAppModule;
-import sun.awt.Mutex;
-
-import java.sql.*;
+import db.RedisClient;
 
 /**
  * Database management class
  */
-public class SecureDB implements ISecureDB, IAppModule {
-    private String fileName;
-    private Connection conn;
-    private Mutex mtx = new Mutex();
-
-    private String modName;
-
-    public SecureDB(String name, IAppModule ...dep) {
-        this.modName = name;
-    }
-
+public class SecureDB extends RedisClient implements ISecureDB {
     /**
-     * Set path to database file
-     * @param fileName Name of database file
+     * constructor: connect to Redis server and authorization
+     *
+     * @param host  Ip address of database
+     * @param table Redis table
      */
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-        try {
-            DriverManager.registerDriver(new JDBC());
-        } catch (Exception ignored) {}
+    public SecureDB(String host, int table) throws Exception {
+        super(host, table);
     }
 
-    /**
-     * Connect to database
-     * @throws SQLException If fail to connect
-     */
-    public void connect() throws SQLException {
-        mtx.lock();
-        this.conn = DriverManager.getConnection("jdbc:sqlite:" + fileName);
+    public void saveStatus(boolean status) {
+        setValue("status", status);
     }
 
-    /**
-     * Get status and alarm states from db
-     * @return States
-     * @throws SQLException If fail to read states
-     */
-    public SecureDBData loadSecureStates() throws SQLException {
-        SecureDBData states = new SecureDBData();
-        Statement statement = conn.createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT status, alarm FROM secure");
-
-        while (resultSet.next()) {
-            states.setStatus(resultSet.getBoolean("status"));
-            states.setAlarm(resultSet.getBoolean("alarm"));
-        }
-        statement.close();
-        resultSet.close();
-
-        return states;
+    public void saveAlarm(boolean alarm) {
+        setValue("alarm", alarm);
     }
 
-    /**
-     * Save states to db
-     * @param data States data
-     * @throws SQLException If fail to save states
-     */
-    public void saveStates(SecureDBData data) throws SQLException {
-        PreparedStatement statement = conn.prepareStatement("UPDATE secure SET status = ?, alarm = ?");
-        statement.setObject(1, data.isStatus());
-        statement.setObject(2, data.isAlarm());
-        statement.execute();
-        statement.close();
+    public void saveMIHStatus(boolean status) {
+        setValue("mih-status", status);
     }
 
-    /**
-     * Save Man In Home states to db
-     * @param data MIH data
-     * @throws SQLException If fail to save states
-     */
-    public void saveMIHStatus(MIHDBData data) throws SQLException {
-        PreparedStatement statement = conn.prepareStatement("UPDATE mih SET status = ?, tmon = ?, tmoff = ?");
-        statement.setObject(1, data.isStatus());
-        statement.setObject(2, data.getTimeOn());
-        statement.setObject(3, data.getTimeOff());
-        statement.execute();
-        statement.close();
+    public void saveMIHTimeOn(int hour) {
+        setValue("mih-on", hour);
     }
 
-    /**
-     * Get Man In Home subsystem data from db
-     * @return States
-     * @throws SQLException If fail to read states
-     */
-    public MIHDBData loadMIHData() throws SQLException {
-        MIHDBData data = new MIHDBData();
-        Statement statement = conn.createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT * FROM mih");
-
-        while (resultSet.next()) {
-            data.setStatus(resultSet.getBoolean("status"));
-            data.setTimeOn(resultSet.getInt("tmon"));
-            data.setTimeOff(resultSet.getInt("tmoff"));
-        }
-        statement.close();
-        resultSet.close();
-
-        return data;
+    public void saveMIHTimeOff(int hour) {
+        setValue("mih-off", hour);
     }
 
-    /**
-     * Close db connection
-     * @throws SQLException If fail to close
-     */
-    public void close() throws SQLException {
-        this.conn.close();
-        mtx.unlock();
+    public Boolean getStatus() {
+        return getBoolValue("status");
     }
 
-    public String getModName() {
-        return modName;
+    public Boolean getAlarm() {
+        return getBoolValue("alarm");
+    }
+
+    public Boolean getMIHStatus() {
+        return getBoolValue("mih-status");
+    }
+
+    public Integer getMIHTimeOn() {
+        return getIntValue("mih-on");
+    }
+
+    public Integer getMIHTimeOff() {
+        return getIntValue("mih-off");
     }
 }

@@ -50,4 +50,7 @@ public interface IController {
     List<LightInfo> getLightGroupInfo(String group);
     void setGroupStatus(String group, boolean status) throws Exception;
     void setLightStatus(String alias, boolean status) throws Exception;
+
+    void getVisionPhoto(String alias, String fileName) throws Exception;
+    void getVisionPhoto(String alias, String fileName, boolean isLight) throws Exception;
 }

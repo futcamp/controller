@@ -22,7 +22,11 @@ import ru.futcamp.controller.ActMgmt;
 import ru.futcamp.controller.modules.meteo.IMeteoStation;
 import ru.futcamp.controller.modules.secure.ISecureDevice;
 import ru.futcamp.controller.modules.therm.db.IThermDB;
+import ru.futcamp.controller.modules.therm.db.ThermDB;
 import ru.futcamp.controller.modules.therm.db.ThermDBData;
+import ru.futcamp.utils.configs.IConfigs;
+import ru.futcamp.utils.configs.settings.RedisSettings;
+import ru.futcamp.utils.configs.settings.secure.SecureSettings;
 import ru.futcamp.utils.log.ILogger;
 
 import java.sql.SQLException;
@@ -35,9 +39,9 @@ import java.util.Map;
  * Therm control class
  */
 public class ThermControl implements IThermControl, IAppModule {
-    private IThermDB db;
     private ILogger log;
     private IMeteoStation meteo;
+    private IConfigs cfg;
 
     private Map<String, IThermDevice> devices = new HashMap<>();
 
@@ -45,32 +49,28 @@ public class ThermControl implements IThermControl, IAppModule {
 
     public ThermControl(String name, IAppModule ...dep) {
         this.modName = name;
-        this.db = (IThermDB) dep[0];
-        this.log = (ILogger) dep[1];
-        this.meteo = (IMeteoStation) dep[2];
-    }
-
-    private IThermDevice getDeviceByName(String name) {
-        for(Map.Entry<String, IThermDevice> entry : devices.entrySet()) {
-            IThermDevice device = entry.getValue();
-            if (device.getName().equals(name)) {
-                return device;
-            }
-        }
-        return null;
+        this.log = (ILogger) dep[0];
+        this.meteo = (IMeteoStation) dep[1];
+        this.cfg = (IConfigs) dep[2];
     }
 
     /**
      * Save device state to db
      */
-    private void saveStatus(IThermDevice device) throws Exception {
+    private void saveStates(IThermDevice device) throws Exception {
+        RedisSettings set = cfg.getThermCfg().getDb();
+        IThermDB db = null;
+
         try {
-            db.connect();
-            db.saveStates(new ThermDBData(device.getName(), device.isStatus(), device.getThreshold()));
+            db = new ThermDB(set.getIp(), set.getTable());
+            ThermDBData data = new ThermDBData(device.isStatus(), device.getThreshold());
+            db.saveData(device.getName(), data);
         } catch (SQLException e) {
             throw new Exception(e.getMessage());
         } finally {
-            db.close();
+            if (db != null) {
+                db.close();
+            }
         }
     }
 
@@ -83,33 +83,29 @@ public class ThermControl implements IThermControl, IAppModule {
     }
 
     /**
-     * Set database file name
-     * @param fileName Path to database
-     */
-    public void setDBFileName(String fileName) {
-        db.setFileName(fileName);
-    }
-
-    /**
      * Load states from db
      * @throws Exception If fail to load states
      */
     public void loadStates() throws Exception {
-        List<ThermDBData> data;
+        RedisSettings set = cfg.getThermCfg().getDb();
+        IThermDB db = null;
 
         try {
-            db.connect();
-            data = db.loadThermData();
+            db = new ThermDB(set.getIp(), set.getTable());
+            for(Map.Entry<String, IThermDevice> entry : devices.entrySet()) {
+                IThermDevice device = entry.getValue();
+                ThermDBData data = db.loadData(device.getName());
+
+                device.setStatus(data.isStatus());
+                device.setThreshold(data.getThreshold());
+            }
+
         } catch (SQLException e) {
             throw new Exception(e.getMessage());
         } finally {
-            db.close();
-        }
-
-        for (ThermDBData datum : data) {
-            IThermDevice device = getDeviceByName(datum.getName());
-            device.setStatus(datum.isStatus());
-            device.setThreshold(datum.getThreshold());
+            if (db != null) {
+                db.close();
+            }
         }
     }
 
@@ -122,15 +118,15 @@ public class ThermControl implements IThermControl, IAppModule {
     public void changeThreshold(String alias, ActMgmt action) throws Exception {
         IThermDevice device = devices.get(alias);
         switch (action) {
-            case SET_MGMT_HOUR_MINUS:
+            case SET_MGMT_THRESOLD_MINUS:
                 device.setThreshold(device.getThreshold() - 1);
                 break;
 
-            case SET_MGMT_HOUR_PLUS:
+            case SET_MGMT_THRESOLD_PLUS:
                 device.setThreshold(device.getThreshold() + 1);
                 break;
         }
-        saveStatus(device);
+        saveStates(device);
     }
 
     /**
@@ -140,7 +136,7 @@ public class ThermControl implements IThermControl, IAppModule {
     public void switchStatus(String alias) throws Exception {
         IThermDevice device = devices.get(alias);
         device.setStatus(!device.isStatus());
-        saveStatus(device);
+        saveStates(device);
     }
 
     /**

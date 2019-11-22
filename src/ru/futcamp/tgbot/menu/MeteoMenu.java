@@ -27,8 +27,10 @@ import ru.futcamp.IAppModule;
 import ru.futcamp.controller.IController;
 import ru.futcamp.controller.modules.meteo.IMeteoDevice;
 import ru.futcamp.controller.modules.meteo.MeteoInfo;
+import ru.futcamp.utils.configs.IConfigs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,12 +39,14 @@ import java.util.List;
  */
 public class MeteoMenu implements IMenu, IAppModule {
     private IController ctrl;
+    private IConfigs cfg;
 
     private String modName;
 
     public MeteoMenu(String name, IAppModule ...dep) {
         modName = name;
         this.ctrl = (IController) dep[0];
+        this.cfg = (IConfigs) dep[1];
     }
 
     /**
@@ -50,29 +54,29 @@ public class MeteoMenu implements IMenu, IAppModule {
      * @param upd Update message
      */
     public void updateMessage(TelegramLongPollingBot bot, Update upd, IBotMenu menu) throws Exception {
-        String txt = "";
+        StringBuilder txt = new StringBuilder();
         int pressure = 0;
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
 
         List<MeteoInfo> infoList = ctrl.getMeteoInfo();
-        txt += "Метео данные\n\n";
+        txt.append("Метео данные\n\n");
         for (MeteoInfo info : infoList) {
-            txt += "<b>" + info.getAlias() + "</b>\nТемпература: <b>" + info.getTemp() + "°</b> ";
+            txt.append("<b>").append(info.getAlias()).append("</b>\nТемпература: <b>").append(info.getTemp()).append("°</b> ");
             if (info.getHum() != 0) {
-                txt += "Влажность: <b>" + info.getHum() + "%</b>\n\n";
+                txt.append("Влажность: <b>").append(info.getHum()).append("%</b>\n\n");
             } else {
-                txt += "\n\n";
+                txt.append("\n\n");
             }
             if (info.getPres() != 0) {
                 pressure = info.getPres();
             }
         }
         if (pressure != 0) {
-            txt += "Атм. давление: <b>" + pressure + "mm</b>";
+            txt.append("Атм. давление: <b>").append(pressure).append("mm</b>");
         }
 
         msg.enableHtml(true);
-        msg.setText(txt);
+        msg.setText(txt.toString());
         setButtons(msg);
 
         bot.execute(msg);
@@ -90,20 +94,11 @@ public class MeteoMenu implements IMenu, IAppModule {
         replyKeyboardMarkup.setOneTimeKeyboard(false);
         List<KeyboardRow> keyboard = new ArrayList<>();
 
-        /*
-         * Add meteo stat button
-         */
-        List<String> statButton = new LinkedList<>();
-        statButton.add("Статистика");
-        addButtonsRow(statButton, keyboard);
-
-        /*
-         * Add update and back button to menu
-         */
-        List<String> backButton = new LinkedList<>();
-        backButton.add("Обновить");
-        backButton.add("Назад");
-        addButtonsRow(backButton, keyboard);
+        for (String[] row : cfg.getTelegramCfg().getMenu().getMeteo()) {
+            List<String> meteoList = new LinkedList<>();
+            Collections.addAll(meteoList, row);
+            addButtonsRow(meteoList, keyboard);
+        }
 
         replyKeyboardMarkup.setKeyboard(keyboard);
     }

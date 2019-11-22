@@ -22,8 +22,8 @@ public enum SettingsType {
     HTTP_SET,
     METEO_SET,
     SECURE_SET,
-    MOD_SET,
     CTRL_SET,
     THERM_SET,
-    LIGHT_SET
+    LIGHT_SET,
+    VISION_SET
 }

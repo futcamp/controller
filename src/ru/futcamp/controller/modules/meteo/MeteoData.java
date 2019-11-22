@@ -17,59 +17,32 @@
 
 package ru.futcamp.controller.modules.meteo;
 
-import sun.awt.Mutex;
-
 public class MeteoData {
     private int temp;
     private int humidity;
     private int pressure;
-    private Mutex mtx = new Mutex();
 
-    public int getTemp() {
-        int t;
-
-        mtx.lock();
-        t = temp;
-        mtx.unlock();
-
-        return t;
+    public synchronized int getTemp() {
+        return temp;
     }
 
-    public void setTemp(int temp) {
-        mtx.lock();
+    public synchronized void setTemp(int temp) {
         this.temp = temp;
-        mtx.unlock();
     }
 
-    public int getHumidity() {
-        int h;
-
-        mtx.lock();
-        h = humidity;
-        mtx.unlock();
-
-        return h;
+    public synchronized int getHumidity() {
+        return humidity;
     }
 
-    public void setHumidity(int humidity) {
-        mtx.lock();
+    public synchronized void setHumidity(int humidity) {
         this.humidity = humidity;
-        mtx.unlock();
     }
 
-    public int getPressure() {
-        int p;
-
-        mtx.lock();
-        p = pressure;
-        mtx.unlock();
-
-        return p;
+    public synchronized int getPressure() {
+        return pressure;
     }
 
-    public void setPressure(int pressure) {
-        mtx.lock();
+    public synchronized void setPressure(int pressure) {
         this.pressure = pressure;
-        mtx.unlock();
     }
 }

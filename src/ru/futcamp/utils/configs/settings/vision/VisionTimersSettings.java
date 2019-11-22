@@ -15,34 +15,25 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.utils.configs.settings.vision;
 
-public class LcdSettings {
-    private String ip;
-    private String name;
-    private LcdDeviceSettings[] sensors;
+public class VisionTimersSettings {
+    private int main;
+    private int warming;
 
-    public LcdDeviceSettings[] getSensors() {
-        return sensors;
+    public int getMain() {
+        return main;
     }
 
-    public void setSensors(LcdDeviceSettings[] sensors) {
-        this.sensors = sensors;
+    public void setMain(int main) {
+        this.main = main;
     }
 
-    public String getIp() {
-        return ip;
+    public int getWarming() {
+        return warming;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setWarming(int warming) {
+        this.warming = warming;
     }
 }

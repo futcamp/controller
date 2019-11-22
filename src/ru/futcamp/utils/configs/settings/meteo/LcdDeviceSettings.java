@@ -15,16 +15,34 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.utils.configs.settings.meteo;
 
-public class ModulesSettings {
-    private ModSettings[] modules;
+public class LcdDeviceSettings {
+    private String sensor;
+    private String type;
+    private int id;
 
-    public ModSettings[] getModules() {
-        return modules;
+    public String getSensor() {
+        return sensor;
     }
 
-    public void setModules(ModSettings[] modules) {
-        this.modules = modules;
+    public void setSensor(String sensor) {
+        this.sensor = sensor;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

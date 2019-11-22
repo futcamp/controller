@@ -26,11 +26,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.light.ILightDevice;
-import ru.futcamp.net.web.HttpClient;
 import ru.futcamp.utils.configs.IConfigs;
-import ru.futcamp.utils.configs.settings.TelegramCamGroupSettings;
-import ru.futcamp.utils.configs.settings.TelegramCamSettings;
+import ru.futcamp.utils.configs.settings.vision.TelegramCamSettings;
 import ru.futcamp.utils.log.ILogger;
 
 import java.io.File;
@@ -69,12 +66,20 @@ public class CamMenu implements IMenu, IAppModule {
         } else if (inMsg.equals("Без света")) {
             menu.setLight(false);
         } else if (!inMsg.equals("Список камер") && !inMsg.equals("Камеры")) {
-            if (savePhotoToFile(upd.getMessage().getText(), menu)) {
+            try {
+                if (cfg.getModCfg("light")) {
+                    ctrl.getVisionPhoto(inMsg, "/tmp/photo.jpg", menu.isLight());
+                } else {
+                    ctrl.getVisionPhoto(inMsg, "/tmp/photo.jpg");
+                }
                 SendPhoto ph = new SendPhoto().setChatId(upd.getMessage().getChatId());
                 ph.setPhoto(new File("/tmp/photo.jpg"));
                 bot.execute(ph);
-            } else {
-                msg.setText("Ошибка получения фото");
+            } catch (Exception e) {
+                log.error("Fail to get photo: " + e.getMessage(), "CAMMENU");
+                SendMessage errMsg = new SendMessage().setChatId(upd.getMessage().getChatId());
+                errMsg.setText("Ошибка получения фото!");
+                bot.execute(errMsg);
             }
             return;
         }
@@ -82,48 +87,6 @@ public class CamMenu implements IMenu, IAppModule {
         msg.setText("Список камер");
         setButtons(msg, menu);
         bot.execute(msg);
-    }
-
-    /**
-     * Get photo from cam device and save to file
-     * @param camName Camera name
-     * @return Status
-     */
-    private boolean savePhotoToFile(String camName, IBotMenu menu) {
-        for (TelegramCamGroupSettings camGroup : cfg.getTelegramCfg().getCamgroups()) {
-            for (TelegramCamSettings cam : camGroup.getCams()) {
-                if (camName.equals(cam.getName())) {
-                    /*
-                     * Switch on lamps
-                     */
-                    if (menu.isLight()) {
-                        switchLamps(cam.getLamps(), true);
-                        try {
-                            Thread.sleep(1000);
-                        } catch (Exception ignored) {}
-                    }
-
-                    /*
-                     * GetPhoto
-                     */
-                    HttpClient client = new HttpClient("http://" + cam.getIp() + "/camera?dev=" + cam.getChannel());
-                    try {
-                        client.saveImage("/tmp/photo.jpg");
-                    } catch (Exception e) {
-                        return false;
-                    }
-
-                    /*
-                     * Switch off lamps
-                     */
-                    if (menu.isLight()) {
-                        switchLamps(cam.getLamps(), false);
-                    }
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**
@@ -156,27 +119,23 @@ public class CamMenu implements IMenu, IAppModule {
         /*
          * Add buttons to menu
          */
-        for (TelegramCamGroupSettings camGroup : cfg.getTelegramCfg().getCamgroups()) {
-            List<String> cams = new LinkedList<>();
+        for (String[] row : cfg.getTelegramCfg().getMenu().getVision().getList()) {
+            List<String> camGroup = new LinkedList<>();
 
-            for (TelegramCamSettings cam : camGroup.getCams()) {
-                cams.add(cam.getName());
+            for (String btn : row) {
+                if (btn.equals("%light%")) {
+                    if (menu.isLight()) {
+                        camGroup.add("Без света");
+                    } else {
+                        camGroup.add("Подсветка");
+                    }
+                } else {
+                    camGroup.add(btn);
+                }
             }
 
-            addButtonsRow(cams, keyboard);
+            addButtonsRow(camGroup, keyboard);
         }
-
-        /*
-         * Add back button to menu
-         */
-        List<String> backButton = new LinkedList<>();
-        if (menu.isLight())
-            backButton.add("Без света");
-        else
-            backButton.add("Подсветка");
-        backButton.add("Назад");
-        addButtonsRow(backButton, keyboard);
-
         replyKeyboardMarkup.setKeyboard(keyboard);
     }
 

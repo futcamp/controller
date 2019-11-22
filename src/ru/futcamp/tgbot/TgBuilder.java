@@ -48,7 +48,7 @@ public class TgBuilder implements IBuilder {
         } else if (name.equals("mihm")) {
             return new MIHMenu(name, dep);
         } else if (name.equals("lightsm")) {
-            return new LightStreetMenu(name, dep);
+            return new LightGroupMenu(name, dep);
         } else if (name.equals("tgbotapi")) {
             return new FcBotApi(name, dep);
         } else if (name.equals("tgbot")) {

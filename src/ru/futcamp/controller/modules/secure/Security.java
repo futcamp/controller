@@ -18,47 +18,38 @@
 package ru.futcamp.controller.modules.secure;
 
 import ru.futcamp.IAppModule;
+import ru.futcamp.controller.modules.light.ILightControl;
 import ru.futcamp.controller.modules.secure.db.ISecureDB;
-import ru.futcamp.controller.modules.secure.db.SecureDBData;
+import ru.futcamp.controller.modules.secure.db.SecureDB;
 import ru.futcamp.net.INotifier;
-import ru.futcamp.tgbot.menu.SecureMenu;
+import ru.futcamp.utils.configs.IConfigs;
+import ru.futcamp.utils.configs.settings.RedisSettings;
 import ru.futcamp.utils.log.ILogger;
-import sun.awt.Mutex;
 
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Security process
  */
-public class Security implements ISecurity, IAppModule {
-    private ISecureDB db;
+public class Security extends SecureData implements ISecurity, IAppModule {
     private ILogger log;
     private INotifier notify;
+    private IConfigs cfg;
+    private ILightControl light;
 
     private List<ISecureDevice> devices = new LinkedList<>();
-    private boolean status;
     private boolean alarm;
-    private Mutex mtxStat = new Mutex();
 
     private String modName;
 
     public Security(String name, IAppModule ...dep) {
         modName = name;
-        this.db = (ISecureDB) dep[0];
-        this.log = (ILogger) dep[1];
-        this.notify = (INotifier) dep[2];
-    }
-
-    /**
-     * Set path to database file
-     * @param fileName Path to db
-     */
-    public void setDBFileName(String fileName) {
-        db.setFileName(fileName);
+        this.log = (ILogger) dep[0];
+        this.notify = (INotifier) dep[1];
+        this.cfg = (IConfigs) dep[2];
+        this.light = (ILightControl) dep[3];
     }
 
     /**
@@ -71,7 +62,7 @@ public class Security implements ISecurity, IAppModule {
         for (ISecureDevice device : devices) {
             SecureModInfo mod = new SecureModInfo();
             mod.setAlias(device.getAlias());
-            mod.setState(device.isState());
+            mod.setState(device.isStatus());
             modules.add(mod);
         }
 
@@ -89,8 +80,20 @@ public class Security implements ISecurity, IAppModule {
      */
     public void switchStatus() throws Exception {
         setStatus(!isStatus());
-        saveStates();
-        update(null);
+
+        RedisSettings set = cfg.getSecureCfg().getDb();
+        ISecureDB db = null;
+        try {
+            db = new SecureDB(set.getIp(), set.getTable());
+            db.saveStatus(isStatus());
+            db.saveAlarm(isAlarm());
+        } catch (SQLException e) {
+            throw new Exception(e.getMessage());
+        } finally {
+            db.close();
+        }
+
+        update();
     }
 
     /**
@@ -100,12 +103,32 @@ public class Security implements ISecurity, IAppModule {
     public void newAction(String ip, int chan) {
         for (ISecureDevice device : devices) {
             if (device.getIp().equals(ip) && device.getChannel() == chan) {
-                device.setState(true);
+                device.setStatus(true);
+
+                /*
+                 * Send telegram message
+                 */
+                if (!isAlarm()) {
+                    try {
+                        notify.sendNotify("Внимание! Проникновение! Открыта: " + device.getAlias());
+                    } catch (Exception e) {
+                        log.error("Fail to send secure notify: " + e.getMessage(), "SECURE");
+                    }
+                    /*
+                     * Switch on all street lamps
+                     */
+                    try {
+                        light.setGroupStatus("street", true);
+                    } catch (Exception e) {
+                        log.error("Fail to switch on lamps: " + e.getMessage(), "SECURE");
+                    }
+                }
 
                 if (isStatus()) {
                     setAlarm(true);
                 }
-                update(device.getAlias());
+
+                update();
                 break;
             }
         }
@@ -113,33 +136,18 @@ public class Security implements ISecurity, IAppModule {
 
     /**
      * Update security states
-     * @param alias Alias of device
      */
-    private void update(String alias) {
+    public void update() {
         if (!isStatus()) {
             setAlarm(false);
         }
 
-        if (isAlarm()) {
-            /*
-             * Send telegram message
-             */
-            try {
-                notify.sendNotify("Внимание! Проникновение! Открыта: " + alias);
-            } catch (Exception e) {
-                log.error("Fail to send secure notify: " + e.getMessage(), "SECURE");
-            }
-            /*
-             * Switch on all street lamps
-             */
-        }
-
         /*
-         * Switch on siren
+         * Switch on/off siren
          */
         for (ISecureDevice device : devices) {
             if (!isStatus()) {
-                device.setState(false);
+                device.setStatus(false);
             }
             try {
                 device.syncSecureAlarm(isAlarm());
@@ -154,11 +162,12 @@ public class Security implements ISecurity, IAppModule {
      * @throws Exception If fail to load states from db
      */
     public void loadStates() throws Exception {
+        RedisSettings set = cfg.getSecureCfg().getDb();
+        ISecureDB db = null;
         try {
-            db.connect();
-            SecureDBData states = db.loadSecureStates();
-            this.setStatus(states.isStatus());
-            this.setAlarm(states.isAlarm());
+            db = new SecureDB(set.getIp(), set.getTable());
+            setStatus(db.getStatus());
+            setAlarm(db.getAlarm());
         } catch (SQLException e) {
             throw new Exception(e.getMessage());
         } finally {
@@ -176,37 +185,6 @@ public class Security implements ISecurity, IAppModule {
 
     public String getModName() {
         return modName;
-    }
-
-    /**
-     * Save states to database
-     * @throws Exception If fail to save states
-     */
-    private void saveStates() throws Exception {
-        try {
-            db.connect();
-            db.saveStates(new SecureDBData(isStatus(), isAlarm()));
-        } catch (SQLException e) {
-            throw new Exception(e.getMessage());
-        } finally {
-            db.close();
-        }
-    }
-
-    private void setStatus(boolean status) {
-        mtxStat.lock();
-        this.status = status;
-        mtxStat.unlock();
-    }
-
-    private boolean isStatus() {
-        boolean status;
-
-        mtxStat.lock();
-        status = this.status;
-        mtxStat.unlock();
-
-        return status;
     }
 
     private void setAlarm(boolean alarm) {

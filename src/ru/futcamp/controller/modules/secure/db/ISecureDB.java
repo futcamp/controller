@@ -20,11 +20,15 @@ package ru.futcamp.controller.modules.secure.db;
 import java.sql.SQLException;
 
 public interface ISecureDB {
-    void setFileName(String fileName);
-    void connect() throws SQLException;
-    SecureDBData loadSecureStates() throws SQLException;
-    void saveStates(SecureDBData data) throws SQLException;
-    void saveMIHStatus(MIHDBData status) throws SQLException;
-    MIHDBData loadMIHData() throws SQLException;
+    void saveStatus(boolean status);
+    void saveAlarm(boolean alarm);
+    void saveMIHStatus(boolean status);
+    void saveMIHTimeOn(int hour);
+    void saveMIHTimeOff(int hour);
+    Boolean getStatus();
+    Boolean getAlarm();
+    Boolean getMIHStatus();
+    Integer getMIHTimeOn();
+    Integer getMIHTimeOff();
     void close() throws SQLException;
 }

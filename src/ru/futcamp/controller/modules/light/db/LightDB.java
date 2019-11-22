@@ -17,94 +17,27 @@
 
 package ru.futcamp.controller.modules.light.db;
 
-import org.sqlite.JDBC;
-import ru.futcamp.IAppModule;
-import ru.futcamp.controller.modules.light.LightDevice;
-import sun.awt.Mutex;
-
-import java.sql.*;
-import java.util.LinkedList;
-import java.util.List;
+import db.RedisClient;
 
 /**
  * Database management class
  */
-public class LightDB implements ILightDB, IAppModule {
-    private String fileName;
-    private Connection conn;
-    private Mutex mtx = new Mutex();
-
-    private String modName;
-
-    public LightDB(String name, IAppModule ...dep) {
-        this.modName = name;
-    }
-
+public class LightDB extends RedisClient implements ILightDB {
     /**
-     * Set path to database file
-     * @param fileName Name of database file
+     * constructor: connect to Redis server and authorization
+     *
+     * @param host  Ip address of database
+     * @param table Redis table
      */
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-        try {
-            DriverManager.registerDriver(new JDBC());
-        } catch (Exception ignored) {}
+    public LightDB(String host, int table) throws Exception {
+        super(host, table);
     }
 
-    /**
-     * Connect to database
-     * @throws SQLException If fail to connect
-     */
-    public void connect() throws SQLException {
-        mtx.lock();
-        this.conn = DriverManager.getConnection("jdbc:sqlite:" + fileName);
+    public Boolean getStatus(String alias) {
+        return getBoolValue(alias);
     }
 
-    /**
-     * Get status and alarm states from db
-     * @return All devices states
-     * @throws SQLException If fail to read states
-     */
-    public List<LightDBData> loadLightStates() throws SQLException {
-        List<LightDBData> data = new LinkedList<>();
-        Statement statement = conn.createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT * FROM light");
-
-        while (resultSet.next()) {
-            LightDBData states = new LightDBData();
-            states.setName(resultSet.getString("name"));
-            states.setStatus(resultSet.getBoolean("status"));
-            data.add(states);
-        }
-        statement.close();
-        resultSet.close();
-
-        return data;
-    }
-
-    /**
-     * Save states to db
-     * @param data States data
-     * @throws SQLException If fail to save states
-     */
-    public void saveStates(LightDBData data) throws SQLException {
-        PreparedStatement statement = conn.prepareStatement("UPDATE light SET status = ? WHERE name = '" +
-                                                            data.getName() + "'");
-        statement.setObject(1, data.isStatus());
-        statement.execute();
-        statement.close();
-    }
-
-    /**
-     * Close db connection
-     * @throws SQLException If fail to close
-     */
-    public void close() throws SQLException {
-        this.conn.close();
-        mtx.unlock();
-    }
-
-    public String getModName() {
-        return modName;
+    public void saveStatus(String alias, boolean status) {
+        setValue(alias, status);
     }
 }

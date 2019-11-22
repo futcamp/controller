@@ -19,14 +19,14 @@ package ru.futcamp.controller.modules.secure;
 
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.ActMgmt;
-import ru.futcamp.controller.IController;
 import ru.futcamp.controller.TimeMgmt;
 import ru.futcamp.controller.modules.light.ILightControl;
 import ru.futcamp.controller.modules.secure.db.ISecureDB;
-import ru.futcamp.controller.modules.secure.db.MIHDBData;
+import ru.futcamp.controller.modules.secure.db.SecureDB;
 import ru.futcamp.controller.modules.secure.mod.SecureModule;
 import ru.futcamp.utils.TimeControl;
 import ru.futcamp.utils.configs.IConfigs;
+import ru.futcamp.utils.configs.settings.RedisSettings;
 import ru.futcamp.utils.log.ILogger;
 
 import java.sql.SQLException;
@@ -35,39 +35,44 @@ import java.sql.SQLException;
  * Main In Home security system
  */
 public class ManInHome extends MIHData implements IMainInHome, IAppModule {
-    private ISecureDB db;
     private ILogger log;
     private ILightControl light;
     private IConfigs cfg;
 
-    private String ip;
     private String modName;
 
     public ManInHome(String name, IAppModule ...dep) {
         modName = name;
-        this.db = (ISecureDB) dep[0];
-        this.log = (ILogger) dep[1];
-        this.light = (ILightControl) dep[2];
-        this.cfg = (IConfigs) dep[3];
+        this.log = (ILogger) dep[0];
+        this.light = (ILightControl) dep[1];
+        this.cfg = (IConfigs) dep[2];
     }
-
-    public void setDBFileName(String fileName) {
-        this.db.setFileName(fileName);
-    }
-
-    public void setIp(String ip) { this.ip = ip; }
 
     /**
      * Sync states with device
      */
     public void syncStates() throws Exception {
-        SecureModule mod = new SecureModule(ip);
+        SecureModule mod = new SecureModule(cfg.getSecureCfg().getMih());
         mod.setMIHStates(isRadio(), isLamp());
     }
 
     public void switchStatus() throws Exception {
         setStatus(!isStatus());
-        saveStatus();
+
+        /*
+         * Save time to db
+         */
+        RedisSettings set = cfg.getSecureCfg().getDb();
+        ISecureDB db = null;
+        try {
+            db = new SecureDB(set.getIp(), set.getTable());
+            db.saveMIHStatus(super.isStatus());
+        } catch (SQLException e) {
+            throw new Exception(e.getMessage());
+        } finally {
+            db.close();
+        }
+
         update();
     }
 
@@ -105,7 +110,22 @@ public class ManInHome extends MIHData implements IMainInHome, IAppModule {
                     break;
             }
         }
-        saveStatus();
+
+        /*
+         * Save time to db
+         */
+        RedisSettings set = cfg.getSecureCfg().getDb();
+        ISecureDB db = null;
+        try {
+            db = new SecureDB(set.getIp(), set.getTable());
+            db.saveMIHTimeOn(super.getTimeOn());
+            db.saveMIHTimeOff(super.getTimeOff());
+        } catch (SQLException e) {
+            throw new Exception(e.getMessage());
+        } finally {
+            db.close();
+        }
+
         update();
     }
 
@@ -126,39 +146,22 @@ public class ManInHome extends MIHData implements IMainInHome, IAppModule {
     }
 
     /**
-     * Save status to database
-     * @throws Exception If fail to save status
-     */
-    private void saveStatus() throws Exception {
-        try {
-            db.connect();
-            db.saveMIHStatus(new MIHDBData(isStatus(), getTimeOn(), getTimeOff()));
-        } catch (SQLException e) {
-            throw new Exception(e.getMessage());
-        } finally {
-            db.close();
-        }
-    }
-
-    /**
      * Loading MIH data from db
      * @throws Exception If fail to load
      */
     public void loadDataFromDb() throws Exception {
-        MIHDBData data;
-
+        RedisSettings set = cfg.getSecureCfg().getDb();
+        ISecureDB db = null;
         try {
-            db.connect();
-            data = db.loadMIHData();
+            db = new SecureDB(set.getIp(), set.getTable());
+            super.setStatus(db.getMIHStatus());
+            super.setTimeOn(db.getMIHTimeOn());
+            super.setTimeOff(db.getMIHTimeOff());
         } catch (SQLException e) {
             throw new Exception(e.getMessage());
         } finally {
             db.close();
         }
-
-        super.setStatus(data.isStatus());
-        super.setTimeOn(data.getTimeOn());
-        super.setTimeOff(data.getTimeOff());
     }
 
     /**

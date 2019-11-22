@@ -15,20 +15,16 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.utils.configs.settings.secure;
 
-public class LightSettings {
+import ru.futcamp.utils.configs.settings.RedisSettings;
+
+public class SecureSettings {
     private int interval;
-    private String db;
-    private LightDeviceSettings[] devices;
-
-    public LightDeviceSettings[] getDevices() {
-        return devices;
-    }
-
-    public void setDevices(LightDeviceSettings[] devices) {
-        this.devices = devices;
-    }
+    private RedisSettings db;
+    private String mih;
+    private String[] lamps;
+    private SecureDeviceSettings[] devices;
 
     public int getInterval() {
         return interval;
@@ -38,11 +34,35 @@ public class LightSettings {
         this.interval = interval;
     }
 
-    public String getDb() {
+    public SecureDeviceSettings[] getDevices() {
+        return devices;
+    }
+
+    public void setDevices(SecureDeviceSettings[] devices) {
+        this.devices = devices;
+    }
+
+    public RedisSettings getDb() {
         return db;
     }
 
-    public void setDb(String db) {
+    public void setDb(RedisSettings db) {
         this.db = db;
+    }
+
+    public String getMih() {
+        return mih;
+    }
+
+    public void setMih(String mih) {
+        this.mih = mih;
+    }
+
+    public String[] getLamps() {
+        return lamps;
+    }
+
+    public void setLamps(String[] lamps) {
+        this.lamps = lamps;
     }
 }
