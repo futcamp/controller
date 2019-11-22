@@ -56,7 +56,7 @@ public class MeteoModule {
         MeteoModuleData data;
 
         HttpClient client = new HttpClient("http://" + ip + "/meteo?type=" + type + "&chan=" + channel);
-        String response = client.getRequest(2000);
+        String response = client.getRequest(4000);
         data = JSON.parseObject(response, MeteoModuleData.class);
 
         return data;
@@ -68,7 +68,7 @@ public class MeteoModule {
      */
     public void updateMeteoLcd() throws Exception {
         HttpClient client = new HttpClient("http://" + ip + "/update?type=" + type + "&id=" + id + "&value=" + value);
-        client.getRequest(2000);
+        client.getRequest(4000);
     }
 
     /**
@@ -77,6 +77,6 @@ public class MeteoModule {
      */
     public void displayMeteoLcd() throws Exception {
         HttpClient client = new HttpClient("http://" + ip + "/display");
-        String response = client.getRequest(2000);
+        client.getRequest(4000);
     }
 }

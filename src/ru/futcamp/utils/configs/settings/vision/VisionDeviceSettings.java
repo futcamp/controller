@@ -15,13 +15,15 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.utils.configs.settings.vision;
 
-public class ThermDeviceSettings {
+public class VisionDeviceSettings {
     private String name;
     private String alias;
     private String ip;
-    private String sensor;
+    private int channel;
+    private boolean warming;
+    private String[] lamps;
 
     public String getName() {
         return name;
@@ -47,11 +49,27 @@ public class ThermDeviceSettings {
         this.ip = ip;
     }
 
-    public String getSensor() {
-        return sensor;
+    public int getChannel() {
+        return channel;
     }
 
-    public void setSensor(String sensor) {
-        this.sensor = sensor;
+    public void setChannel(int channel) {
+        this.channel = channel;
+    }
+
+    public String[] getLamps() {
+        return lamps;
+    }
+
+    public void setLamps(String[] lamps) {
+        this.lamps = lamps;
+    }
+
+    public boolean isWarming() {
+        return warming;
+    }
+
+    public void setWarming(boolean warming) {
+        this.warming = warming;
     }
 }

@@ -28,6 +28,7 @@ import ru.futcamp.controller.ActMgmt;
 import ru.futcamp.controller.IController;
 import ru.futcamp.controller.modules.therm.IThermDevice;
 import ru.futcamp.controller.modules.therm.ThermInfo;
+import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.log.ILogger;
 
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import java.util.List;
 public class ThermCtrlMenu implements IMenu, IAppModule {
     private IController ctrl;
     private ILogger log;
+    private IConfigs cfg;
 
     private String modName;
 
@@ -47,6 +49,7 @@ public class ThermCtrlMenu implements IMenu, IAppModule {
         modName = name;
         this.ctrl = (IController) dep[0];
         this.log = (ILogger) dep[1];
+        this.cfg = (IConfigs) dep[2];
     }
 
     /**
@@ -59,14 +62,14 @@ public class ThermCtrlMenu implements IMenu, IAppModule {
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
         String inMsg = upd.getMessage().getText();
 
-        if (!inMsg.equals("+") && !inMsg.equals("-") && !inMsg.equals("Обновить") &&
+        if (!inMsg.equals("+ градус") && !inMsg.equals("- градус") && !inMsg.equals("Обновить") &&
                 !inMsg.equals("Включить") && !inMsg.equals("Отключить"))
         {
             menu.setDevice(inMsg);
         }
 
-        ThermInfo info = ctrl.getThermInfo(menu.getDevice());
         setAction(inMsg, menu.getDevice());
+        ThermInfo info = ctrl.getThermInfo(menu.getDevice());
 
         String txt = "Настройка обогрева\n\n";
         txt += "<b>" + menu.getDevice() + "</b>\n";
@@ -86,13 +89,13 @@ public class ThermCtrlMenu implements IMenu, IAppModule {
      * @param msg Message
      */
     private void setAction(String msg, String device) {
-        if (msg.equals("+")) {
+        if (msg.equals("+ градус")) {
             try {
                 ctrl.changeThermThreshold(device, ActMgmt.SET_MGMT_THRESOLD_PLUS);
             } catch (Exception e) {
                 log.error("Fail to change threshold: " + e.getMessage(), "THERMMENU");
             }
-        } else if (msg.equals("-")) {
+        } else if (msg.equals("- градус")) {
             try {
                 ctrl.changeThermThreshold(device, ActMgmt.SET_MGMT_THRESOLD_MINUS);
             } catch (Exception e) {
@@ -124,23 +127,23 @@ public class ThermCtrlMenu implements IMenu, IAppModule {
          */
         ThermInfo info = ctrl.getThermInfo(alias);
 
-        List<String> row1 = new LinkedList<>();
-        if (info.isStatus()) {
-            row1.add("Отключить");
-        } else {
-            row1.add("Включить");
+        for (String[] row : cfg.getTelegramCfg().getMenu().getTherm().getList()) {
+            List<String> thermGroup = new LinkedList<>();
+
+            for (String btn : row) {
+                if (btn.equals("%status%")) {
+                    if (info.isStatus()) {
+                        thermGroup.add("Отключить");
+                    } else {
+                        thermGroup.add("Включить");
+                    }
+                } else {
+                    thermGroup.add(btn);
+                }
+            }
+
+            addButtonsRow(thermGroup, keyboard);
         }
-        addButtonsRow(row1, keyboard);
-
-        List<String> row2 = new LinkedList<>();
-        row2.add("+");
-        row2.add("-");
-        addButtonsRow(row2, keyboard);
-
-        List<String> backButton = new LinkedList<>();
-        backButton.add("Обновить");
-        backButton.add("Назад");
-        addButtonsRow(backButton, keyboard);
 
         replyKeyboardMarkup.setKeyboard(keyboard);
     }

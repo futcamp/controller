@@ -15,43 +15,25 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.utils.configs.settings.vision;
 
-public class MeteoSettings {
-    private MeteoTimersSettings timers;
-    private String db;
-    private MeteoDeviceSettings[] devices;
-    private LcdSettings[] displays;
+public class VisionSettings {
+    private VisionTimersSettings timers;
+    private VisionDeviceSettings[] devices;
 
-    public MeteoDeviceSettings[] getDevices() {
+    public VisionDeviceSettings[] getDevices() {
         return devices;
     }
 
-    public void setDevices(MeteoDeviceSettings[] devices) {
+    public void setDevices(VisionDeviceSettings[] devices) {
         this.devices = devices;
     }
 
-    public String getDb() {
-        return db;
-    }
-
-    public void setDb(String db) {
-        this.db = db;
-    }
-
-    public LcdSettings[] getDisplays() {
-        return displays;
-    }
-
-    public void setDisplays(LcdSettings[] displays) {
-        this.displays = displays;
-    }
-
-    public MeteoTimersSettings getTimers() {
+    public VisionTimersSettings getTimers() {
         return timers;
     }
 
-    public void setTimers(MeteoTimersSettings timers) {
+    public void setTimers(VisionTimersSettings timers) {
         this.timers = timers;
     }
 }

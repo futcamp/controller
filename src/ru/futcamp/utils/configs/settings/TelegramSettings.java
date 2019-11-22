@@ -23,7 +23,6 @@ public class TelegramSettings {
     private String[] users;
     private String[] chats;
     private TelegramMenuSettings menu;
-    private TelegramCamGroupSettings[] camgroups;
 
     public String getKey() {
         return key;
@@ -47,14 +46,6 @@ public class TelegramSettings {
 
     public void setUsers(String[] users) {
         this.users = users;
-    }
-
-    public TelegramCamGroupSettings[] getCamgroups() {
-        return camgroups;
-    }
-
-    public void setCamgroups(TelegramCamGroupSettings[] camgroups) {
-        this.camgroups = camgroups;
     }
 
     public String[] getChats() {

@@ -76,16 +76,16 @@ public class FutureCamp implements IFutureCamp {
         addModule(builder.makeModule("meteolcd"));
         addModule(builder.makeModule("meteo", getMod("meteodb"), getMod("log")));
         addModule(builder.makeModule("meteotsk", getMod("log"), getMod("meteo"), getMod("cfg"), getMod("meteolcd")));
-        addModule(builder.makeModule("thermdb"));
-        addModule(builder.makeModule("therm", getMod("thermdb"), getMod("log"), getMod("meteo")));
+        addModule(builder.makeModule("therm", getMod("log"), getMod("meteo"), getMod("cfg")));
         addModule(builder.makeModule("thermtsk", getMod("therm"), getMod("cfg")));
-        addModule(builder.makeModule("lightdb"));
-        addModule(builder.makeModule("light", getMod("lightdb")));
-        addModule(builder.makeModule("securedb"));
-        addModule(builder.makeModule("secure", getMod("securedb"), getMod("log"), getMod("ntf")));
-        addModule(builder.makeModule("mih", getMod("securedb"), getMod("log"), getMod("light"), getMod("cfg")));
-        addModule(builder.makeModule("securetsk", getMod("mih"), getMod("cfg")));
-        addModule(builder.makeModule("ctrl", getMod("log"), getMod("cfg"), getMod("meteo"), getMod("meteotsk"), getMod("secure"), getMod("securetsk"), getMod("therm"), getMod("thermtsk"), getMod("mih"), getMod("light")));
+        addModule(builder.makeModule("light", getMod("cfg"), getMod("log")));
+        addModule(builder.makeModule("lighttsk", getMod("light"), getMod("cfg")));
+        addModule(builder.makeModule("vision", getMod("light"), getMod("log")));
+        addModule(builder.makeModule("vistask", getMod("vision"), getMod("cfg")));
+        addModule(builder.makeModule("secure", getMod("log"), getMod("ntf"), getMod("cfg"), getMod("light")));
+        addModule(builder.makeModule("mih", getMod("log"), getMod("light"), getMod("cfg")));
+        addModule(builder.makeModule("securetsk", getMod("mih"), getMod("cfg"), getMod("secure")));
+        addModule(builder.makeModule("ctrl", getMod("log"), getMod("cfg"), getMod("meteo"), getMod("meteotsk"), getMod("secure"), getMod("securetsk"), getMod("therm"), getMod("thermtsk"), getMod("mih"), getMod("light"), getMod("lighttsk"), getMod("vision"), getMod("vistask")));
     }
 
     /**
@@ -105,13 +105,13 @@ public class FutureCamp implements IFutureCamp {
      */
     private void buildTelegram(IBuilder builder) {
         addModule(builder.makeModule("mainm", getMod("cfg")));
-        addModule(builder.makeModule("meteom", getMod("ctrl")));
+        addModule(builder.makeModule("meteom", getMod("ctrl"), getMod("cfg")));
         addModule(builder.makeModule("camm", getMod("cfg"), getMod("ctrl"), getMod("log")));
         addModule(builder.makeModule("securem", getMod("ctrl"), getMod("log")));
         addModule(builder.makeModule("meteosm", getMod("ctrl"), getMod("cfg"), getMod("log")));
         addModule(builder.makeModule("thermm", getMod("ctrl"), getMod("cfg")));
-        addModule(builder.makeModule("thermcm", getMod("ctrl"), getMod("log")));
-        addModule(builder.makeModule("lightm"));
+        addModule(builder.makeModule("thermcm", getMod("ctrl"), getMod("log"), getMod("cfg")));
+        addModule(builder.makeModule("lightm", getMod("cfg")));
         addModule(builder.makeModule("mihm", getMod("ctrl"), getMod("log")));
         addModule(builder.makeModule("lightsm", getMod("cfg"), getMod("ctrl")));
         addModule(builder.makeModule("tgbotapi"));

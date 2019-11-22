@@ -15,34 +15,25 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.utils.configs.settings.light;
 
-public class LcdDeviceSettings {
-    private String sensor;
-    private String type;
-    private int id;
+public class TelegramLightSettings {
+    private String[][] list;
+    private LightGroupSettings[] groups;
 
-    public String getSensor() {
-        return sensor;
+    public String[][] getList() {
+        return list;
     }
 
-    public void setSensor(String sensor) {
-        this.sensor = sensor;
+    public void setList(String[][] list) {
+        this.list = list;
     }
 
-    public String getType() {
-        return type;
+    public LightGroupSettings[] getGroups() {
+        return groups;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+    public void setGroups(LightGroupSettings[] groups) {
+        this.groups = groups;
     }
 }

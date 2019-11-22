@@ -17,96 +17,39 @@
 
 package ru.futcamp.controller.modules.therm.db;
 
-import org.sqlite.JDBC;
-import ru.futcamp.IAppModule;
-import ru.futcamp.controller.modules.therm.ThermDevice;
-import sun.awt.Mutex;
-
-import java.sql.*;
-import java.util.LinkedList;
-import java.util.List;
+import com.alibaba.fastjson.JSON;
+import db.RedisClient;
 
 /**
  * Database management class
  */
-public class ThermDB implements IThermDB, IAppModule {
-    private String fileName;
-    private Connection conn;
-    private Mutex mtx = new Mutex();
+public class ThermDB extends RedisClient implements IThermDB {
 
-    private String modName;
-
-    public ThermDB(String name, IAppModule ...dep) {
-        this.modName = name;
+    /**
+     * constructor: connect to Redis server and authorization
+     *
+     * @param host  Ip address of database
+     * @param table Redis table
+     */
+    public ThermDB(String host, int table) throws Exception {
+        super(host, table);
     }
 
     /**
-     * Set path to database file
-     * @param fileName Name of database file
+     * Save therm data to database
+     * @param name Name of device
+     * @param data Therm data
      */
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-        try {
-            DriverManager.registerDriver(new JDBC());
-        } catch (Exception ignored) {}
+    public void saveData(String name, ThermDBData data) {
+        setValue(name, JSON.toJSONString(data));
     }
 
     /**
-     * Connect to database
-     * @throws SQLException If fail to connect
+     * Load therm data from db
+     * @param name Name of device
+     * @return Therm data
      */
-    public void connect() throws SQLException {
-        mtx.lock();
-        this.conn = DriverManager.getConnection("jdbc:sqlite:" + fileName);
-    }
-
-    /**
-     * Get status and alarm states from db
-     * @return States All devices states
-     * @throws SQLException If fail to read states
-     */
-    public List<ThermDBData> loadThermData() throws SQLException {
-        List<ThermDBData> data = new LinkedList<>();
-        Statement statement = conn.createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT * FROM therm");
-
-        while (resultSet.next()) {
-            ThermDBData states = new ThermDBData();
-            states.setName(resultSet.getString("name"));
-            states.setStatus(resultSet.getBoolean("status"));
-            states.setThreshold(resultSet.getInt("threshold"));
-            data.add(states);
-        }
-        statement.close();
-        resultSet.close();
-
-        return data;
-    }
-
-    /**
-     * Save states to db
-     * @param data States data
-     * @throws SQLException If fail to save states
-     */
-    public void saveStates(ThermDBData data) throws SQLException {
-        PreparedStatement statement = conn.prepareStatement("UPDATE therm SET status = ?, threshold = ? WHERE name = '" +
-                                                            data.getName() + "'");
-        statement.setObject(1, data.isStatus());
-        statement.setObject(2, data.getThreshold());
-        statement.execute();
-        statement.close();
-    }
-
-    /**
-     * Close db connection
-     * @throws SQLException If fail to close
-     */
-    public void close() throws SQLException {
-        this.conn.close();
-        mtx.unlock();
-    }
-
-    public String getModName() {
-        return modName;
+    public ThermDBData loadData(String name) {
+        return JSON.parseObject(getStrValue(name), ThermDBData.class);
     }
 }

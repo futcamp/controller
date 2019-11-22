@@ -20,6 +20,7 @@ package ru.futcamp.controller;
 import ru.futcamp.IAppModule;
 import ru.futcamp.IBuilder;
 import ru.futcamp.controller.modules.light.LightControl;
+import ru.futcamp.controller.modules.light.LightTask;
 import ru.futcamp.controller.modules.light.db.LightDB;
 import ru.futcamp.controller.modules.meteo.MeteoDisplay;
 import ru.futcamp.controller.modules.meteo.MeteoStation;
@@ -32,6 +33,8 @@ import ru.futcamp.controller.modules.secure.db.SecureDB;
 import ru.futcamp.controller.modules.therm.ThermControl;
 import ru.futcamp.controller.modules.therm.ThermTask;
 import ru.futcamp.controller.modules.therm.db.ThermDB;
+import ru.futcamp.controller.modules.vision.Vision;
+import ru.futcamp.controller.modules.vision.VisionTask;
 
 public class ControllerBuilder implements IBuilder {
     /**
@@ -48,26 +51,26 @@ public class ControllerBuilder implements IBuilder {
             return new MeteoStation(name, dep);
         } else if (name.equals("meteotsk")) {
             return new MeteoTask(name, dep);
-        } else if (name.equals("thermdb")) {
-            return new ThermDB(name, dep);
         } else if (name.equals("therm")) {
             return new ThermControl(name, dep);
         } else if (name.equals("thermtsk")) {
             return new ThermTask(name, dep);
-        } else if (name.equals("securedb")) {
-            return new SecureDB(name, dep);
         } else if (name.equals("secure")) {
             return new Security(name, dep);
         } else if (name.equals("mih")) {
             return new ManInHome(name, dep);
         } else if (name.equals("securetsk")) {
             return new SecureTask(name, dep);
-        } else if (name.equals("lightdb")) {
-            return new LightDB(name, dep);
         } else if (name.equals("light")) {
             return new LightControl(name, dep);
         } else if (name.equals("ctrl")) {
             return new Controller(name, dep);
+        } else if (name.equals("lighttsk")) {
+            return new LightTask(name, dep);
+        } else if (name.equals("vision")) {
+            return new Vision(name, dep);
+        } else if (name.equals("vistask")) {
+            return new VisionTask(name, dep);
         }
         return null;
     }

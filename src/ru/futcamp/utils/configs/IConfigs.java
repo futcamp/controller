@@ -18,6 +18,11 @@
 package ru.futcamp.utils.configs;
 
 import ru.futcamp.utils.configs.settings.*;
+import ru.futcamp.utils.configs.settings.light.LightSettings;
+import ru.futcamp.utils.configs.settings.meteo.MeteoSettings;
+import ru.futcamp.utils.configs.settings.secure.SecureSettings;
+import ru.futcamp.utils.configs.settings.therm.ThermSettings;
+import ru.futcamp.utils.configs.settings.vision.VisionSettings;
 
 public interface IConfigs {
     void readFromFile(String fileName, SettingsType set) throws Exception;
@@ -29,4 +34,5 @@ public interface IConfigs {
     CtrlSettings getCtrlCfg();
     ThermSettings getThermCfg();
     LightSettings getLightCfg();
+    VisionSettings getVisionCfg();
 }

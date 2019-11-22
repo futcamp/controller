@@ -91,27 +91,6 @@ public class MIHMenu implements IMenu, IAppModule {
     }
 
     /**
-     * Convert state to string
-     * @param state State value
-     * @param type Type of sensor
-     * @return String value
-     */
-    private String stateToStr(boolean state, String type) {
-        if (state) {
-            if (type.equals("door"))
-                return "Открыта";
-            else
-                return "Открыто";
-        }
-        else {
-            if (type.equals("door"))
-                return "Закрыта";
-            else
-                return "Закрыто";
-        }
-    }
-
-    /**
      * Run action
      * @param upd Telegram bot update
      */

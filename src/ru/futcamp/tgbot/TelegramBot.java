@@ -230,8 +230,9 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot,
                 level.get(user).setLevel(MAIN_MENU);
                 return;
             }
-            if (msg.equals("Улица")) {
+            if (!msg.equals("Выбор освещения")) {
                 level.get(user).setLevel(LIGHT_STREET_MENU);
+                level.get(user).setGroup(msg);
                 return;
             }
         }

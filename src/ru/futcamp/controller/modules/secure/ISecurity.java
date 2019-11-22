@@ -19,9 +19,9 @@ package ru.futcamp.controller.modules.secure;
 
 public interface ISecurity {
     void addDevice(ISecureDevice device);
-    void setDBFileName(String fileName);
     void loadStates() throws Exception;
     void switchStatus() throws Exception;
     SecureInfo getSecureInfo();
     void newAction(String ip, int chan);
+    void update();
 }

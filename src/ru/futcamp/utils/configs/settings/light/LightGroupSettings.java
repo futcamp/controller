@@ -15,43 +15,34 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.utils.configs.settings.light;
 
-public class TelegramCamSettings {
-    private String name;
-    private String ip;
-    private int channel;
-    private String[] lamps;
+public class LightGroupSettings {
+    private String group;
+    private String caption;
+    private String[][] device;
 
-    public String getName() {
-        return name;
+    public String getGroup() {
+        return group;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setGroup(String group) {
+        this.group = group;
     }
 
-    public String getIp() {
-        return ip;
+    public String getCaption() {
+        return caption;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setCaption(String caption) {
+        this.caption = caption;
     }
 
-    public int getChannel() {
-        return channel;
+    public String[][] getDevice() {
+        return device;
     }
 
-    public void setChannel(int channel) {
-        this.channel = channel;
-    }
-
-    public String[] getLamps() {
-        return lamps;
-    }
-
-    public void setLamps(String[] lamp) {
-        this.lamps = lamp;
+    public void setDevice(String[][] device) {
+        this.device = device;
     }
 }

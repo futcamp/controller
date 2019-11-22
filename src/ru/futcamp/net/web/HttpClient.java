@@ -18,9 +18,8 @@
 package ru.futcamp.net.web;
 
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.Charset;
 
 public class HttpClient {
     private String request;
@@ -35,24 +34,20 @@ public class HttpClient {
      * @throws Exception If fail to get request
      */
     private String getReq(int timeout) throws Exception {
-        StringBuilder sb = new StringBuilder();
-        URL url = new URL(request);
+        final URL url = new URL(request);
+        final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setConnectTimeout(timeout);
 
-        URLConnection urlConn = url.openConnection();
-        urlConn.setConnectTimeout(timeout);
-        urlConn.setReadTimeout(timeout);
-        if (urlConn.getInputStream() != null) {
-            InputStreamReader in = new InputStreamReader(urlConn.getInputStream(),
-                                    Charset.defaultCharset());
-            BufferedReader bufferedReader = new BufferedReader(in);
-            int cp;
-            while ((cp = bufferedReader.read()) != -1) {
-                sb.append((char) cp);
+        try (final BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+            String inputLine;
+            final StringBuilder content = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
             }
-            bufferedReader.close();
-            in.close();
+            return content.toString();
+        } catch (final Exception ex) {
+            throw new Exception(ex.getMessage());
         }
-        return sb.toString();
     }
 
     /**

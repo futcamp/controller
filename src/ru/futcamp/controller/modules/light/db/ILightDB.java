@@ -18,12 +18,9 @@
 package ru.futcamp.controller.modules.light.db;
 
 import java.sql.SQLException;
-import java.util.List;
 
 public interface ILightDB {
-    void setFileName(String fileName);
-    void connect() throws SQLException;
-    List<LightDBData> loadLightStates() throws SQLException;
-    void saveStates(LightDBData data) throws SQLException;
+    Boolean getStatus(String alias);
+    void saveStatus(String alias, boolean status);
     void close() throws SQLException;
 }

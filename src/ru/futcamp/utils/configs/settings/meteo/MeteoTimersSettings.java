@@ -1,4 +1,4 @@
-package ru.futcamp.utils.configs.settings;
+package ru.futcamp.utils.configs.settings.meteo;
 
 public class MeteoTimersSettings {
     private int sensors;

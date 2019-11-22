@@ -17,98 +17,50 @@
 
 package ru.futcamp.controller.modules.secure;
 
-import ru.futcamp.controller.modules.secure.db.MIHDBData;
-import sun.awt.Mutex;
-
 public class MIHData {
     private boolean status;
     private boolean radio;
     private boolean lamp;
     private int timeOn;
     private int timeOff;
-    private Mutex mtxStat = new Mutex();
-    private Mutex mtxRadio = new Mutex();
-    private Mutex mtxLamp = new Mutex();
-    private Mutex mtxTmOn = new Mutex();
-    private Mutex mtxTmOff = new Mutex();
 
-    public boolean isStatus() {
-        boolean stat;
-
-        mtxStat.lock();
-        stat = status;
-        mtxStat.unlock();
-
-        return stat;
+    public synchronized boolean isStatus() {
+        return status;
     }
 
-    public void setStatus(boolean status) {
-        mtxStat.lock();
+    public synchronized void setStatus(boolean status) {
         this.status = status;
-        mtxStat.unlock();
     }
 
-    public boolean isRadio() {
-        boolean rad;
-
-        mtxRadio.lock();
-        rad = radio;
-        mtxRadio.unlock();
-
-        return rad;
+    public synchronized boolean isRadio() {
+        return radio;
     }
 
-    public void setRadio(boolean radio) {
-        mtxRadio.lock();
+    public synchronized void setRadio(boolean radio) {
         this.radio = radio;
-        mtxRadio.unlock();
     }
 
-    public boolean isLamp() {
-        boolean l;
-
-        mtxLamp.lock();
-        l = lamp;
-        mtxLamp.unlock();
-
-        return l;
+    public synchronized boolean isLamp() {
+        return lamp;
     }
 
-    public void setLamp(boolean lamp) {
-        mtxLamp.lock();
+    public synchronized void setLamp(boolean lamp) {
         this.lamp = lamp;
-        mtxLamp.unlock();
     }
 
-    public int getTimeOff() {
-        int tm;
-
-        mtxTmOff.lock();
-        tm = timeOff;
-        mtxTmOff.unlock();
-
-        return tm;
+    public synchronized int getTimeOn() {
+        return timeOn;
     }
 
-    public void setTimeOff(int timeOff) {
-        mtxTmOff.lock();
-        this.timeOff = timeOff;
-        mtxTmOff.unlock();
-    }
-
-    public int getTimeOn() {
-        int tm;
-
-        mtxTmOn.lock();
-        tm = timeOn;
-        mtxTmOn.unlock();
-
-        return tm;
-    }
-
-    public void setTimeOn(int timeOn) {
-        mtxTmOn.lock();
+    public synchronized void setTimeOn(int timeOn) {
         this.timeOn = timeOn;
-        mtxTmOn.unlock();
+    }
+
+    public synchronized int getTimeOff() {
+        return timeOff;
+    }
+
+    public synchronized void setTimeOff(int timeOff) {
+        this.timeOff = timeOff;
     }
 }

@@ -25,6 +25,7 @@ import java.util.TimerTask;
 public class SecureTask extends TimerTask implements Runnable, IAppModule {
     private IMainInHome mih;
     private IConfigs cfg;
+    private ISecurity secure;
 
     private String modName;
     private int counter = 0;
@@ -33,6 +34,7 @@ public class SecureTask extends TimerTask implements Runnable, IAppModule {
         this.modName = name;
         this.mih = (IMainInHome) dep[0];
         this.cfg = (IConfigs) dep[1];
+        this.secure = (ISecurity) dep[2];
     }
 
     @Override
@@ -44,6 +46,7 @@ public class SecureTask extends TimerTask implements Runnable, IAppModule {
         counter = 0;
 
         mih.update();
+        secure.update();
     }
 
     public String getModName() {

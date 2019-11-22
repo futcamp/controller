@@ -19,7 +19,6 @@ package ru.futcamp.controller.modules.meteo.db;
 
 import org.sqlite.JDBC;
 import ru.futcamp.IAppModule;
-import sun.awt.Mutex;
 
 import java.sql.*;
 import java.util.LinkedList;
@@ -31,7 +30,6 @@ import java.util.List;
 public class MeteoDB implements IMeteoDB, IAppModule {
     private String fileName;
     private Connection conn;
-    private Mutex mtx = new Mutex();
 
     private String modName;
 
@@ -55,7 +53,6 @@ public class MeteoDB implements IMeteoDB, IAppModule {
      * @throws SQLException If fail to connect
      */
     public void connect() throws SQLException {
-        mtx.lock();
         this.conn = DriverManager.getConnection("jdbc:sqlite:" + fileName);
     }
 
@@ -131,7 +128,6 @@ public class MeteoDB implements IMeteoDB, IAppModule {
      */
     public void close() throws SQLException {
         this.conn.close();
-        mtx.unlock();
     }
 
     public String getModName() {

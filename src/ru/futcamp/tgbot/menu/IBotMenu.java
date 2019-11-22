@@ -24,4 +24,6 @@ public interface IBotMenu {
     void setDevice(String device);
     boolean isLight();
     void setLight(boolean light);
+    String getGroup();
+    void setGroup(String group);
 }

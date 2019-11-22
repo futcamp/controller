@@ -56,17 +56,13 @@ public class ThermMenu implements IMenu, IAppModule {
      */
     public void updateMessage(TelegramLongPollingBot bot, Update upd, IBotMenu menu) throws Exception {
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
-        String txt = "Обогрев помещений\n\n";
+        StringBuilder txt = new StringBuilder("Обогрев помещений\n\n");
 
         for (ThermInfo info : ctrl.getThermInfo()) {
-            txt += "<b>" + info.getAlias() + "</b>\n";
-            txt += "Статус: <b>" + (info.isStatus() ? "Работает" : "Отключен") + "</b>\n";
-            txt += "Обогреватель: <b>" + (info.isHeater() ? "Работает" : "Отключен") + "</b>\n";
-            txt += "Текущая температура: <b>" + ctrl.getMeteoInfo(info.getSensor()).getTemp() + "°</b>\n";
-            txt += "Держать температуру: <b>" + info.getThreshold() + "°</b>\n\n";
+            txt.append("<b>").append(info.getAlias()).append("</b> Статус: <b>").append(info.isStatus() ? "Работает" : "Отключен").append("</b>\n");
         }
 
-        msg.setText(txt);
+        msg.setText(txt.toString());
         msg.enableHtml(true);
         setButtons(msg);
         bot.execute(msg);
@@ -84,7 +80,7 @@ public class ThermMenu implements IMenu, IAppModule {
         replyKeyboardMarkup.setOneTimeKeyboard(false);
         List<KeyboardRow> keyboard = new ArrayList<>();
 
-        for (String[] row : cfg.getTelegramCfg().getMenu().getTherm()) {
+        for (String[] row : cfg.getTelegramCfg().getMenu().getTherm().getList()) {
             List<String> thermGroup = new LinkedList<>();
 
             for (String btn : row) {
@@ -93,14 +89,6 @@ public class ThermMenu implements IMenu, IAppModule {
 
             addButtonsRow(thermGroup, keyboard);
         }
-
-        /*
-         * Add back button to menu
-         */
-        List<String> backButton = new LinkedList<>();
-        backButton.add("Обновить");
-        backButton.add("Назад");
-        addButtonsRow(backButton, keyboard);
 
         replyKeyboardMarkup.setKeyboard(keyboard);
     }

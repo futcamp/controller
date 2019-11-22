@@ -18,11 +18,10 @@
 package ru.futcamp.controller.modules.meteo;
 
 import ru.futcamp.IAppModule;
-import ru.futcamp.utils.TimeControl;
 import ru.futcamp.utils.configs.IConfigs;
-import ru.futcamp.utils.configs.settings.LcdDeviceSettings;
-import ru.futcamp.utils.configs.settings.LcdSettings;
-import ru.futcamp.utils.configs.settings.MeteoSettings;
+import ru.futcamp.utils.configs.settings.meteo.LcdDeviceSettings;
+import ru.futcamp.utils.configs.settings.meteo.LcdSettings;
+import ru.futcamp.utils.configs.settings.meteo.MeteoSettings;
 import ru.futcamp.utils.log.ILogger;
 
 import java.util.TimerTask;
@@ -78,7 +77,7 @@ public class MeteoTask extends TimerTask implements IAppModule {
 
                     lcd.updateData(display.getIp(), device.getId(), value, device.getType());
                 } catch (Exception e) {
-                    log.error("Fail to update meteo data on lcd \"" + display.getName() + "\": " + e.getMessage(), "METEOTASK");
+                    log.error("Fail to update meteo data on lcd \"" + display.getName() + "\" sensor \""+device.getSensor()+"\": " + e.getMessage(), "METEOTASK");
                 }
             }
             try {

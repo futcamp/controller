@@ -15,32 +15,25 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.modules.secure.db;
+package ru.futcamp.utils.configs.settings.therm;
 
-public class SecureDBData {
-    private boolean status;
-    private boolean alarm;
+public class TelegramThermSettings {
+    private String[][] list;
+    private String[][] device;
 
-    public SecureDBData() { }
-
-    public SecureDBData(boolean status, boolean alarm) {
-        this.status = status;
-        this.alarm = alarm;
+    public String[][] getList() {
+        return list;
     }
 
-    public boolean isStatus() {
-        return status;
+    public void setList(String[][] list) {
+        this.list = list;
     }
 
-    public void setStatus(boolean status) {
-        this.status = status;
+    public String[][] getDevice() {
+        return device;
     }
 
-    public boolean isAlarm() {
-        return alarm;
-    }
-
-    public void setAlarm(boolean alarm) {
-        this.alarm = alarm;
+    public void setDevice(String[][] device) {
+        this.device = device;
     }
 }

@@ -19,12 +19,12 @@ package ru.futcamp.controller.modules.secure;
 
 public interface ISecureDevice {
     void syncSecureAlarm(boolean state) throws Exception;
-    boolean isState();
-    void setState(boolean state);
     String getName();
     String getAlias();
     String getIp();
     int getChannel();
     String getGroup();
     String getType();
+    boolean isStatus();
+    void setStatus(boolean statue);
 }

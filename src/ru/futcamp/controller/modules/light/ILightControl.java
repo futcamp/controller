@@ -22,11 +22,11 @@ import java.util.List;
 public interface ILightControl {
     void loadStates() throws Exception;
     void addDevice(ILightDevice device);
-    void setDBFileName(String fileName);
     void switchStatus(String alias) throws Exception;
     List<LightInfo> getLightInfo();
     LightInfo getLightInfo(String alias) throws Exception;
     List<LightInfo> getLightGroupInfo(String group);
     void setGroupStatus(String group, boolean status) throws Exception;
     void setLightStatus(String alias, boolean status) throws Exception;
+    void update();
 }

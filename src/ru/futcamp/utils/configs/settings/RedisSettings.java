@@ -17,29 +17,9 @@
 
 package ru.futcamp.utils.configs.settings;
 
-public class SecureDeviceSettings {
-    private String name;
-    private String alias;
+public class RedisSettings {
     private String ip;
-    private int channel;
-    private String type;
-    private String group;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
+    private int table;
 
     public String getIp() {
         return ip;
@@ -49,27 +29,11 @@ public class SecureDeviceSettings {
         this.ip = ip;
     }
 
-    public int getChannel() {
-        return channel;
+    public int getTable() {
+        return table;
     }
 
-    public void setChannel(int channel) {
-        this.channel = channel;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getGroup() {
-        return group;
-    }
-
-    public void setGroup(String group) {
-        this.group = group;
+    public void setTable(int table) {
+        this.table = table;
     }
 }

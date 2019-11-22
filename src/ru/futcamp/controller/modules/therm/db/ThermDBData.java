@@ -18,24 +18,14 @@
 package ru.futcamp.controller.modules.therm.db;
 
 public class ThermDBData {
-    private String name;
     private boolean status;
     private int threshold;
 
     public ThermDBData() { }
 
-    public ThermDBData(String name, boolean status, int threshold) {
-        this.name = name;
+    public ThermDBData(boolean status, int threshold) {
         this.status = status;
         this.threshold = threshold;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public boolean isStatus() {

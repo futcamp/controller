@@ -21,6 +21,7 @@ public class BotMenu implements IBotMenu {
     private LevelMenu level;
     private String device;
     private boolean light;
+    private String group;
 
     public BotMenu() {
         level = LevelMenu.MAIN_MENU;
@@ -48,5 +49,13 @@ public class BotMenu implements IBotMenu {
 
     public void setLight(boolean light) {
         this.light = light;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 }
