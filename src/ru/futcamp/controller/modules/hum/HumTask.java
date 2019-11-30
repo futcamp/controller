@@ -15,10 +15,9 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.modules.light;
+package ru.futcamp.controller.modules.hum;
 
 import ru.futcamp.IAppModule;
-import ru.futcamp.controller.modules.therm.IThermControl;
 import ru.futcamp.utils.configs.IConfigs;
 
 import java.util.TimerTask;
@@ -26,16 +25,16 @@ import java.util.TimerTask;
 /**
  * Therm task
  */
-public class LightTask extends TimerTask implements IAppModule {
-    private ILightControl light;
+public class HumTask extends TimerTask implements IAppModule {
+    private IHumControl hum;
     private IConfigs cfg;
 
     private int counter = 0;
     private String modName;
 
-    public LightTask(String name, IAppModule ...dep) {
+    public HumTask(String name, IAppModule ...dep) {
         this.modName = name;
-        this.light = (ILightControl) dep[0];
+        this.hum = (IHumControl) dep[0];
         this.cfg = (IConfigs) dep[1];
     }
 
@@ -43,11 +42,11 @@ public class LightTask extends TimerTask implements IAppModule {
     public void run() {
         counter++;
 
-        if (counter != cfg.getLightCfg().getInterval())
+        if (counter != cfg.getHumCfg().getInterval())
             return;
         counter = 0;
 
-        light.update();
+        hum.getUpdate();
     }
 
     public String getModName() {

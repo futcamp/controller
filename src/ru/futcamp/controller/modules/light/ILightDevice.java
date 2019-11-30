@@ -31,4 +31,6 @@ public interface ILightDevice {
     boolean isStatus();
     void setStatus(boolean status);
     void syncStates() throws Exception;
+    String getSwitchIP();
+    int getSwitchChannel();
 }

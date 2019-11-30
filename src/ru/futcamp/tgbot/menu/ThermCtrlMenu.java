@@ -127,7 +127,7 @@ public class ThermCtrlMenu implements IMenu, IAppModule {
          */
         ThermInfo info = ctrl.getThermInfo(alias);
 
-        for (String[] row : cfg.getTelegramCfg().getMenu().getTherm().getList()) {
+        for (String[] row : cfg.getTelegramCfg().getMenu().getTherm().getDevice()) {
             List<String> thermGroup = new LinkedList<>();
 
             for (String btn : row) {

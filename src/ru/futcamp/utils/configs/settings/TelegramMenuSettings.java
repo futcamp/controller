@@ -17,6 +17,7 @@
 
 package ru.futcamp.utils.configs.settings;
 
+import ru.futcamp.utils.configs.settings.hum.TelegramHumSettings;
 import ru.futcamp.utils.configs.settings.light.TelegramLightSettings;
 import ru.futcamp.utils.configs.settings.therm.TelegramThermSettings;
 import ru.futcamp.utils.configs.settings.vision.TelegramCamSettings;
@@ -25,7 +26,10 @@ public class TelegramMenuSettings {
     private String[][] main;
     private String[][] meteo;
     private String[][] meteostat;
+    private String[][] security;
+    private String[][] mih;
     private TelegramThermSettings therm;
+    private TelegramHumSettings hum;
     private TelegramLightSettings light;
     private TelegramCamSettings vision;
 
@@ -75,5 +79,29 @@ public class TelegramMenuSettings {
 
     public void setVision(TelegramCamSettings vision) {
         this.vision = vision;
+    }
+
+    public String[][] getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(String[][] security) {
+        this.security = security;
+    }
+
+    public String[][] getMih() {
+        return mih;
+    }
+
+    public void setMih(String[][] mih) {
+        this.mih = mih;
+    }
+
+    public TelegramHumSettings getHum() {
+        return hum;
+    }
+
+    public void setHum(TelegramHumSettings hum) {
+        this.hum = hum;
     }
 }

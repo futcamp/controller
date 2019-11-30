@@ -62,6 +62,12 @@ class Path {
 
             case "vision":
                 return "/etc/futcamp/vision.conf";
+
+            case "monitor":
+                return "/etc/futcamp/monitor.conf";
+
+            case "hum":
+                return "/etc/futcamp/hum.conf";
         }
         return null;
     }

@@ -18,7 +18,7 @@
 package ru.futcamp.controller.modules.therm;
 
 import ru.futcamp.controller.ActMgmt;
-import ru.futcamp.controller.modules.light.LightInfo;
+import ru.futcamp.controller.events.Events;
 
 import java.util.List;
 
@@ -29,5 +29,5 @@ public interface IThermControl {
     void changeThreshold(String alias, ActMgmt action) throws Exception;
     void loadStates() throws Exception;
     void addDevice(IThermDevice device);
-    void update();
+    void getUpdate();
 }

@@ -15,39 +15,39 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.net;
+package ru.futcamp.controller.modules.monitor;
 
 import ru.futcamp.IAppModule;
-import ru.futcamp.net.web.HttpClient;
+import ru.futcamp.controller.modules.light.ILightControl;
 import ru.futcamp.utils.configs.IConfigs;
 
-import java.net.URLEncoder;
+import java.util.TimerTask;
 
 /**
- * Telegram notifier
+ * Therm task
  */
-public class Notifier implements INotifier, IAppModule {
+public class MonitorTask extends TimerTask implements IAppModule {
+    private IMonitor monitor;
     private IConfigs cfg;
 
+    private int counter = 0;
     private String modName;
 
-    public Notifier(String name, IAppModule ...dep) {
+    public MonitorTask(String name, IAppModule ...dep) {
         this.modName = name;
-        this.cfg = (IConfigs) dep[0];
+        this.monitor = (IMonitor) dep[0];
+        this.cfg = (IConfigs) dep[1];
     }
 
-    /**
-     * Send telegram notify to user
-     * @param message Sending message
-     * @throws Exception If fail to send notify
-     */
-    public void sendNotify(String message) throws Exception {
-        for (String chatID : cfg.getTelegramCfg().getChats()) {
-            HttpClient client = new HttpClient("https://api.telegram.org/bot" + cfg.getTelegramCfg().getKey() +
-                                                "/sendMessage?chat_id=" + chatID + "&text=" +
-                                                URLEncoder.encode(message, "UTF-8"));
-            client.getRequest(2000);
-        }
+    @Override
+    public void run() {
+        counter++;
+
+        if (counter != cfg.getMonitorCfg().getInterval())
+            return;
+        counter = 0;
+
+        monitor.checkStatus();
     }
 
     public String getModName() {

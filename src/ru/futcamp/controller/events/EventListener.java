@@ -15,16 +15,8 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.modules.meteo.db;
+package ru.futcamp.controller.events;
 
-import java.sql.SQLException;
-import java.util.List;
-
-public interface IMeteoDB {
-    void setFileName(String fileName);
-    void connect() throws SQLException;
-    String getLastTime(String sensor) throws SQLException;
-    List<MeteoDBData> getDataByDate(String sensor, String findDate) throws SQLException;
-    void saveMeteoData(String sensor, MeteoDBData data) throws SQLException;
-    void close() throws SQLException;
+public interface EventListener {
+    void getEvent(Events event,  String module, String ip, int channel);
 }

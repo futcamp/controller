@@ -23,6 +23,7 @@ public class LightDeviceSettings {
     private String group;
     private String ip;
     private int channel;
+    private LightSwitchSettings switcher;
 
     public String getName() {
         return name;
@@ -62,5 +63,13 @@ public class LightDeviceSettings {
 
     public void setChannel(int channel) {
         this.channel = channel;
+    }
+
+    public LightSwitchSettings getSwitcher() {
+        return switcher;
+    }
+
+    public void setSwitcher(LightSwitchSettings switcher) {
+        this.switcher = switcher;
     }
 }

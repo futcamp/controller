@@ -29,14 +29,18 @@ public class SecureDevice extends SecureData implements ISecureDevice {
     private int channel;
     private String type;
     private String group;
+    private String camera;
+    private boolean watch;
 
-    public SecureDevice(String name, String alias, String ip, int chan, String type, String group) {
+    public SecureDevice(String name, String alias, String ip, int chan, String type, String group, String cam, boolean watch) {
         this.name = name;
         this.alias = alias;
         this.ip = ip;
         this.channel = chan;
         this.type = type;
         this.group = group;
+        this.camera = cam;
+        this.watch = watch;
     }
 
     /**
@@ -45,8 +49,7 @@ public class SecureDevice extends SecureData implements ISecureDevice {
      * @throws Exception If fail to sync state
      */
     public void syncSecureAlarm(boolean state) throws Exception {
-        SecureModule hdk = new SecureModule(ip);
-        hdk.setSecureAlarm(state);
+        SecureModule.setSecureAlarm(ip, state);
     }
 
     public String getName() {
@@ -95,5 +98,13 @@ public class SecureDevice extends SecureData implements ISecureDevice {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getCamera() {
+        return camera;
+    }
+
+    public boolean isWatch() {
+        return watch;
     }
 }

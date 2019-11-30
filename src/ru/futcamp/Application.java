@@ -85,6 +85,12 @@ public class Application implements IApplication, IAppModule {
             if (cfg.getModCfg("vision")) {
                 cfg.readFromFile(path.getPath("vision"), VISION_SET);
             }
+            if (cfg.getModCfg("monitor")) {
+                cfg.readFromFile(path.getPath("monitor"), MONITOR_SET);
+            }
+            if (cfg.getModCfg("hum")) {
+                cfg.readFromFile(path.getPath("hum"), HUM_SET);
+            }
         } catch (Exception e) {
             log.error("Fail to read configs: " + e.getMessage(), "APP");
             return;
@@ -99,7 +105,9 @@ public class Application implements IApplication, IAppModule {
          * Start controller modules
          */
         log.info("Starting controller modules", "APP");
-        ctrl.startModules();
+        if (!ctrl.startModules()) {
+            return;
+        }
 
         /*
          * Start web server

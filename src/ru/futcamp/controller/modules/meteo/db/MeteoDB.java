@@ -17,120 +17,84 @@
 
 package ru.futcamp.controller.modules.meteo.db;
 
-import org.sqlite.JDBC;
-import ru.futcamp.IAppModule;
+import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.jdbc.JdbcConnectionSource;
+import com.j256.ormlite.support.ConnectionSource;
 
-import java.sql.*;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Database management class
  */
-public class MeteoDB implements IMeteoDB, IAppModule {
-    private String fileName;
-    private Connection conn;
-
-    private String modName;
-
-    public MeteoDB(String name, IAppModule ...dep) {
-        this.modName = name;
-    }
-
-    /**
-     * Set path to database file
-     * @param fileName Name of database file
-     */
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-        try {
-            DriverManager.registerDriver(new JDBC());
-        } catch (Exception ignored) {}
-    }
-
-    /**
-     * Connect to database
-     * @throws SQLException If fail to connect
-     */
-    public void connect() throws SQLException {
-        this.conn = DriverManager.getConnection("jdbc:sqlite:" + fileName);
-    }
-
-    /**
-     * Get last hour of data
-     * @param sensor Meteo sensor name
-     * @return Last hour
-     * @throws SQLException
-     */
-    public String getLastTime(String sensor) throws SQLException {
-        String time = "";
-        Statement statement = conn.createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT hour FROM " + sensor);
-
-        while (resultSet.next()) {
-            time = resultSet.getString("hour");
-        }
-        statement.close();
-        resultSet.close();
-
-        return time;
-    }
+public class MeteoDB {
+    private static String path;
 
     /**
      * Get meteo data list by date
      * @param sensor Meteo sensor name
      * @param findDate Date
      * @return Meteo data list
-     * @throws SQLException If fail to get meteo data
+     * @throws Exception If fail to get meteo data
      */
-    public List<MeteoDBData> getDataByDate(String sensor, String findDate) throws SQLException {
-        List<MeteoDBData> data = new LinkedList<>();
-        Statement statement = conn.createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT * FROM " + sensor + " WHERE date = '" + findDate + "'");
+    public static List<MeteoDBData> getDataByDate(String sensor, String findDate) throws Exception {
+        List<MeteoDBData> data = null;
+        Dao<MeteoDBData, String> dao;
 
-        while (resultSet.next()) {
-            MeteoDBData datum = new MeteoDBData();
-            datum.setTemp(resultSet.getInt("temp"));
-            datum.setHum(resultSet.getInt("hum"));
-            datum.setPres(resultSet.getInt("pres"));
-            datum.setHour(resultSet.getInt("hour"));
-            datum.setDate(resultSet.getString("date"));
-            data.add(datum);
+        synchronized (MeteoDB.class) {
+            try (ConnectionSource source = new JdbcConnectionSource("jdbc:sqlite:" + path + sensor + ".db")) {
+                dao = DaoManager.createDao(source, MeteoDBData.class);
+                data = dao.queryForEq("date", findDate);
+            } catch (Exception e) {
+                throw new Exception(e.getMessage());
+            }
         }
-        statement.close();
-        resultSet.close();
 
         return data;
+    }
+
+    /**
+     * Get last record hour
+     * @param sensor Sensor name
+     * @return Hour
+     * @throws Exception If fail to get hour
+     */
+    public static int getLastTime(String sensor) throws Exception {
+        List<MeteoDBData> data = null;
+        Dao<MeteoDBData, String> dao;
+
+        synchronized (MeteoDB.class) {
+            try (ConnectionSource source = new JdbcConnectionSource("jdbc:sqlite:" + path + sensor + ".db")) {
+                dao = DaoManager.createDao(source, MeteoDBData.class);
+                data = dao.queryForAll();
+            } catch (Exception e) {
+                throw new Exception(e.getMessage());
+            }
+        }
+
+        return data.get(data.size() - 1).getHour();
     }
 
     /**
      * Save meteo data to db
      * @param sensor Meteo sensor name
      * @param data Meteo data
-     * @throws SQLException If fail to save data
+     * @throws Exception If fail to save data
      */
-    public void saveMeteoData(String sensor, MeteoDBData data) throws SQLException {
-        PreparedStatement statement =
-                conn.prepareStatement("INSERT INTO " + sensor +
-                        " (temp, hum, pres, hour, date) VALUES (?, ?, ?, ?, ?)");
-        statement.setObject(1, data.getTemp());
-        statement.setObject(2, data.getHum());
-        statement.setObject(3, data.getPres());
-        statement.setObject(4, data.getHour());
-        statement.setObject(5, data.getDate());
-        statement.execute();
-        statement.close();
+    public static void saveMeteoData(String sensor, MeteoDBData data) throws Exception {
+        Dao<MeteoDBData, String> dao;
+
+        synchronized (MeteoDB.class) {
+            try (ConnectionSource source = new JdbcConnectionSource("jdbc:sqlite:" + path + sensor + ".db")) {
+                dao = DaoManager.createDao(source, MeteoDBData.class);
+                dao.create(data);
+            } catch (Exception e) {
+                throw new Exception(e.getMessage());
+            }
+        }
     }
 
-    /**
-     * Close db connection
-     * @throws SQLException If fail to close
-     */
-    public void close() throws SQLException {
-        this.conn.close();
-    }
-
-    public String getModName() {
-        return modName;
+    public static void setPath(String path) {
+        MeteoDB.path = path;
     }
 }

@@ -17,6 +17,8 @@
 
 package ru.futcamp.controller.modules.light;
 
+import ru.futcamp.controller.events.Events;
+
 import java.util.List;
 
 public interface ILightControl {
@@ -28,5 +30,4 @@ public interface ILightControl {
     List<LightInfo> getLightGroupInfo(String group);
     void setGroupStatus(String group, boolean status) throws Exception;
     void setLightStatus(String alias, boolean status) throws Exception;
-    void update();
 }

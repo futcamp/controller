@@ -15,9 +15,12 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.net.web.handlers;
+package ru.futcamp.controller.modules.hum.db;
 
-public enum Handlers {
-    INDEX_HDL,
-    SECURE_HDL
+import java.sql.SQLException;
+
+public interface IHumDB {
+    void saveData(String name, HumDBData data);
+    HumDBData loadData(String name);
+    void close() throws SQLException;
 }

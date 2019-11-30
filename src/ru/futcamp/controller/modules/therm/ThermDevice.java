@@ -50,8 +50,7 @@ public class ThermDevice extends ThermData implements IThermDevice {
      * @throws Exception If fail to sync state
      */
     public void syncStates() throws Exception {
-        ThermModule hdk = new ThermModule(this.ip);
-        hdk.syncStates(isStatus(), isHeater());
+        ThermModule.syncStates(ip, isStatus(), isHeater());
     }
 
     public String getName() {

@@ -19,20 +19,20 @@ package ru.futcamp.controller;
 
 import ru.futcamp.IAppModule;
 import ru.futcamp.IBuilder;
+import ru.futcamp.controller.events.EventManager;
+import ru.futcamp.controller.modules.hum.HumControl;
+import ru.futcamp.controller.modules.hum.HumTask;
 import ru.futcamp.controller.modules.light.LightControl;
-import ru.futcamp.controller.modules.light.LightTask;
-import ru.futcamp.controller.modules.light.db.LightDB;
 import ru.futcamp.controller.modules.meteo.MeteoDisplay;
 import ru.futcamp.controller.modules.meteo.MeteoStation;
 import ru.futcamp.controller.modules.meteo.MeteoTask;
-import ru.futcamp.controller.modules.meteo.db.MeteoDB;
+import ru.futcamp.controller.modules.monitor.Monitor;
+import ru.futcamp.controller.modules.monitor.MonitorTask;
 import ru.futcamp.controller.modules.secure.ManInHome;
 import ru.futcamp.controller.modules.secure.SecureTask;
 import ru.futcamp.controller.modules.secure.Security;
-import ru.futcamp.controller.modules.secure.db.SecureDB;
 import ru.futcamp.controller.modules.therm.ThermControl;
 import ru.futcamp.controller.modules.therm.ThermTask;
-import ru.futcamp.controller.modules.therm.db.ThermDB;
 import ru.futcamp.controller.modules.vision.Vision;
 import ru.futcamp.controller.modules.vision.VisionTask;
 
@@ -43,8 +43,8 @@ public class ControllerBuilder implements IBuilder {
      * @return Module
      */
     public IAppModule makeModule(String name, IAppModule ...dep) {
-        if (name.equals("meteodb")) {
-            return new MeteoDB(name, dep);
+        if (name.equals("evmngr")) {
+            return new EventManager(name, dep);
         } else if (name.equals("meteolcd")) {
             return new MeteoDisplay(name, dep);
         } else if (name.equals("meteo")) {
@@ -55,6 +55,10 @@ public class ControllerBuilder implements IBuilder {
             return new ThermControl(name, dep);
         } else if (name.equals("thermtsk")) {
             return new ThermTask(name, dep);
+        } else if (name.equals("hum")) {
+            return new HumControl(name, dep);
+        } else if (name.equals("humtsk")) {
+            return new HumTask(name, dep);
         } else if (name.equals("secure")) {
             return new Security(name, dep);
         } else if (name.equals("mih")) {
@@ -65,12 +69,14 @@ public class ControllerBuilder implements IBuilder {
             return new LightControl(name, dep);
         } else if (name.equals("ctrl")) {
             return new Controller(name, dep);
-        } else if (name.equals("lighttsk")) {
-            return new LightTask(name, dep);
         } else if (name.equals("vision")) {
             return new Vision(name, dep);
         } else if (name.equals("vistask")) {
             return new VisionTask(name, dep);
+        } else if (name.equals("monitor")) {
+            return new Monitor(name, dep);
+        } else if (name.equals("montsk")) {
+            return new MonitorTask(name, dep);
         }
         return null;
     }

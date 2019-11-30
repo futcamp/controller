@@ -18,6 +18,7 @@
 package ru.futcamp.controller.modules.secure;
 
 import ru.futcamp.controller.ActMgmt;
+import ru.futcamp.controller.events.Events;
 import ru.futcamp.controller.TimeMgmt;
 
 public interface IMainInHome {
@@ -26,5 +27,5 @@ public interface IMainInHome {
     void switchStatus() throws Exception;
     void changeTime(TimeMgmt time, ActMgmt action) throws Exception;
     MIHInfo getMIHInfo();
-    void update();
+    void getUpdate();
 }

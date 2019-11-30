@@ -24,6 +24,8 @@ public enum SettingsType {
     SECURE_SET,
     CTRL_SET,
     THERM_SET,
+    HUM_SET,
     LIGHT_SET,
-    VISION_SET
+    VISION_SET,
+    MONITOR_SET
 }

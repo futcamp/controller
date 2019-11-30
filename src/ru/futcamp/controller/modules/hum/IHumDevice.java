@@ -15,8 +15,22 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.net;
+package ru.futcamp.controller.modules.hum;
 
-public interface INotifier {
-    void sendNotify(String message) throws Exception;
+public interface IHumDevice {
+    String getName();
+    void setName(String name);
+    String getAlias();
+    void setAlias(String alias);
+    String getIp();
+    void setIp(String ip);
+    String getSensor();
+    void setSensor(String sensor);
+    void syncStates() throws Exception;
+    boolean isStatus();
+    void setStatus(boolean status);
+    boolean isHeater();
+    void setHeater(boolean heater);
+    int getThreshold();
+    void setThreshold(int threshold);
 }

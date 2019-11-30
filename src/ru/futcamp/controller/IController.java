@@ -17,6 +17,8 @@
 
 package ru.futcamp.controller;
 
+import ru.futcamp.controller.events.Events;
+import ru.futcamp.controller.modules.hum.HumInfo;
 import ru.futcamp.controller.modules.light.LightInfo;
 import ru.futcamp.controller.modules.meteo.MeteoInfo;
 import ru.futcamp.controller.modules.secure.MIHInfo;
@@ -29,7 +31,7 @@ public interface IController {
     boolean startModules();
 
     List<MeteoInfo> getMeteoInfo();
-    MeteoInfo getMeteoInfo(String alias);
+    MeteoInfo getMeteoInfo(String alias) throws Exception;
     List<MeteoInfo> getMeteoInfoByDate(String alias, String date) throws Exception;
 
     List<ThermInfo> getThermInfo();
@@ -42,7 +44,6 @@ public interface IController {
     void changeMIHTime(TimeMgmt time, ActMgmt action) throws Exception;
     SecureInfo getSecureInfo();
     void switchSecureStatus() throws Exception;
-    void newSecureAction(String ip, int chan);
 
     void switchLightStatus(String alias) throws Exception;
     LightInfo getLightInfo(String alias) throws Exception;
@@ -53,4 +54,11 @@ public interface IController {
 
     void getVisionPhoto(String alias, String fileName) throws Exception;
     void getVisionPhoto(String alias, String fileName, boolean isLight) throws Exception;
+
+    void switchHumStatus(String alias) throws Exception;
+    List<HumInfo> getHumInfo();
+    HumInfo getHumInfo(String alias) throws Exception;
+    void changeHumThreshold(String alias, ActMgmt action) throws Exception;
+
+    void genEvent(Events ev, String mod, String ip, int chan) throws Exception;
 }

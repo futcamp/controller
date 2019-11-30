@@ -39,9 +39,7 @@ public class MeteoDisplay implements IMeteoDisplay, IAppModule {
      * @throws Exception If fail to update data
      */
     public void updateData(String ip, int id, int value, String type) throws Exception {
-        MeteoModule hdk = new MeteoModule(ip, id, value, type);
-
-        hdk.updateMeteoLcd();
+        MeteoModule.updateMeteoLcd(ip, id, value, type);
     }
 
     /**
@@ -50,9 +48,7 @@ public class MeteoDisplay implements IMeteoDisplay, IAppModule {
      * @throws Exception If fail to show data
      */
     public void showData(String ip) throws Exception {
-        MeteoModule hdk = new MeteoModule(ip);
-
-        hdk.displayMeteoLcd();
+        MeteoModule.displayMeteoLcd(ip);
     }
 
     public String getModName() {

@@ -23,21 +23,31 @@ import ru.futcamp.net.web.HttpClient;
  * Therm control communication
  */
 public class ThermModule {
-    private String ip;
-
-    public ThermModule(String ip) {
-        this.ip = ip;
-    }
+    private static final int TIMEOUT = 4000;
 
     /**
      * Sync states with device
+     * @param ip Address of device
      * @param status Therm control status
      * @param heater Heater state
      * @throws Exception If fail to sync with device
      */
-    public void syncStates(boolean status, boolean heater) throws Exception {
-        HttpClient client = new HttpClient("http://" + ip + "/therm?status=" + status +
-                                            "&heater=" + heater);
-        client.getRequest(2000);
+    public static void syncStates(String ip, boolean status, boolean heater) throws Exception {
+        synchronized (ThermModule.class) {
+            HttpClient client = new HttpClient("http://" + ip + "/therm?status=" + status + "&heater=" + heater);
+            client.getRequest(TIMEOUT);
+        }
+    }
+
+    /**
+     * Check device status
+     * @param ip Address of device
+     * @throws Exception If fail to get status
+     */
+    public static void checkStatus(String ip) throws Exception {
+        synchronized (ThermModule.class) {
+            HttpClient client = new HttpClient("http://" + ip + "/");
+            client.getRequest(TIMEOUT);
+        }
     }
 }

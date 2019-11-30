@@ -27,4 +27,6 @@ public interface ISecureDevice {
     String getType();
     boolean isStatus();
     void setStatus(boolean statue);
+    String getCamera();
+    boolean isWatch();
 }

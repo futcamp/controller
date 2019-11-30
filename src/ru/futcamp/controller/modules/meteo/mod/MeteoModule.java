@@ -24,59 +24,64 @@ import ru.futcamp.net.web.HttpClient;
  * Meteo Hardware Communication
  */
 public class MeteoModule {
-    private String ip;
-    private int channel;
-    private String type;
-    private int id;
-    private int value;
-
-    public MeteoModule(String ip, String type, int chan) {
-        this.ip = ip;
-        this.channel = chan;
-        this.type = type;
-    }
-
-    public MeteoModule(String ip, int id, int value, String type) {
-        this.ip = ip;
-        this.id = id;
-        this.value = value;
-        this.type = type;
-    }
-
-    public MeteoModule(String ip) {
-        this.ip = ip;
-    }
+    private static final int TIMEOUT = 4000;
 
     /**
-     * Get meteo data from device
+     * Get meteo data from sensor device
+     * @param ip Address of device
+     * @param channel Channel of device
+     * @param type Type of sensor
      * @return Meteo data
      * @throws Exception If fail to get data
      */
-    public MeteoModuleData getMeteoData() throws Exception {
+    public static MeteoModuleData getMeteoData(String ip, String type, int channel) throws Exception {
         MeteoModuleData data;
 
-        HttpClient client = new HttpClient("http://" + ip + "/meteo?type=" + type + "&chan=" + channel);
-        String response = client.getRequest(4000);
-        data = JSON.parseObject(response, MeteoModuleData.class);
+        synchronized (MeteoModule.class) {
+            HttpClient client = new HttpClient("http://" + ip + "/meteo?type=" + type + "&chan=" + channel);
+            String response = client.getRequest(TIMEOUT);
+            data = JSON.parseObject(response, MeteoModuleData.class);
+        }
 
         return data;
     }
 
     /**
-     * Update meteo data on lcd module
+     * Update meteo data in LCD buffer
+     * @param ip Address of device
+     * @param type Type of device
+     * @param id Number of sensor on screen
+     * @param value Meteo value
      * @throws Exception If fail to update data
      */
-    public void updateMeteoLcd() throws Exception {
-        HttpClient client = new HttpClient("http://" + ip + "/update?type=" + type + "&id=" + id + "&value=" + value);
-        client.getRequest(4000);
+    public static void updateMeteoLcd(String ip, int id, int value, String type) throws Exception {
+        synchronized (MeteoModule.class) {
+            HttpClient client = new HttpClient("http://" + ip + "/update?type=" + type + "&id=" + id + "&value=" + value);
+            client.getRequest(TIMEOUT);
+        }
     }
 
     /**
      * Show data on screen
+     * @param ip Address of device
      * @throws Exception If fail to show data
      */
-    public void displayMeteoLcd() throws Exception {
-        HttpClient client = new HttpClient("http://" + ip + "/display");
-        client.getRequest(4000);
+    public static void displayMeteoLcd(String ip) throws Exception {
+        synchronized (MeteoModule.class) {
+            HttpClient client = new HttpClient("http://" + ip + "/display");
+            client.getRequest(TIMEOUT);
+        }
+    }
+
+    /**
+     * Check device status
+     * @param ip Address of device
+     * @throws Exception If fail to get status
+     */
+    public static void checkStatus(String ip) throws Exception {
+        synchronized (MeteoModule.class) {
+            HttpClient client = new HttpClient("http://" + ip + "/");
+            client.getRequest(TIMEOUT);
+        }
     }
 }

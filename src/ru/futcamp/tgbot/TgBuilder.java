@@ -53,6 +53,10 @@ public class TgBuilder implements IBuilder {
             return new FcBotApi(name, dep);
         } else if (name.equals("tgbot")) {
             return new TelegramBot(name, dep);
+        } else if (name.equals("humm")) {
+            return new HumMenu(name, dep);
+        } else if (name.equals("humcm")) {
+            return new HumCtrlMenu(name, dep);
         } else {
             return null;
         }
