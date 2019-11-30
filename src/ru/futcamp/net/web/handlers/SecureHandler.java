@@ -17,18 +17,18 @@
 
 package ru.futcamp.net.web.handlers;
 
+import com.alibaba.fastjson.JSON;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import ru.futcamp.IAppModule;
+import ru.futcamp.controller.events.Events;
 import ru.futcamp.controller.IController;
 import ru.futcamp.net.web.HttpResponse;
+import ru.futcamp.net.web.handlers.data.SecureData;
 import ru.futcamp.utils.log.ILogger;
 
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 public class SecureHandler implements HttpHandler, IAppModule {
     private ILogger log;
@@ -44,29 +44,35 @@ public class SecureHandler implements HttpHandler, IAppModule {
 
     @Override
     public void handle(HttpExchange ex) {
-        int channel = 0;
+        String line;
+        StringBuilder inBody = new StringBuilder();
         HttpResponse resp = new HttpResponse("security", ex);
         String inIP = ex.getRemoteAddress().getAddress().toString().split("/")[1];
 
         try {
-            List<NameValuePair> params = URLEncodedUtils.parse(new URI(ex.getRequestURI().toString()), Charset.forName("UTF-8"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(ex.getRequestBody()));
+            while ((line = reader.readLine()) != null) {
+                inBody.append(line);
+            }
+            SecureData data = JSON.parseObject(inBody.toString(), SecureData.class);
 
-            for (NameValuePair param : params) {
-                if (param.getName().equals("chan")) {
-                    channel = Integer.parseInt(param.getValue());
-                }
+            switch (data.getEvent()) {
+                case "open":
+                    ctrl.genEvent(Events.SECURE_OPEN_EVENT, "secure", inIP, data.getChannel());
+                    break;
+
+                case "sync":
+                    ctrl.genEvent(Events.SYNC_EVENT, "secure", inIP, 0);
+                    break;
             }
         } catch (Exception e) {
-            log.error("Fail to parse secure request: " + e.getMessage(), "SECUREHDL");
+            log.error("Fail to process secure event: " + e.getMessage(), "SECUREHDL");
             try {
                 resp.simpleResult(false);
             } catch (Exception exc) {
                 log.error("Fail to send secure response: " + exc.getMessage(), "SECUREHDL");
             }
-            return;
         }
-
-        ctrl.newSecureAction(inIP, channel);
 
         try {
             resp.simpleResult(true);

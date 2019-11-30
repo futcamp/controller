@@ -28,6 +28,7 @@ import ru.futcamp.controller.IController;
 import ru.futcamp.controller.modules.secure.ISecureDevice;
 import ru.futcamp.controller.modules.secure.SecureInfo;
 import ru.futcamp.controller.modules.secure.SecureModInfo;
+import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.log.ILogger;
 
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import java.util.List;
 public class SecureMenu implements IMenu, IAppModule {
     private IController ctrl;
     private ILogger log;
+    private IConfigs cfg;
 
     private String modName;
 
@@ -47,6 +49,7 @@ public class SecureMenu implements IMenu, IAppModule {
         modName = name;
         this.ctrl = (IController) dep[0];
         this.log = (ILogger) dep[1];
+        this.cfg = (IConfigs) dep[2];
     }
 
     /**
@@ -61,7 +64,7 @@ public class SecureMenu implements IMenu, IAppModule {
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
         SecureInfo info = ctrl.getSecureInfo();
 
-        StringBuilder txt = new StringBuilder("Состояние\n\n");
+        StringBuilder txt = new StringBuilder("<b>Состояние</b>\n");
 
         txt.append("Сигнализация: ");
         if (info.isStatus())
@@ -79,7 +82,7 @@ public class SecureMenu implements IMenu, IAppModule {
         msg.enableHtml(true);
         bot.execute(msg);
 
-        txt = new StringBuilder("Датчики\n\n");
+        txt = new StringBuilder("<b>Датчики</b>\n");
         for (SecureModInfo modInf : info.getModules()) {
             txt.append(modInf.getAlias()).append(": <b>").append(stateToStr(modInf.isState())).append("</b>\n");
         }
@@ -109,14 +112,8 @@ public class SecureMenu implements IMenu, IAppModule {
      * @param upd Telegram bot update
      */
     private void startAction(Update upd) {
-        if (upd.getMessage().getText().equals("Включить")) {
-            try {
-                ctrl.switchSecureStatus();
-            } catch (Exception e) {
-                log.error("Fail to switch secure state: " + e.getMessage(), "SECUREMENU");
-            }
-        }
-        if (upd.getMessage().getText().equals("Отключить")) {
+        String inMsg = upd.getMessage().getText();
+        if (inMsg.equals("Включить") || inMsg.equals("Отключить")) {
             try {
                 ctrl.switchSecureStatus();
             } catch (Exception e) {
@@ -142,28 +139,23 @@ public class SecureMenu implements IMenu, IAppModule {
         /*
          * Add buttons to menu
          */
-        List<String> ctrlButtons = new LinkedList<>();
-        if (info.isStatus()) {
-            ctrlButtons.add("Отключить");
-        } else {
-            ctrlButtons.add("Включить");
+        for (String[] row : cfg.getTelegramCfg().getMenu().getSecurity()) {
+            List<String> group = new LinkedList<>();
+
+            for (String btn : row) {
+                if (btn.equals("%status%")) {
+                    if (info.isStatus()) {
+                        group.add("Отключить");
+                    } else {
+                        group.add("Включить");
+                    }
+                } else {
+                    group.add(btn);
+                }
+            }
+
+            addButtonsRow(group, keyboard);
         }
-        addButtonsRow(ctrlButtons, keyboard);
-
-        /*
-         * Add buttons to menu
-         */
-        List<String> mihButtons = new LinkedList<>();
-        mihButtons.add("Человек в Доме");
-        addButtonsRow(mihButtons, keyboard);
-
-        /*
-         * Add back button to menu
-         */
-        List<String> backButton = new LinkedList<>();
-        backButton.add("Обновить");
-        backButton.add("Назад");
-        addButtonsRow(backButton, keyboard);
 
         replyKeyboardMarkup.setKeyboard(keyboard);
     }

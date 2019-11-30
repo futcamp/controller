@@ -45,8 +45,7 @@ public class SecureTask extends TimerTask implements Runnable, IAppModule {
             return;
         counter = 0;
 
-        mih.update();
-        secure.update();
+        mih.getUpdate();
     }
 
     public String getModName() {

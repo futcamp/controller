@@ -17,7 +17,7 @@
 
 package ru.futcamp.controller.modules.light.db;
 
-import db.RedisClient;
+import ru.futcamp.db.RedisClient;
 
 /**
  * Database management class

@@ -23,30 +23,44 @@ import ru.futcamp.net.web.HttpClient;
  * Security communication
  */
 public class SecureModule {
-    private String ip;
-
-    public SecureModule(String ip) {
-        this.ip = ip;
-    }
+    private static final int TIMEOUT = 4000;
 
     /**
      * Send secure alarm update state to device
+     * @param ip Address of device
      * @param state Alarm state
      * @throws Exception If fail to send request
      */
-    public void setSecureAlarm(boolean state) throws Exception {
-        HttpClient client = new HttpClient("http://" + ip + "/alarm?state=" + state);
-        client.getRequest(2000);
+    public static void setSecureAlarm(String ip, boolean state) throws Exception {
+        synchronized (SecureModule.class) {
+            HttpClient client = new HttpClient("http://" + ip + "/alarm?state=" + state);
+            client.getRequest(TIMEOUT);
+        }
     }
 
     /**
      * Sync states with device
+     * @param ip Address of device
      * @param radio Radio state
      * @param lamp Lamp state
      * @throws Exception If fail to send states
      */
-    public void setMIHStates(boolean radio, boolean lamp) throws Exception {
-        HttpClient client = new HttpClient("http://" + ip + "/mih?radio=" + radio + "&lamp=" + lamp);
-        client.getRequest(2000);
+    public static void setMIHStates(String ip, boolean radio, boolean lamp) throws Exception {
+        synchronized (SecureModule.class) {
+            HttpClient client = new HttpClient("http://" + ip + "/mih?radio=" + radio + "&lamp=" + lamp);
+            client.getRequest(TIMEOUT);
+        }
+    }
+
+    /**
+     * Check device status
+     * @param ip Address of device
+     * @throws Exception If fail to get status
+     */
+    public static void checkStatus(String ip) throws Exception {
+        synchronized (SecureModule.class) {
+            HttpClient client = new HttpClient("http://" + ip + "/");
+            client.getRequest(TIMEOUT);
+        }
     }
 }

@@ -19,14 +19,14 @@ package ru.futcamp.controller.modules.therm;
 
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.ActMgmt;
+import ru.futcamp.controller.events.EventListener;
+import ru.futcamp.controller.events.Events;
 import ru.futcamp.controller.modules.meteo.IMeteoStation;
-import ru.futcamp.controller.modules.secure.ISecureDevice;
 import ru.futcamp.controller.modules.therm.db.IThermDB;
 import ru.futcamp.controller.modules.therm.db.ThermDB;
 import ru.futcamp.controller.modules.therm.db.ThermDBData;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.configs.settings.RedisSettings;
-import ru.futcamp.utils.configs.settings.secure.SecureSettings;
 import ru.futcamp.utils.log.ILogger;
 
 import java.sql.SQLException;
@@ -38,7 +38,7 @@ import java.util.Map;
 /**
  * Therm control class
  */
-public class ThermControl implements IThermControl, IAppModule {
+public class ThermControl implements IThermControl, EventListener, IAppModule {
     private ILogger log;
     private IMeteoStation meteo;
     private IConfigs cfg;
@@ -55,7 +55,7 @@ public class ThermControl implements IThermControl, IAppModule {
     }
 
     /**
-     * Save device state to db
+     * Save device state to ru.futcamp.db
      */
     private void saveStates(IThermDevice device) throws Exception {
         RedisSettings set = cfg.getThermCfg().getDb();
@@ -83,7 +83,7 @@ public class ThermControl implements IThermControl, IAppModule {
     }
 
     /**
-     * Load states from db
+     * Load states from ru.futcamp.db
      * @throws Exception If fail to load states
      */
     public void loadStates() throws Exception {
@@ -98,8 +98,10 @@ public class ThermControl implements IThermControl, IAppModule {
 
                 device.setStatus(data.isStatus());
                 device.setThreshold(data.getThreshold());
-            }
 
+                log.info("Loaded therm status from DB for device \"" + device.getName() + "\" is \"" + device.isStatus() + "\"", "THERM");
+                log.info("Loaded therm threshold from DB for device \"" + device.getName() + "\" is \"" + device.getThreshold() + "\"", "THERM");
+            }
         } catch (SQLException e) {
             throw new Exception(e.getMessage());
         } finally {
@@ -135,8 +137,26 @@ public class ThermControl implements IThermControl, IAppModule {
      */
     public void switchStatus(String alias) throws Exception {
         IThermDevice device = devices.get(alias);
-        device.setStatus(!device.isStatus());
+
+        boolean status = device.isStatus();
+        device.setStatus(!status);
         saveStates(device);
+
+        if (device.isStatus()) {
+            log.info("Set therm status \"" + device.getName() + "\" to \"true\"", "THERM");
+        } else {
+            device.setHeater(false);
+            log.info("Set therm status \"" + device.getName() + "\" to \"false\"", "THERM");
+        }
+
+        /*
+         * Syncing states with device
+         */
+        try {
+            device.syncStates();
+        } catch (Exception e) {
+            log.error("Fail to sync therm device " + device.getName(), "THERM");
+        }
     }
 
     /**
@@ -149,7 +169,7 @@ public class ThermControl implements IThermControl, IAppModule {
 
         IThermDevice device = devices.get(alias);
         if (device == null) {
-            throw new Exception("Device \""+alias+"\" not found");
+            throw new Exception("Therm device \""+alias+"\" not found");
         }
 
         info.setStatus(device.isStatus());
@@ -188,35 +208,88 @@ public class ThermControl implements IThermControl, IAppModule {
     /**
      * Update states
      */
-    public void update() {
+    public void getUpdate() {
+        int curTemp = 0;
+
         for(Map.Entry<String, IThermDevice> entry : devices.entrySet()) {
             IThermDevice device = entry.getValue();
 
             if (device.isStatus()) {
-                int curTemp = meteo.getMeteoInfo(device.getSensor()).getTemp();
+                try {
+                    curTemp = meteo.getMeteoInfo(device.getSensor()).getTemp();
+                } catch (Exception e) {
+                    log.error("Fail to get meteo info: " + e.getMessage(), "THERM");
+                    continue;
+                }
 
                 if (curTemp < device.getThreshold()) {
-                    device.setHeater(true);
+                    if (!device.isHeater()) {
+                        log.info("Set heater status \"" + device.getName() + "\" to \"true\"", "THERM");
+                        device.setHeater(true);
+                        /*
+                         * Syncing states with device
+                         */
+                        try {
+                            device.syncStates();
+                        } catch (Exception e) {
+                            log.error("Fail to sync therm device " + device.getName(), "THERM");
+                        }
+                    }
                 }
                 if (curTemp > device.getThreshold()) {
-                    device.setHeater(false);
+                    if (device.isHeater()) {
+                        log.info("Set heater status \"" + device.getName() + "\" to \"false\"", "THERM");
+                        device.setHeater(false);
+                        /*
+                         * Syncing states with device
+                         */
+                        try {
+                            device.syncStates();
+                        } catch (Exception e) {
+                            log.error("Fail to sync therm device " + device.getName(), "THERM");
+                        }
+                    }
                 }
-            } else {
-                device.setHeater(false);
-            }
-
-            /*
-             * Syncing states with device
-             */
-            try {
-                device.syncStates();
-            } catch (Exception e) {
-                log.error("Fail to sync therm device " + device.getName(), "THERMCTRL");
             }
         }
     }
 
     public String getModName() {
         return modName;
+    }
+
+    @Override
+    public void getEvent(Events event, String module, String ip, int channel) {
+        if (module.equals(modName)) {
+            switch (event) {
+                case SYNC_EVENT:
+                    for (Map.Entry<String, IThermDevice> entry : devices.entrySet()) {
+                        IThermDevice device = entry.getValue();
+                        if (device.getIp().equals(ip)) {
+                            try {
+                                device.syncStates();
+                            } catch (Exception e) {
+                                log.error("Fail to first start sync of therm device \"" + device.getName() + "\"", "THERM");
+                            }
+                            return;
+                        }
+                    }
+                    break;
+
+                case SWITCH_STATUS_EVENT:
+                    for (Map.Entry<String, IThermDevice> entry : devices.entrySet()) {
+                        IThermDevice device = entry.getValue();
+                        if (device.getIp().equals(ip)) {
+                            try {
+                                switchStatus(device.getAlias());
+                            } catch (Exception e) {
+                                log.error("Fail to switch status of therm device \"" + device.getName() + "\"", "THERM");
+                            }
+                            return;
+                        }
+                    }
+                    break;
+            }
+        }
     }
 }

@@ -19,6 +19,8 @@ package ru.futcamp.controller.modules.secure;
 
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.ActMgmt;
+import ru.futcamp.controller.events.EventListener;
+import ru.futcamp.controller.events.Events;
 import ru.futcamp.controller.TimeMgmt;
 import ru.futcamp.controller.modules.light.ILightControl;
 import ru.futcamp.controller.modules.secure.db.ISecureDB;
@@ -34,7 +36,7 @@ import java.sql.SQLException;
 /**
  * Main In Home security system
  */
-public class ManInHome extends MIHData implements IMainInHome, IAppModule {
+public class ManInHome extends MIHData implements IMainInHome, EventListener, IAppModule {
     private ILogger log;
     private ILightControl light;
     private IConfigs cfg;
@@ -52,15 +54,21 @@ public class ManInHome extends MIHData implements IMainInHome, IAppModule {
      * Sync states with device
      */
     public void syncStates() throws Exception {
-        SecureModule mod = new SecureModule(cfg.getSecureCfg().getMih());
-        mod.setMIHStates(isRadio(), isLamp());
+        SecureModule.setMIHStates(cfg.getSecureCfg().getMih(), isRadio(), isLamp());
     }
 
     public void switchStatus() throws Exception {
         setStatus(!isStatus());
 
+        if (!isStatus()) {
+            setRadio(false);
+            setLamp(false);
+        }
+
+        log.info("Switch MIH status to \"" + isStatus() + "\"", "MIH");
+
         /*
-         * Save time to db
+         * Save time to ru.futcamp.db
          */
         RedisSettings set = cfg.getSecureCfg().getDb();
         ISecureDB db = null;
@@ -73,7 +81,17 @@ public class ManInHome extends MIHData implements IMainInHome, IAppModule {
             db.close();
         }
 
-        update();
+        setLamp(false);
+        setRadio(false);
+        for (String lamp : cfg.getSecureCfg().getLamps()) {
+            try {
+                light.setLightStatus(lamp, false);
+            } catch (Exception e) {
+                log.error("Fail to set light status for lamp \"" + lamp + "\"", "MIH");
+            }
+        }
+
+        syncStates();
     }
 
     /**
@@ -112,7 +130,7 @@ public class ManInHome extends MIHData implements IMainInHome, IAppModule {
         }
 
         /*
-         * Save time to db
+         * Save time to ru.futcamp.db
          */
         RedisSettings set = cfg.getSecureCfg().getDb();
         ISecureDB db = null;
@@ -125,8 +143,6 @@ public class ManInHome extends MIHData implements IMainInHome, IAppModule {
         } finally {
             db.close();
         }
-
-        update();
     }
 
     /**
@@ -146,7 +162,7 @@ public class ManInHome extends MIHData implements IMainInHome, IAppModule {
     }
 
     /**
-     * Loading MIH data from db
+     * Loading MIH data from ru.futcamp.db
      * @throws Exception If fail to load
      */
     public void loadDataFromDb() throws Exception {
@@ -167,7 +183,7 @@ public class ManInHome extends MIHData implements IMainInHome, IAppModule {
     /**
      * Update states
      */
-    public void update() {
+    public void getUpdate() {
         int curTime = TimeControl.getCurHour();
 
         if (isStatus()) {
@@ -184,53 +200,59 @@ public class ManInHome extends MIHData implements IMainInHome, IAppModule {
                     }
                 }
 
-                setLamp(true);
-                /*
-                 * Switch on radio
-                 */
-                if (curTime % 2 == 0) {
-                    setRadio(false);
-                } else {
+                if (!isLamp() || !isRadio()) {
+                    setLamp(true);
                     setRadio(true);
+
+                    /*
+                     * Sync states with device
+                     */
+                    try {
+                        syncStates();
+                    } catch (Exception e) {
+                        log.error("Fail to sync MIH states: " + e.getMessage(), "SECURE");
+                    }
                 }
             } else {
-                /*
-                 * Switch off street lamps
-                 */
-
-                setLamp(false);
-                setRadio(false);
-                for (String lamp : cfg.getSecureCfg().getLamps()) {
+                if (isRadio() || isLamp()) {
+                    setLamp(false);
+                    setRadio(false);
+                    for (String lamp : cfg.getSecureCfg().getLamps()) {
+                        try {
+                            light.setLightStatus(lamp, false);
+                        } catch (Exception e) {
+                            log.error("Fail to set light status for lamp \"" + lamp + "\"", "MIH");
+                        }
+                    }
+                    /*
+                     * Sync states with device
+                     */
                     try {
-                        light.setLightStatus(lamp, false);
+                        syncStates();
                     } catch (Exception e) {
-                        log.error("Fail to set light status for lamp \"" + lamp + "\"", "MIH");
+                        log.error("Fail to sync MIH states: " + e.getMessage(), "SECURE");
                     }
                 }
             }
-        } else {
-            setLamp(false);
-            setRadio(false);
-            for (String lamp : cfg.getSecureCfg().getLamps()) {
-                try {
-                    light.setLightStatus(lamp, false);
-                } catch (Exception e) {
-                    log.error("Fail to set light status for lamp \"" + lamp + "\"", "MIH");
-                }
-            }
-        }
-
-        /*
-         * Sync states with device
-         */
-        try {
-            syncStates();
-        } catch (Exception e) {
-            log.error("Fail to sync MIH states: " + e.getMessage(), "SECURE");
         }
     }
 
     public String getModName() {
         return modName;
+    }
+
+    @Override
+    public void getEvent(Events event, String module, String ip, int channel) {
+        if (module.equals(modName)) {
+            switch (event) {
+                case SYNC_EVENT:
+                    try {
+                        syncStates();
+                    } catch (Exception e) {
+                        log.error("Fail to first start sync of MIH device", "MIH");
+                    }
+                    break;
+            }
+        }
     }
 }

@@ -32,7 +32,7 @@ public class FutureCamp implements IFutureCamp {
      * Make builder object
      * @return Builder
      */
-    public static IFutureCamp create() {
+    static IFutureCamp create() {
         return new FutureCamp();
     }
 
@@ -72,20 +72,23 @@ public class FutureCamp implements IFutureCamp {
      * @param builder Controller fabric
      */
     private void buildController(IBuilder builder) {
-        addModule(builder.makeModule("meteodb"));
+        addModule(builder.makeModule("evmngr"));
         addModule(builder.makeModule("meteolcd"));
-        addModule(builder.makeModule("meteo", getMod("meteodb"), getMod("log")));
+        addModule(builder.makeModule("meteo", getMod("log")));
         addModule(builder.makeModule("meteotsk", getMod("log"), getMod("meteo"), getMod("cfg"), getMod("meteolcd")));
         addModule(builder.makeModule("therm", getMod("log"), getMod("meteo"), getMod("cfg")));
         addModule(builder.makeModule("thermtsk", getMod("therm"), getMod("cfg")));
+        addModule(builder.makeModule("hum", getMod("log"), getMod("meteo"), getMod("cfg")));
+        addModule(builder.makeModule("humtsk", getMod("hum"), getMod("cfg")));
         addModule(builder.makeModule("light", getMod("cfg"), getMod("log")));
-        addModule(builder.makeModule("lighttsk", getMod("light"), getMod("cfg")));
         addModule(builder.makeModule("vision", getMod("light"), getMod("log")));
         addModule(builder.makeModule("vistask", getMod("vision"), getMod("cfg")));
-        addModule(builder.makeModule("secure", getMod("log"), getMod("ntf"), getMod("cfg"), getMod("light")));
+        addModule(builder.makeModule("secure", getMod("log"), getMod("ntf"), getMod("cfg"), getMod("light"), getMod("vision")));
         addModule(builder.makeModule("mih", getMod("log"), getMod("light"), getMod("cfg")));
         addModule(builder.makeModule("securetsk", getMod("mih"), getMod("cfg"), getMod("secure")));
-        addModule(builder.makeModule("ctrl", getMod("log"), getMod("cfg"), getMod("meteo"), getMod("meteotsk"), getMod("secure"), getMod("securetsk"), getMod("therm"), getMod("thermtsk"), getMod("mih"), getMod("light"), getMod("lighttsk"), getMod("vision"), getMod("vistask")));
+        addModule(builder.makeModule("monitor", getMod("log"), getMod("ntf"), getMod("cfg")));
+        addModule(builder.makeModule("montsk", getMod("monitor"), getMod("cfg")));
+        addModule(builder.makeModule("ctrl", getMod("log"), getMod("cfg"), getMod("meteo"), getMod("meteotsk"), getMod("secure"), getMod("securetsk"), getMod("therm"), getMod("thermtsk"), getMod("mih"), getMod("light"), getMod("vision"), getMod("vistask"), getMod("monitor"), getMod("montsk"), getMod("hum"), getMod("humtsk"), getMod("evmngr")));
     }
 
     /**
@@ -95,8 +98,12 @@ public class FutureCamp implements IFutureCamp {
     private void buildWeb(IBuilder builder) {
         addModule(builder.makeModule("websrv"));
         addModule(builder.makeModule("idxh"));
+        addModule(builder.makeModule("ligh", getMod("log"), getMod("ctrl")));
         addModule(builder.makeModule("sech", getMod("log"), getMod("ctrl")));
-        addModule(builder.makeModule("server", getMod("websrv"), getMod("idxh"), getMod("sech")));
+        addModule(builder.makeModule("mihh", getMod("log"), getMod("ctrl")));
+        addModule(builder.makeModule("thermh", getMod("log"), getMod("ctrl")));
+        addModule(builder.makeModule("humh", getMod("log"), getMod("ctrl")));
+        addModule(builder.makeModule("server", getMod("websrv"), getMod("idxh"), getMod("sech"), getMod("ligh"), getMod("mihh"), getMod("thermh"), getMod("humh")));
     }
 
     /**
@@ -107,15 +114,17 @@ public class FutureCamp implements IFutureCamp {
         addModule(builder.makeModule("mainm", getMod("cfg")));
         addModule(builder.makeModule("meteom", getMod("ctrl"), getMod("cfg")));
         addModule(builder.makeModule("camm", getMod("cfg"), getMod("ctrl"), getMod("log")));
-        addModule(builder.makeModule("securem", getMod("ctrl"), getMod("log")));
+        addModule(builder.makeModule("securem", getMod("ctrl"), getMod("log"), getMod("cfg")));
         addModule(builder.makeModule("meteosm", getMod("ctrl"), getMod("cfg"), getMod("log")));
         addModule(builder.makeModule("thermm", getMod("ctrl"), getMod("cfg")));
         addModule(builder.makeModule("thermcm", getMod("ctrl"), getMod("log"), getMod("cfg")));
+        addModule(builder.makeModule("humm", getMod("ctrl"), getMod("cfg")));
+        addModule(builder.makeModule("humcm", getMod("ctrl"), getMod("log"), getMod("cfg")));
         addModule(builder.makeModule("lightm", getMod("cfg")));
-        addModule(builder.makeModule("mihm", getMod("ctrl"), getMod("log")));
+        addModule(builder.makeModule("mihm", getMod("ctrl"), getMod("log"), getMod("cfg")));
         addModule(builder.makeModule("lightsm", getMod("cfg"), getMod("ctrl")));
         addModule(builder.makeModule("tgbotapi"));
-        addModule(builder.makeModule("tgbot", getMod("log"), getMod("cfg"), getMod("mainm"), getMod("meteom"), getMod("camm"), getMod("securem"), getMod("meteosm"), getMod("thermm"), getMod("thermcm"), getMod("mihm"), getMod("lightm"), getMod("lightsm")));
+        addModule(builder.makeModule("tgbot", getMod("log"), getMod("cfg"), getMod("mainm"), getMod("meteom"), getMod("camm"), getMod("securem"), getMod("meteosm"), getMod("thermm"), getMod("thermcm"), getMod("mihm"), getMod("lightm"), getMod("lightsm"), getMod("humm"), getMod("humcm")));
     }
 
     /**

@@ -17,6 +17,7 @@
 
 package ru.futcamp.controller.modules.vision;
 
+import com.sun.org.apache.bcel.internal.generic.RET;
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.modules.light.ILightControl;
 import ru.futcamp.controller.modules.light.LightInfo;
@@ -36,6 +37,8 @@ public class Vision implements IVision, IAppModule {
 
     private ILightControl light;
     private ILogger log;
+
+    private static int RETRIES = 3;
 
     public Vision(String name, IAppModule ...dep) {
         this.modName = name;
@@ -71,7 +74,7 @@ public class Vision implements IVision, IAppModule {
         List<Boolean> states = new LinkedList<>();
 
         if (device == null) {
-            throw new Exception("Device \"" + alias + "\" not found!");
+            throw new Exception("Cam device \"" + alias + "\" not found!");
         }
 
         if (isLight) {
@@ -120,10 +123,22 @@ public class Vision implements IVision, IAppModule {
         for (Map.Entry<String, ICamDevice> entry : devices.entrySet()) {
             ICamDevice device = entry.getValue();
             if (device.isWarm()) {
-                try {
-                    device.savePhoto("/tmp/warm.jpg");
-                } catch (Exception e) {
-                    log.error("Fail to wawrm camera \"" + device.getAlias() + "\": " + e.getMessage(), "VISION");
+                log.info("Starting warming up camera \"" + device.getName() + "\"", "VISION");
+
+                Exception ex = null;
+                for (int i = 0; i < RETRIES; i++) {
+                    try {
+                        device.savePhoto("/tmp/warm.jpg");
+                        break;
+                    } catch (Exception e) {
+                        ex = e;
+                        try {
+                            Thread.sleep(1000);
+                        } catch (Exception ignored) {}
+                    }
+                }
+                if (ex != null) {
+                    log.error("Fail to warm up camera \"" + device.getAlias() + "\": " + ex.getMessage(), "VISION");
                 }
             }
         }

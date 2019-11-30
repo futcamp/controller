@@ -18,7 +18,7 @@
 package ru.futcamp.controller.modules.therm.db;
 
 import com.alibaba.fastjson.JSON;
-import db.RedisClient;
+import ru.futcamp.db.RedisClient;
 
 /**
  * Database management class
@@ -45,7 +45,7 @@ public class ThermDB extends RedisClient implements IThermDB {
     }
 
     /**
-     * Load therm data from db
+     * Load therm data from ru.futcamp.db
      * @param name Name of device
      * @return Therm data
      */

@@ -28,13 +28,17 @@ public class LightDevice extends LightData implements ILightDevice {
     private String group;
     private String ip;
     private int channel;
+    private String switchIp;
+    private int switchChannel;
 
-    public LightDevice(String name, String alias, String group, String ip, int chan) {
+    public LightDevice(String name, String alias, String group, String ip, int chan, String swIP, int swChan) {
         this.name = name;
         this.alias = alias;
         this.ip = ip;
         this.channel = chan;
         this.group = group;
+        this.switchIp = swIP;
+        this.switchChannel = swChan;
     }
 
     /**
@@ -42,9 +46,7 @@ public class LightDevice extends LightData implements ILightDevice {
      * @throws Exception If fail to sync states
      */
     public void syncStates() throws Exception {
-        LightModule hdk = new LightModule(ip, channel);
-
-        hdk.syncStates(isStatus());
+        LightModule.syncStates(ip, channel, isStatus());
     }
 
     public String getIp() {
@@ -85,5 +87,13 @@ public class LightDevice extends LightData implements ILightDevice {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    public String getSwitchIP() {
+        return switchIp;
+    }
+
+    public int getSwitchChannel() {
+        return switchChannel;
     }
 }

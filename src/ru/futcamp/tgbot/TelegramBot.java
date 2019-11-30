@@ -48,6 +48,8 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot,
     private IMenu mihMenu;
     private IMenu lightMenu;
     private IMenu lightStMenu;
+    private IMenu humMenu;
+    private IMenu humCtrlMenu;
 
     private String key;
     private String login;
@@ -69,6 +71,8 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot,
         this.mihMenu = (IMenu) dep[9];
         this.lightMenu = (IMenu) dep[10];
         this.lightStMenu = (IMenu) dep[11];
+        this.humMenu = (IMenu) dep[12];
+        this.humCtrlMenu = (IMenu) dep[13];
     }
 
     /**
@@ -156,6 +160,14 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot,
                     lightStMenu.updateMessage(this, upd, menu);
                     break;
 
+                case HUM_MENU:
+                    humMenu.updateMessage(this, upd, menu);
+                    break;
+
+                case HUM_CTRL_MENU:
+                    humCtrlMenu.updateMessage(this, upd, menu);
+                    break;
+
                 default:
                     mainMenu.updateMessage(this, upd, menu);
                     break;
@@ -198,6 +210,10 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot,
             }
             if (msg.equals("Свет"))  {
                 level.get(user).setLevel(LIGHT_MENU);
+                return;
+            }
+            if (msg.equals("Влажность"))  {
+                level.get(user).setLevel(HUM_MENU);
                 return;
             }
         }
@@ -289,6 +305,26 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot,
         if (level.get(user).getLevel().equals(THERM_CTRL_MENU)) {
             if (msg.equals("Назад")) {
                 level.get(user).setLevel(THERM_MENU);
+                return;
+            }
+        }
+
+        /*
+         * Humidity Control level
+         */
+        if (level.get(user).getLevel().equals(HUM_MENU)) {
+            if (msg.equals("Назад")) {
+                level.get(user).setLevel(MAIN_MENU);
+                return;
+            }
+            if (!msg.equals("Обновить")) {
+                level.get(user).setLevel(HUM_CTRL_MENU);
+                return;
+            }
+        }
+        if (level.get(user).getLevel().equals(HUM_CTRL_MENU)) {
+            if (msg.equals("Назад")) {
+                level.get(user).setLevel(HUM_MENU);
                 return;
             }
         }

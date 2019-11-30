@@ -17,7 +17,7 @@
 
 package ru.futcamp;
 
-import ru.futcamp.net.Notifier;
+import ru.futcamp.net.notifier.Notifier;
 import ru.futcamp.utils.configs.Configs;
 import ru.futcamp.utils.log.Logger;
 

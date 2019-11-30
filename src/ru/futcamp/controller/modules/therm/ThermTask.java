@@ -18,10 +18,7 @@
 package ru.futcamp.controller.modules.therm;
 
 import ru.futcamp.IAppModule;
-import ru.futcamp.controller.modules.meteo.IMeteoStation;
-import ru.futcamp.controller.modules.therm.db.IThermDB;
 import ru.futcamp.utils.configs.IConfigs;
-import ru.futcamp.utils.log.ILogger;
 
 import java.util.TimerTask;
 
@@ -49,7 +46,7 @@ public class ThermTask extends TimerTask implements IAppModule {
             return;
         counter = 0;
 
-        therm.update();
+        therm.getUpdate();
     }
 
     public String getModName() {

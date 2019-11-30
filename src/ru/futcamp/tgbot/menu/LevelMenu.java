@@ -27,5 +27,7 @@ public enum LevelMenu {
     THERM_MENU,
     THERM_CTRL_MENU,
     LIGHT_MENU,
-    LIGHT_STREET_MENU
+    LIGHT_STREET_MENU,
+    HUM_MENU,
+    HUM_CTRL_MENU
 }

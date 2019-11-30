@@ -23,9 +23,8 @@ import java.util.List;
 
 public interface IMeteoStation {
     void addDevice(IMeteoDevice device);
-    void setDBFileName(String fileName);
     List<MeteoInfo> getMeteoInfo();
-    MeteoInfo getMeteoInfo(String alias);
+    MeteoInfo getMeteoInfo(String alias) throws Exception;
     List<MeteoInfo> getMeteoInfoByDate(String alias, String date) throws Exception;
     void update();
 }

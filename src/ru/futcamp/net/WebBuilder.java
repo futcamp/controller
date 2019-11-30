@@ -20,8 +20,7 @@ package ru.futcamp.net;
 import ru.futcamp.IAppModule;
 import ru.futcamp.IBuilder;
 import ru.futcamp.net.web.HttpServer;
-import ru.futcamp.net.web.handlers.IndexHandler;
-import ru.futcamp.net.web.handlers.SecureHandler;
+import ru.futcamp.net.web.handlers.*;
 import ru.futcamp.net.web.server.WebServer;
 
 public class WebBuilder implements IBuilder {
@@ -40,6 +39,14 @@ public class WebBuilder implements IBuilder {
             return new SecureHandler(name, dep);
         } else if (name.equals("server")) {
             return new HttpServer(name, dep);
+        } else if (name.equals("ligh")) {
+            return new LightHandler(name, dep);
+        } else if (name.equals("mihh")) {
+            return new MIHHandler(name, dep);
+        } else if (name.equals("humh")) {
+            return new HumHandler(name, dep);
+        } else if (name.equals("thermh")) {
+            return new ThermHandler(name, dep);
         } else {
             return null;
         }

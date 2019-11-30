@@ -18,7 +18,7 @@
 package ru.futcamp.controller.modules.meteo;
 
 import ru.futcamp.IAppModule;
-import ru.futcamp.controller.modules.meteo.db.IMeteoDB;
+import ru.futcamp.controller.modules.meteo.db.MeteoDB;
 import ru.futcamp.controller.modules.meteo.db.MeteoDBData;
 import ru.futcamp.utils.TimeControl;
 import ru.futcamp.utils.log.ILogger;
@@ -34,20 +34,17 @@ import java.util.Map;
  */
 public class MeteoStation implements IMeteoStation, IAppModule {
     private Map<String, IMeteoDevice> devices = new HashMap<>();
-
-    private IMeteoDB db;
-    private ILogger log;
-
     private String modName;
+
+    private ILogger log;
 
     public MeteoStation(String name, IAppModule ...dep) {
         this.modName = name;
-        this.db = (IMeteoDB) dep[0];
-        this.log = (ILogger) dep[1];
+        this.log = (ILogger) dep[0];
     }
 
     /**
-     * Save meteo data to db
+     * Save meteo data to ru.futcamp.db
      * @throws Exception If fail to save data
      */
     private void saveMeteoData(IMeteoDevice device) throws Exception {
@@ -58,40 +55,11 @@ public class MeteoStation implements IMeteoStation, IAppModule {
         data.setHour(TimeControl.getCurHour());
         data.setDate(TimeControl.getCurDate());
 
-        try {
-            db.connect();
-            int lastHour = Integer.parseInt(db.getLastTime(device.getName()));
-            int curHour = TimeControl.getCurHour();
-            if (curHour != lastHour) {
-                db.saveMeteoData(device.getName(), data);
-            }
-        } catch (SQLException e) {
-            throw new Exception(e.getMessage());
-        } finally {
-            db.close();
+        int lastHour = MeteoDB.getLastTime(device.getName());
+        int curHour = TimeControl.getCurHour();
+        if (curHour != lastHour) {
+            MeteoDB.saveMeteoData(device.getName(), data);
         }
-    }
-
-    /**
-     * Get meteo data from sensor by date
-     * @param device Meteo device
-     * @param date Date
-     * @return List of meteo data
-     * @throws Exception If fail to get data from db
-     */
-    private List<MeteoDBData> getDataByDate(IMeteoDevice device, String date) throws Exception {
-        List<MeteoDBData> data;
-
-        try {
-            db.connect();
-            data = db.getDataByDate(device.getName(), date);
-        } catch (SQLException e) {
-            throw new Exception(e.getMessage());
-        } finally {
-            db.close();
-        }
-
-        return data;
     }
 
     /**
@@ -99,10 +67,15 @@ public class MeteoStation implements IMeteoStation, IAppModule {
      * @param alias Alias of device
      * @return Info
      */
-    public MeteoInfo getMeteoInfo(String alias) {
+    public MeteoInfo getMeteoInfo(String alias) throws Exception {
         MeteoInfo info = new MeteoInfo();
 
         IMeteoDevice device = devices.get(alias);
+
+        if (device == null) {
+            throw new Exception("Meteo device \"" + alias + "\" not found");
+        }
+
         info.setHum(device.getHumidity());
         info.setPres(device.getPressure());
         info.setTemp(device.getTemp());
@@ -145,7 +118,7 @@ public class MeteoStation implements IMeteoStation, IAppModule {
         List<MeteoInfo> infoList = new LinkedList<>();
         IMeteoDevice device = devices.get(alias);
 
-        List<MeteoDBData> data = getDataByDate(device, date);
+        List<MeteoDBData> data = MeteoDB.getDataByDate(device.getName(), date);
         for (MeteoDBData datum : data) {
             MeteoInfo info = new MeteoInfo();
 
@@ -162,14 +135,6 @@ public class MeteoStation implements IMeteoStation, IAppModule {
     }
 
     /**
-     * Set database file name
-     * @param fileName Path to database
-     */
-    public void setDBFileName(String fileName) {
-        db.setFileName(fileName);
-    }
-
-    /**
      * Update meteo data from sensors
      */
     public void update() {
@@ -182,12 +147,12 @@ public class MeteoStation implements IMeteoStation, IAppModule {
             }
 
             /*
-             * Save meteo data to db
+             * Save meteo data to ru.futcamp.db
              */
             try {
                 saveMeteoData(device);
             } catch (Exception e) {
-                log.error("Fail to save meteo data to db: " + e.getMessage(), "METEO");
+                log.error("Fail to save meteo data to ru.futcamp.db: " + e.getMessage(), "METEO");
             }
         }
     }

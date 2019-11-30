@@ -18,6 +18,8 @@
 package ru.futcamp.controller.modules.light;
 
 import ru.futcamp.IAppModule;
+import ru.futcamp.controller.events.EventListener;
+import ru.futcamp.controller.events.Events;
 import ru.futcamp.controller.modules.light.db.ILightDB;
 import ru.futcamp.controller.modules.light.db.LightDB;
 import ru.futcamp.utils.configs.IConfigs;
@@ -33,7 +35,7 @@ import java.util.Map;
 /**
  * Light control class
  */
-public class LightControl implements ILightControl, IAppModule {
+public class LightControl implements ILightControl, EventListener, IAppModule {
     private IConfigs cfg;
     private ILogger log;
 
@@ -69,7 +71,7 @@ public class LightControl implements ILightControl, IAppModule {
     }
 
     /**
-     * Loading states from db
+     * Loading states from ru.futcamp.db
      * @throws Exception If fail to load states
      */
     public void loadStates() throws Exception {
@@ -82,6 +84,7 @@ public class LightControl implements ILightControl, IAppModule {
                 ILightDevice device = entry.getValue();
                 device.setStatus(db.getStatus(device.getName()));
                 device.syncStates();
+                log.info("Loaded status from DB for light device \"" + device.getName() + "\" is \"" + device.isStatus() + "\"", "LIGHT");
             }
         } catch (SQLException e) {
             throw new Exception(e.getMessage());
@@ -98,10 +101,8 @@ public class LightControl implements ILightControl, IAppModule {
      * @throws Exception If fail to switch status
      */
     public void switchStatus(String alias) throws Exception {
-        ILightDevice device = devices.get(alias);
-        device.setStatus(!device.isStatus());
-        device.syncStates();
-        saveStatus(device);
+        LightInfo info = getLightInfo(alias);
+        setLightStatus(alias, !info.isStatus());
     }
 
     /**
@@ -176,10 +177,7 @@ public class LightControl implements ILightControl, IAppModule {
             if (device.getGroup().equals(group)) {
                 if (device.isStatus() == status)
                     continue;
-
-                device.setStatus(status);
-                device.syncStates();
-                saveStatus(device);
+                setLightStatus(device.getAlias(), status);
             }
         }
     }
@@ -212,21 +210,50 @@ public class LightControl implements ILightControl, IAppModule {
         devices.put(device.getAlias(), device);
     }
 
-    /**
-     * Update light devices status
-     */
-    public void update() {
-        for (Map.Entry<String, ILightDevice> entry : devices.entrySet()) {
-            ILightDevice device = entry.getValue();
-            try {
-                device.syncStates();
-            } catch (Exception e) {
-                log.error("Fail to update light device status: " + e.getMessage(), "LIGHT");
-            }
-        }
-    }
-
     public String getModName() {
         return modName;
+    }
+
+    @Override
+    public void getEvent(Events event, String module, String ip, int channel) {
+        if (module.equals(modName)) {
+            switch (event) {
+                case SYNC_EVENT:
+                    for (Map.Entry<String, ILightDevice> entry : devices.entrySet()) {
+                        ILightDevice device = entry.getValue();
+                        if (device.getIp().equals(ip)) {
+                            try {
+                                device.syncStates();
+                            } catch (Exception e) {
+                                log.error("Fail to first start sync of light device \"" + device.getName() + "\"", "LIGHT");
+                            }
+                            return;
+                        }
+                    }
+                    break;
+
+                case SWITCH_STATUS_EVENT:
+                    for (Map.Entry<String, ILightDevice> entry : devices.entrySet()) {
+                        ILightDevice device = entry.getValue();
+                        if (device.getSwitchIP().equals(ip) && device.getSwitchChannel() == channel) {
+                            try {
+                                switchStatus(device.getAlias());
+                            } catch (Exception e) {
+                                log.error("Fail to switch status of light device \"" + device.getName() + "\"", "LIGHT");
+                            }
+                            return;
+                        }
+                    }
+                    break;
+
+                case SECURE_OPEN_EVENT:
+                    try {
+                        setGroupStatus("street", true);
+                    } catch (Exception e) {
+                        log.error("Fail to set light group status", "LIGHT");
+                    }
+                    break;
+            }
+        }
     }
 }

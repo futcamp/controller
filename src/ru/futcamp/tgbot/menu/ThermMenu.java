@@ -59,7 +59,7 @@ public class ThermMenu implements IMenu, IAppModule {
         StringBuilder txt = new StringBuilder("Обогрев помещений\n\n");
 
         for (ThermInfo info : ctrl.getThermInfo()) {
-            txt.append("<b>").append(info.getAlias()).append("</b> Статус: <b>").append(info.isStatus() ? "Работает" : "Отключен").append("</b>\n");
+            txt.append("<b>").append(info.getAlias()).append("</b>\nСтатус: <b>").append(info.isStatus() ? "Работает" : "Отключен").append("</b>\n");
         }
 
         msg.setText(txt.toString());

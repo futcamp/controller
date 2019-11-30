@@ -20,25 +20,34 @@ package ru.futcamp.controller.modules.light.mod;
 import ru.futcamp.net.web.HttpClient;
 
 /**
- * Therm control communication
+ * Light communication
  */
 public class LightModule {
-    private String ip;
-    private int channel;
+    private static final int TIMEOUT = 4000;
 
-    public LightModule(String ip, int chan) {
-        this.ip = ip;
-        this.channel = chan;
+    /**
+     * Sync light states with module device
+     * @param ip Address of device
+     * @param chan Channel of device
+     * @param status New light status
+     * @throws Exception If fail to sync states
+     */
+    public static void syncStates(String ip, int chan, boolean status) throws Exception {
+        synchronized (LightModule.class) {
+            HttpClient client = new HttpClient("http://" + ip + "/light?state=" + status + "&chan=" + chan);
+            client.getRequest(TIMEOUT);
+        }
     }
 
     /**
-     * Sync states with device
-     * @param status Therm control status
-     * @throws Exception If fail to sync with device
+     * Check device status
+     * @param ip Address of device
+     * @throws Exception If fail to get status
      */
-    public void syncStates(boolean status) throws Exception {
-        HttpClient client = new HttpClient("http://" + ip + "/light?state=" + status +
-                                            "&chan=" + channel);
-        client.getRequest(2000);
+    public static void checkStatus(String ip) throws Exception {
+        synchronized (LightModule.class) {
+            HttpClient client = new HttpClient("http://" + ip + "/");
+            client.getRequest(TIMEOUT);
+        }
     }
 }

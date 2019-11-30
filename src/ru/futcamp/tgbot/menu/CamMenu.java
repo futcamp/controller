@@ -17,6 +17,7 @@
 
 package ru.futcamp.tgbot.menu;
 
+import com.sun.org.apache.bcel.internal.generic.RET;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -45,6 +46,8 @@ public class CamMenu implements IMenu, IAppModule {
 
     private String modName;
 
+    private static int RETRIES = 3;
+
     public CamMenu(String name, IAppModule ...dep) {
         modName = name;
         this.cfg = (IConfigs) dep[0];
@@ -66,17 +69,29 @@ public class CamMenu implements IMenu, IAppModule {
         } else if (inMsg.equals("Без света")) {
             menu.setLight(false);
         } else if (!inMsg.equals("Список камер") && !inMsg.equals("Камеры")) {
-            try {
-                if (cfg.getModCfg("light")) {
-                    ctrl.getVisionPhoto(inMsg, "/tmp/photo.jpg", menu.isLight());
-                } else {
-                    ctrl.getVisionPhoto(inMsg, "/tmp/photo.jpg");
+            Exception ex = null;
+
+            for (int i = 0; i < RETRIES; i++) {
+                try {
+                    if (cfg.getModCfg("light")) {
+                        ctrl.getVisionPhoto(inMsg, "/tmp/photo.jpg", menu.isLight());
+                    } else {
+                        ctrl.getVisionPhoto(inMsg, "/tmp/photo.jpg");
+                    }
+                    SendPhoto ph = new SendPhoto().setChatId(upd.getMessage().getChatId());
+                    ph.setPhoto(new File("/tmp/photo.jpg"));
+                    bot.execute(ph);
+                    break;
+                } catch (Exception e) {
+                    ex = e;
+                    try {
+                        Thread.sleep(1000);
+                    } catch (Exception ignored) {}
                 }
-                SendPhoto ph = new SendPhoto().setChatId(upd.getMessage().getChatId());
-                ph.setPhoto(new File("/tmp/photo.jpg"));
-                bot.execute(ph);
-            } catch (Exception e) {
-                log.error("Fail to get photo: " + e.getMessage(), "CAMMENU");
+            }
+
+            if (ex != null) {
+                log.error("Fail to get photo: " + ex.getMessage(), "CAMMENU");
                 SendMessage errMsg = new SendMessage().setChatId(upd.getMessage().getChatId());
                 errMsg.setText("Ошибка получения фото!");
                 bot.execute(errMsg);
@@ -87,21 +102,6 @@ public class CamMenu implements IMenu, IAppModule {
         msg.setText("Список камер");
         setButtons(msg, menu);
         bot.execute(msg);
-    }
-
-    /**
-     * Switch lamp states before and after snapshot
-     * @param lamps List of lamps
-     * @param status Status of lamp
-     */
-    private void switchLamps(String[] lamps, boolean status) {
-        for (String lamp : lamps) {
-            try {
-                ctrl.setLightStatus(lamp, status);
-            } catch (Exception e) {
-                log.error("Fail to set lamp status for photo: " + e.getMessage(), "CAMMENU");
-            }
-        }
     }
 
     /**

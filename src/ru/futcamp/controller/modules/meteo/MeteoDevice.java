@@ -17,14 +17,8 @@
 
 package ru.futcamp.controller.modules.meteo;
 
-import ru.futcamp.controller.modules.meteo.db.IMeteoDB;
-import ru.futcamp.controller.modules.meteo.db.MeteoDBData;
 import ru.futcamp.controller.modules.meteo.mod.MeteoModuleData;
 import ru.futcamp.controller.modules.meteo.mod.MeteoModule;
-import ru.futcamp.utils.TimeControl;
-
-import java.sql.SQLException;
-import java.util.List;
 
 /**
  * Meteo station sensor
@@ -51,8 +45,7 @@ public class MeteoDevice extends MeteoData implements IMeteoDevice {
      * @throws Exception If fail to sync data
      */
     public void syncMeteoData() throws Exception {
-        MeteoModule hdk = new MeteoModule(this.address, this.type, this.channel);
-        MeteoModuleData data = hdk.getMeteoData();
+        MeteoModuleData data = MeteoModule.getMeteoData(this.address, this.type, this.channel);
         setTemp(data.getTemp());
         setHumidity(data.getHum());
         setPressure(data.getPres());

@@ -17,11 +17,22 @@
 
 package ru.futcamp.controller.modules.meteo.db;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
+@DatabaseTable(tableName = "meteo")
 public class MeteoDBData {
+    @DatabaseField(generatedId = true)
+    private int id;
+    @DatabaseField
     private int temp;
+    @DatabaseField
     private int hum;
+    @DatabaseField
     private int pres;
+    @DatabaseField
     private int hour;
+    @DatabaseField
     private String date;
 
     public MeteoDBData() { }
@@ -72,5 +83,13 @@ public class MeteoDBData {
 
     public void setHour(int hour) {
         this.hour = hour;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

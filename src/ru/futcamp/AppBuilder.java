@@ -29,7 +29,7 @@ public class AppBuilder implements IAppBuilder {
      * Make app builder
      * @return Builder
      */
-    public static IAppBuilder create() {
+    static IAppBuilder create() {
         return new AppBuilder();
     }
 
