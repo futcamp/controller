@@ -18,47 +18,16 @@
 package ru.futcamp.controller;
 
 import ru.futcamp.controller.events.Events;
-import ru.futcamp.controller.modules.hum.HumInfo;
-import ru.futcamp.controller.modules.light.LightInfo;
-import ru.futcamp.controller.modules.meteo.MeteoInfo;
-import ru.futcamp.controller.modules.secure.MIHInfo;
-import ru.futcamp.controller.modules.secure.SecureInfo;
-import ru.futcamp.controller.modules.therm.ThermInfo;
-
-import java.util.List;
+import ru.futcamp.controller.subcontrollers.ILightController;
+import ru.futcamp.controller.subcontrollers.IMeteoController;
+import ru.futcamp.controller.subcontrollers.IMiscController;
+import ru.futcamp.controller.subcontrollers.ISecureController;
 
 public interface IController {
-    boolean startModules();
-
-    List<MeteoInfo> getMeteoInfo();
-    MeteoInfo getMeteoInfo(String alias) throws Exception;
-    List<MeteoInfo> getMeteoInfoByDate(String alias, String date) throws Exception;
-
-    List<ThermInfo> getThermInfo();
-    ThermInfo getThermInfo(String alias) throws Exception;
-    void switchThermStatus(String alias) throws Exception;
-    void changeThermThreshold(String alias, ActMgmt action) throws Exception;
-
-    void switchMIHStatus() throws Exception;
-    MIHInfo getMIHInfo();
-    void changeMIHTime(TimeMgmt time, ActMgmt action) throws Exception;
-    SecureInfo getSecureInfo();
-    void switchSecureStatus() throws Exception;
-
-    void switchLightStatus(String alias) throws Exception;
-    LightInfo getLightInfo(String alias) throws Exception;
-    List<LightInfo> getLightInfo();
-    List<LightInfo> getLightGroupInfo(String group);
-    void setGroupStatus(String group, boolean status) throws Exception;
-    void setLightStatus(String alias, boolean status) throws Exception;
-
-    void getVisionPhoto(String alias, String fileName) throws Exception;
-    void getVisionPhoto(String alias, String fileName, boolean isLight) throws Exception;
-
-    void switchHumStatus(String alias) throws Exception;
-    List<HumInfo> getHumInfo();
-    HumInfo getHumInfo(String alias) throws Exception;
-    void changeHumThreshold(String alias, ActMgmt action) throws Exception;
-
+    IMeteoController getMeteo();
+    ISecureController getSecure();
+    ILightController getLight();
+    IMiscController getMisc();
+    boolean startAll();
     void genEvent(Events ev, String mod, String ip, int chan) throws Exception;
 }

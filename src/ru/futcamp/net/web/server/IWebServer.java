@@ -22,7 +22,6 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 
 public interface IWebServer {
-    void init() throws IOException;
     void addHandler(String path, HttpHandler handler);
     void start(int port, int queu, int threads) throws IOException;
 }

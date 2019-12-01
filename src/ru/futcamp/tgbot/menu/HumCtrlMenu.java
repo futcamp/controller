@@ -26,7 +26,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.ActMgmt;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.hum.HumInfo;
+import ru.futcamp.controller.subcontrollers.modules.hum.HumInfo;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.log.ILogger;
 
@@ -68,13 +68,13 @@ public class HumCtrlMenu implements IMenu, IAppModule {
         }
 
         setAction(inMsg, menu.getDevice());
-        HumInfo info = ctrl.getHumInfo(menu.getDevice());
+        HumInfo info = ctrl.getMeteo().getHumInfo(menu.getDevice());
 
         String txt = "Настройка увлажнения\n\n";
         txt += "<b>" + menu.getDevice() + "</b>\n";
         txt += "Статус: <b>" + (info.isStatus() ? "Работает" : "Отключен") + "</b>\n";
         txt += "Обогреватель: <b>" + (info.isHeater() ? "Работает" : "Отключен") + "</b>\n";
-        txt += "Текущая влажность: <b>" + ctrl.getMeteoInfo(info.getSensor()).getHum() + "%</b>\n";
+        txt += "Текущая влажность: <b>" + ctrl.getMeteo().getMeteoInfo(info.getSensor()).getHum() + "%</b>\n";
         txt += "Держать влажность: <b>" + info.getThreshold() + "%</b>\n\n";
 
         msg.setText(txt);
@@ -90,19 +90,19 @@ public class HumCtrlMenu implements IMenu, IAppModule {
     private void setAction(String msg, String device) {
         if (msg.equals("+ процент")) {
             try {
-                ctrl.changeHumThreshold(device, ActMgmt.SET_MGMT_THRESOLD_PLUS);
+                ctrl.getMeteo().changeHumThreshold(device, ActMgmt.SET_MGMT_THRESOLD_PLUS);
             } catch (Exception e) {
                 log.error("Fail to change threshold: " + e.getMessage(), "HUMMENU");
             }
         } else if (msg.equals("- процент")) {
             try {
-                ctrl.changeHumThreshold(device, ActMgmt.SET_MGMT_THRESOLD_MINUS);
+                ctrl.getMeteo().changeHumThreshold(device, ActMgmt.SET_MGMT_THRESOLD_MINUS);
             } catch (Exception e) {
                 log.error("Fail to change threshold: " + e.getMessage(), "HUMMENU");
             }
         } else if (msg.equals("Включить") || msg.equals("Отключить")) {
             try {
-                ctrl.switchHumStatus(device);
+                ctrl.getMeteo().switchHumStatus(device);
             } catch (Exception e) {
                 log.error("Fail to switch status: " + e.getMessage(), "HUMMENU");
             }
@@ -124,7 +124,7 @@ public class HumCtrlMenu implements IMenu, IAppModule {
         /*
          * Add back button to menu
          */
-        HumInfo info = ctrl.getHumInfo(alias);
+        HumInfo info = ctrl.getMeteo().getHumInfo(alias);
 
         for (String[] row : cfg.getTelegramCfg().getMenu().getHum().getDevice()) {
             List<String> group = new LinkedList<>();

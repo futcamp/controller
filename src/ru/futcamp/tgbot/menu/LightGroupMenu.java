@@ -25,7 +25,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.light.LightInfo;
+import ru.futcamp.controller.subcontrollers.modules.light.LightInfo;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.configs.settings.light.LightGroupSettings;
 
@@ -63,17 +63,17 @@ public class LightGroupMenu implements IMenu, IAppModule {
         if (!inMsg.equals(menu.getGroup()) && !inMsg.equals("Обновить")) {
 
             if (inMsg.equals("Вкл все")) {
-                ctrl.setGroupStatus(lightGroup.getGroup(), true);
+                ctrl.getLight().setGroupStatus(lightGroup.getGroup(), true);
             } else if (inMsg.equals("Откл все")) {
-                ctrl.setGroupStatus(lightGroup.getGroup(), false);
+                ctrl.getLight().setGroupStatus(lightGroup.getGroup(), false);
             } else {
-                ctrl.switchLightStatus(inMsg);
+                ctrl.getLight().switchLightStatus(inMsg);
             }
         }
 
         txt.append("Управление освещением\n\n");
 
-        for (LightInfo info : ctrl.getLightGroupInfo(lightGroup.getGroup())) {
+        for (LightInfo info : ctrl.getLight().getLightGroupInfo(lightGroup.getGroup())) {
             txt.append(info.getAlias()).append(": ");
             if (info.isStatus())
                 txt.append("<b>Работает</b>\n");

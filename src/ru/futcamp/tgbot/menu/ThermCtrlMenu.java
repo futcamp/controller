@@ -26,8 +26,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.ActMgmt;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.therm.IThermDevice;
-import ru.futcamp.controller.modules.therm.ThermInfo;
+import ru.futcamp.controller.subcontrollers.modules.therm.ThermInfo;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.log.ILogger;
 
@@ -69,13 +68,13 @@ public class ThermCtrlMenu implements IMenu, IAppModule {
         }
 
         setAction(inMsg, menu.getDevice());
-        ThermInfo info = ctrl.getThermInfo(menu.getDevice());
+        ThermInfo info = ctrl.getMeteo().getThermInfo(menu.getDevice());
 
         String txt = "Настройка обогрева\n\n";
         txt += "<b>" + menu.getDevice() + "</b>\n";
         txt += "Статус: <b>" + (info.isStatus() ? "Работает" : "Отключен") + "</b>\n";
         txt += "Обогреватель: <b>" + (info.isHeater() ? "Работает" : "Отключен") + "</b>\n";
-        txt += "Текущая температура: <b>" + ctrl.getMeteoInfo(info.getSensor()).getTemp() + "°</b>\n";
+        txt += "Текущая температура: <b>" + ctrl.getMeteo().getMeteoInfo(info.getSensor()).getTemp() + "°</b>\n";
         txt += "Держать температуру: <b>" + info.getThreshold() + "°</b>\n\n";
 
         msg.setText(txt);
@@ -91,19 +90,19 @@ public class ThermCtrlMenu implements IMenu, IAppModule {
     private void setAction(String msg, String device) {
         if (msg.equals("+ градус")) {
             try {
-                ctrl.changeThermThreshold(device, ActMgmt.SET_MGMT_THRESOLD_PLUS);
+                ctrl.getMeteo().changeThermThreshold(device, ActMgmt.SET_MGMT_THRESOLD_PLUS);
             } catch (Exception e) {
                 log.error("Fail to change threshold: " + e.getMessage(), "THERMMENU");
             }
         } else if (msg.equals("- градус")) {
             try {
-                ctrl.changeThermThreshold(device, ActMgmt.SET_MGMT_THRESOLD_MINUS);
+                ctrl.getMeteo().changeThermThreshold(device, ActMgmt.SET_MGMT_THRESOLD_MINUS);
             } catch (Exception e) {
                 log.error("Fail to change threshold: " + e.getMessage(), "THERMMENU");
             }
         } else if (msg.equals("Включить") || msg.equals("Отключить")) {
             try {
-                ctrl.switchThermStatus(device);
+                ctrl.getMeteo().switchThermStatus(device);
             } catch (Exception e) {
                 log.error("Fail to switch status: " + e.getMessage(), "THERMMENU");
             }
@@ -125,7 +124,7 @@ public class ThermCtrlMenu implements IMenu, IAppModule {
         /*
          * Add back button to menu
          */
-        ThermInfo info = ctrl.getThermInfo(alias);
+        ThermInfo info = ctrl.getMeteo().getThermInfo(alias);
 
         for (String[] row : cfg.getTelegramCfg().getMenu().getTherm().getDevice()) {
             List<String> thermGroup = new LinkedList<>();

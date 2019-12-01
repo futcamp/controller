@@ -25,8 +25,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.meteo.IMeteoDevice;
-import ru.futcamp.controller.modules.meteo.MeteoInfo;
+import ru.futcamp.controller.subcontrollers.modules.meteo.MeteoInfo;
 import ru.futcamp.utils.configs.IConfigs;
 
 import java.util.ArrayList;
@@ -58,7 +57,7 @@ public class MeteoMenu implements IMenu, IAppModule {
         int pressure = 0;
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
 
-        List<MeteoInfo> infoList = ctrl.getMeteoInfo();
+        List<MeteoInfo> infoList = ctrl.getMeteo().getMeteoInfo();
         txt.append("Метео данные\n\n");
         for (MeteoInfo info : infoList) {
             txt.append("<b>").append(info.getAlias()).append("</b>\nТемпература: <b>").append(info.getTemp()).append("°</b> ");

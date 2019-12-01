@@ -105,7 +105,7 @@ public class Application implements IApplication, IAppModule {
          * Start controller modules
          */
         log.info("Starting controller modules", "APP");
-        if (!ctrl.startModules()) {
+        if (!ctrl.startAll()) {
             return;
         }
 
@@ -115,7 +115,7 @@ public class Application implements IApplication, IAppModule {
         HttpSettings httpCfg = cfg.getHttpCfg();
         log.info("Starting http server", "APP");
         try {
-            httpSrv.prepare(httpCfg.getApi());
+            httpSrv.setAPI(httpCfg.getApi());
             httpSrv.start(httpCfg.getPort(), httpCfg.getQueue(), httpCfg.getThreads());
         } catch (Exception e) {
             log.error("Fail to start web server: " + e.getMessage(), "APP");

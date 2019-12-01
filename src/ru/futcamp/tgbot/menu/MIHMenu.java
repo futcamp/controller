@@ -27,7 +27,7 @@ import ru.futcamp.IAppModule;
 import ru.futcamp.controller.ActMgmt;
 import ru.futcamp.controller.IController;
 import ru.futcamp.controller.TimeMgmt;
-import ru.futcamp.controller.modules.secure.MIHInfo;
+import ru.futcamp.controller.subcontrollers.modules.secure.MIHInfo;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.log.ILogger;
 
@@ -62,7 +62,7 @@ public class MIHMenu implements IMenu, IAppModule {
         startAction(upd);
 
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
-        MIHInfo info = ctrl.getMIHInfo();
+        MIHInfo info = ctrl.getSecure().getMIHInfo();
 
         String txt = "Система \"Человек в доме\"\n\n";
 
@@ -102,31 +102,31 @@ public class MIHMenu implements IMenu, IAppModule {
 
         if (inMsg.equals("Включить") || inMsg.equals("Отключить")) {
             try {
-                ctrl.switchMIHStatus();
+                ctrl.getSecure().switchMIHStatus();
             } catch (Exception e) {
                 log.error("Fail to switch status: " + e.getMessage(), "MIHMENU");
             }
         } else if (upd.getMessage().getText().equals("+ час вкл")) {
             try {
-                ctrl.changeMIHTime(TimeMgmt.TIME_MGMT_ON, ActMgmt.SET_MGMT_HOUR_PLUS);
+                ctrl.getSecure().changeMIHTime(TimeMgmt.TIME_MGMT_ON, ActMgmt.SET_MGMT_HOUR_PLUS);
             } catch (Exception e) {
                 log.error("Fail to change time: " + e.getMessage(), "MIHMENU");
             }
         } else if (upd.getMessage().getText().equals("- час вкл")) {
             try {
-                ctrl.changeMIHTime(TimeMgmt.TIME_MGMT_ON, ActMgmt.SET_MGMT_HOUR_MINUS);
+                ctrl.getSecure().changeMIHTime(TimeMgmt.TIME_MGMT_ON, ActMgmt.SET_MGMT_HOUR_MINUS);
             } catch (Exception e) {
                 log.error("Fail to change time: " + e.getMessage(), "MIHMENU");
             }
         } else if (upd.getMessage().getText().equals("+ час откл")) {
             try {
-                ctrl.changeMIHTime(TimeMgmt.TIME_MGMT_OFF, ActMgmt.SET_MGMT_HOUR_PLUS);
+                ctrl.getSecure().changeMIHTime(TimeMgmt.TIME_MGMT_OFF, ActMgmt.SET_MGMT_HOUR_PLUS);
             } catch (Exception e) {
                 log.error("Fail to change time: " + e.getMessage(), "MIHMENU");
             }
         } else if (upd.getMessage().getText().equals("- час откл")) {
             try {
-                ctrl.changeMIHTime(TimeMgmt.TIME_MGMT_OFF, ActMgmt.SET_MGMT_HOUR_MINUS);
+                ctrl.getSecure().changeMIHTime(TimeMgmt.TIME_MGMT_OFF, ActMgmt.SET_MGMT_HOUR_MINUS);
             } catch (Exception e) {
                 log.error("Fail to change time: " + e.getMessage(), "MIHMENU");
             }
@@ -145,7 +145,7 @@ public class MIHMenu implements IMenu, IAppModule {
         replyKeyboardMarkup.setOneTimeKeyboard(false);
         List<KeyboardRow> keyboard = new ArrayList<>();
 
-        MIHInfo info = ctrl.getMIHInfo();
+        MIHInfo info = ctrl.getSecure().getMIHInfo();
 
         /*
          * Add buttons to menu

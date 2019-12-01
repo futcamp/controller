@@ -24,6 +24,7 @@ import ru.futcamp.IAppModule;
 import ru.futcamp.tgbot.menu.BotMenu;
 import ru.futcamp.tgbot.menu.IBotMenu;
 import ru.futcamp.tgbot.menu.IMenu;
+import ru.futcamp.tgbot.menu.LevelMenu;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.log.ILogger;
 
@@ -38,18 +39,7 @@ import static ru.futcamp.tgbot.menu.LevelMenu.*;
 public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot, IAppModule {
     private IConfigs cfg;
     private ILogger log;
-    private IMenu mainMenu;
-    private IMenu meteoMenu;
-    private IMenu camMenu;
-    private IMenu secMenu;
-    private IMenu meteoStatMenu;
-    private IMenu thermMenu;
-    private IMenu thermCtrlMenu;
-    private IMenu mihMenu;
-    private IMenu lightMenu;
-    private IMenu lightStMenu;
-    private IMenu humMenu;
-    private IMenu humCtrlMenu;
+    private Map<LevelMenu, IMenu> menus = new HashMap<>();
 
     private String key;
     private String login;
@@ -57,22 +47,10 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot,
 
     private String modName;
 
-    public TelegramBot(String name, IAppModule ...dep) {
+    TelegramBot(String name, IAppModule... dep) {
         modName = name;
         this.log = (ILogger) dep[0];
         this.cfg = (IConfigs) dep[1];
-        this.mainMenu = (IMenu) dep[2];
-        this.meteoMenu = (IMenu) dep[3];
-        this.camMenu = (IMenu) dep[4];
-        this.secMenu = (IMenu) dep[5];
-        this.meteoStatMenu = (IMenu) dep[6];
-        this.thermMenu = (IMenu) dep[7];
-        this.thermCtrlMenu = (IMenu) dep[8];
-        this.mihMenu = (IMenu) dep[9];
-        this.lightMenu = (IMenu) dep[10];
-        this.lightStMenu = (IMenu) dep[11];
-        this.humMenu = (IMenu) dep[12];
-        this.humCtrlMenu = (IMenu) dep[13];
     }
 
     /**
@@ -87,6 +65,15 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot,
             }
         }
         return false;
+    }
+
+    /**
+     * Add new menu item
+     * @param level Menu level
+     * @param menu Menu jbject
+     */
+    public void addMenu(LevelMenu level, IMenu menu) {
+        this.menus.put(level, menu);
     }
 
     /**
@@ -123,55 +110,7 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot,
 
         try {
             IBotMenu menu = level.get(user);
-            switch (menu.getLevel()) {
-                case METEO_MENU:
-                    meteoMenu.updateMessage(this, upd, menu);
-                    break;
-
-                case CAM_MENU:
-                    camMenu.updateMessage(this, upd, menu);
-                    break;
-
-                case SECURE_MENU:
-                    secMenu.updateMessage(this, upd, menu);
-                    break;
-
-                case METEO_STAT_MENU:
-                    meteoStatMenu.updateMessage(this, upd, menu);
-                    break;
-
-                case THERM_MENU:
-                    thermMenu.updateMessage(this, upd, menu);
-                    break;
-
-                case THERM_CTRL_MENU:
-                    thermCtrlMenu.updateMessage(this, upd, menu);
-                    break;
-
-                case MIH_MENU:
-                    mihMenu.updateMessage(this, upd, menu);
-                    break;
-
-                case LIGHT_MENU:
-                    lightMenu.updateMessage(this, upd, menu);
-                    break;
-
-                case LIGHT_STREET_MENU:
-                    lightStMenu.updateMessage(this, upd, menu);
-                    break;
-
-                case HUM_MENU:
-                    humMenu.updateMessage(this, upd, menu);
-                    break;
-
-                case HUM_CTRL_MENU:
-                    humCtrlMenu.updateMessage(this, upd, menu);
-                    break;
-
-                default:
-                    mainMenu.updateMessage(this, upd, menu);
-                    break;
-            }
+            menus.get(menu.getLevel()).updateMessage(this, upd, menu);
         } catch (Exception e) {
             log.error("Fail to process telegram bot message: " + e.getMessage(), "TGBOT");
         }
@@ -247,12 +186,12 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot,
                 return;
             }
             if (!msg.equals("Выбор освещения")) {
-                level.get(user).setLevel(LIGHT_STREET_MENU);
+                level.get(user).setLevel(LIGHT_CTRL_MENU);
                 level.get(user).setGroup(msg);
                 return;
             }
         }
-        if (level.get(user).getLevel().equals(LIGHT_STREET_MENU)) {
+        if (level.get(user).getLevel().equals(LIGHT_CTRL_MENU)) {
             if (msg.equals("Назад")) {
                 level.get(user).setLevel(LIGHT_MENU);
                 return;

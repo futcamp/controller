@@ -18,10 +18,10 @@
 package ru.futcamp.tgbot;
 
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.futcamp.tgbot.menu.IMenu;
+import ru.futcamp.tgbot.menu.LevelMenu;
 
 public interface ITelegramBot {
-    String getBotUsername();
-    void onUpdateReceived(Update e);
-    String getBotToken();
     void setData(String key, String user);
+    void addMenu(LevelMenu level, IMenu menu);
 }

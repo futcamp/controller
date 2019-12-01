@@ -25,7 +25,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.hum.HumInfo;
+import ru.futcamp.controller.subcontrollers.modules.hum.HumInfo;
 import ru.futcamp.utils.configs.IConfigs;
 
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class HumMenu implements IMenu, IAppModule {
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
         StringBuilder txt = new StringBuilder("Увлажнение воздуха\n\n");
 
-        for (HumInfo info : ctrl.getHumInfo()) {
+        for (HumInfo info : ctrl.getMeteo().getHumInfo()) {
             txt.append("<b>").append(info.getAlias()).append("</b>\nСтатус: <b>").append(info.isStatus() ? "Работает" : "Отключен").append("</b>\n");
         }
 

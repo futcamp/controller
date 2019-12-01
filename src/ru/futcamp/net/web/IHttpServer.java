@@ -17,9 +17,12 @@
 
 package ru.futcamp.net.web;
 
+import com.sun.net.httpserver.HttpHandler;
+
 import java.io.IOException;
 
 public interface IHttpServer {
-    void prepare(String api) throws IOException;
+    void setAPI(String api) throws IOException;
+    void addHandler(String name, HttpHandler handler);
     void start(int port, int queue, int threads) throws IOException;
 }

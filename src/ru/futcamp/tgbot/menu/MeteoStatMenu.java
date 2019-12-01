@@ -25,8 +25,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.meteo.MeteoInfo;
-import ru.futcamp.controller.modules.meteo.db.MeteoDBData;
+import ru.futcamp.controller.subcontrollers.modules.meteo.MeteoInfo;
 import ru.futcamp.utils.TimeControl;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.log.ILogger;
@@ -62,7 +61,7 @@ public class MeteoStatMenu implements IMenu, IAppModule {
 
         if (!inMsg.equals("Обновить") && !inMsg.equals("Статистика") && !inMsg.equals("Метео статистика")) {
             TimeControl.getPrevDate();
-            List<MeteoInfo> prevData = ctrl.getMeteoInfoByDate(inMsg, TimeControl.getPrevDate());
+            List<MeteoInfo> prevData = ctrl.getMeteo().getMeteoInfoByDate(inMsg, TimeControl.getPrevDate());
             if (prevData != null) {
                 try {
                     bot.execute(printData(upd, "Вчера", prevData));
@@ -70,7 +69,7 @@ public class MeteoStatMenu implements IMenu, IAppModule {
                     log.error("Fail to print statistics: " + e.getMessage(), "METEOSTATMENU");
                 }
             }
-            List<MeteoInfo> curData = ctrl.getMeteoInfoByDate(inMsg, TimeControl.getCurDate());
+            List<MeteoInfo> curData = ctrl.getMeteo().getMeteoInfoByDate(inMsg, TimeControl.getCurDate());
             if (curData != null) {
                 try {
                     bot.execute(printData(upd, "Сегодня", curData));

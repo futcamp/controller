@@ -74,9 +74,9 @@ public class CamMenu implements IMenu, IAppModule {
             for (int i = 0; i < RETRIES; i++) {
                 try {
                     if (cfg.getModCfg("light")) {
-                        ctrl.getVisionPhoto(inMsg, "/tmp/photo.jpg", menu.isLight());
+                        ctrl.getSecure().getVisionPhoto(inMsg, "/tmp/photo.jpg", menu.isLight());
                     } else {
-                        ctrl.getVisionPhoto(inMsg, "/tmp/photo.jpg");
+                        ctrl.getSecure().getVisionPhoto(inMsg, "/tmp/photo.jpg");
                     }
                     SendPhoto ph = new SendPhoto().setChatId(upd.getMessage().getChatId());
                     ph.setPhoto(new File("/tmp/photo.jpg"));
