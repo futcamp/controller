@@ -36,14 +36,9 @@ public class WebServer implements IWebServer, IAppModule {
 
     public WebServer(String name, IAppModule ...dep) {
         this.modName = name;
-    }
-
-    /**
-     * Server initialization
-     * @throws IOException If fail to init server
-     */
-    public void init() throws IOException {
-        server = HttpServer.create();
+        try {
+            server = HttpServer.create();
+        } catch (Exception ignored) {}
     }
 
     /**

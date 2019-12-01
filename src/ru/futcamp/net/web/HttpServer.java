@@ -26,38 +26,34 @@ import java.io.IOException;
 
 public class HttpServer implements IHttpServer, IAppModule {
     private IWebServer server;
-    private HttpHandler idxHandler;
-    private HttpHandler secHandler;
-    private HttpHandler lightHandler;
-    private HttpHandler mihHandler;
-    private HttpHandler thermHandler;
-    private HttpHandler humHandler;
 
     private String modName;
+    private String apiVer;
 
     public HttpServer(String name, IAppModule ...dep) {
         this.modName = name;
         this.server = (IWebServer) dep[0];
-        this.idxHandler = (HttpHandler) dep[1];
-        this.secHandler = (HttpHandler) dep[2];
-        this.lightHandler = (HttpHandler) dep[3];
-        this.mihHandler = (HttpHandler) dep[4];
-        this.thermHandler = (HttpHandler) dep[5];
-        this.humHandler = (HttpHandler) dep[6];
     }
 
     /**
-     * Prepare requests and server
+     * Set api version
      * @throws IOException If fail to init server
      */
-    public void prepare(String api) throws IOException {
-        server.init();
-        server.addHandler("/", idxHandler);
-        server.addHandler("/api/" + api + "/security", secHandler);
-        server.addHandler("/api/" + api + "/light", lightHandler);
-        server.addHandler("/api/" + api + "/mih", mihHandler);
-        server.addHandler("/api/" + api + "/therm", thermHandler);
-        server.addHandler("/api/" + api + "/hum", humHandler);
+    public void setAPI(String api) throws IOException {
+        this.apiVer = api;
+    }
+
+    /**
+     * Add HTTP handler
+     * @param name Name of handler
+     * @param handler Handler object
+     */
+    public void addHandler(String name, HttpHandler handler) {
+        if (name.equals("index")) {
+            server.addHandler("/", handler);
+        } else {
+            server.addHandler("/api/" + apiVer + "/" + name, handler);
+        }
     }
 
     /**

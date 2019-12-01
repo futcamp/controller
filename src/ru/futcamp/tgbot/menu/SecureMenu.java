@@ -25,9 +25,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.secure.ISecureDevice;
-import ru.futcamp.controller.modules.secure.SecureInfo;
-import ru.futcamp.controller.modules.secure.SecureModInfo;
+import ru.futcamp.controller.subcontrollers.modules.secure.SecureInfo;
+import ru.futcamp.controller.subcontrollers.modules.secure.SecureModInfo;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.log.ILogger;
 
@@ -62,7 +61,7 @@ public class SecureMenu implements IMenu, IAppModule {
         startAction(upd);
 
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
-        SecureInfo info = ctrl.getSecureInfo();
+        SecureInfo info = ctrl.getSecure().getSecureInfo();
 
         StringBuilder txt = new StringBuilder("<b>Состояние</b>\n");
 
@@ -115,7 +114,7 @@ public class SecureMenu implements IMenu, IAppModule {
         String inMsg = upd.getMessage().getText();
         if (inMsg.equals("Включить") || inMsg.equals("Отключить")) {
             try {
-                ctrl.switchSecureStatus();
+                ctrl.getSecure().switchSecureStatus();
             } catch (Exception e) {
                 log.error("Fail to switch secure state: " + e.getMessage(), "SECUREMENU");
             }
@@ -134,7 +133,7 @@ public class SecureMenu implements IMenu, IAppModule {
         replyKeyboardMarkup.setOneTimeKeyboard(false);
         List<KeyboardRow> keyboard = new ArrayList<>();
 
-        SecureInfo info = ctrl.getSecureInfo();
+        SecureInfo info = ctrl.getSecure().getSecureInfo();
 
         /*
          * Add buttons to menu

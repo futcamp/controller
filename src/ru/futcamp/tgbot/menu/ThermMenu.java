@@ -25,8 +25,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.IController;
-import ru.futcamp.controller.modules.therm.IThermDevice;
-import ru.futcamp.controller.modules.therm.ThermInfo;
+import ru.futcamp.controller.subcontrollers.modules.therm.ThermInfo;
 import ru.futcamp.utils.configs.IConfigs;
 
 import java.util.ArrayList;
@@ -58,7 +57,7 @@ public class ThermMenu implements IMenu, IAppModule {
         SendMessage msg = new SendMessage().setChatId(upd.getMessage().getChatId());
         StringBuilder txt = new StringBuilder("Обогрев помещений\n\n");
 
-        for (ThermInfo info : ctrl.getThermInfo()) {
+        for (ThermInfo info : ctrl.getMeteo().getThermInfo()) {
             txt.append("<b>").append(info.getAlias()).append("</b>\nСтатус: <b>").append(info.isStatus() ? "Работает" : "Отключен").append("</b>\n");
         }
 
