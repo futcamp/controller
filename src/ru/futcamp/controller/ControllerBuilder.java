@@ -19,7 +19,6 @@ package ru.futcamp.controller;
 
 import ru.futcamp.IAppModule;
 import ru.futcamp.IBuilder;
-import ru.futcamp.controller.events.EventManager;
 import ru.futcamp.controller.subcontrollers.LightController;
 import ru.futcamp.controller.subcontrollers.MeteoController;
 import ru.futcamp.controller.subcontrollers.MiscController;
@@ -35,6 +34,7 @@ import ru.futcamp.controller.subcontrollers.modules.monitor.MonitorTask;
 import ru.futcamp.controller.subcontrollers.modules.secure.ManInHome;
 import ru.futcamp.controller.subcontrollers.modules.secure.SecureTask;
 import ru.futcamp.controller.subcontrollers.modules.secure.Security;
+import ru.futcamp.controller.subcontrollers.modules.socket.PowerSocket;
 import ru.futcamp.controller.subcontrollers.modules.therm.ThermControl;
 import ru.futcamp.controller.subcontrollers.modules.therm.ThermTask;
 import ru.futcamp.controller.subcontrollers.modules.vision.Vision;
@@ -47,9 +47,7 @@ public class ControllerBuilder implements IBuilder {
      * @return Module
      */
     public IAppModule makeModule(String name, IAppModule ...dep) {
-        if (name.equals("evmngr")) {
-            return new EventManager(name, dep);
-        } else if (name.equals("meteolcd")) {
+        if (name.equals("meteolcd")) {
             return new MeteoDisplay(name, dep);
         } else if (name.equals("meteo")) {
             return new MeteoStation(name, dep);
@@ -89,6 +87,8 @@ public class ControllerBuilder implements IBuilder {
             return new LightController(name, dep);
         } else if (name.equals("miscc")) {
             return new MiscController(name, dep);
+        } else if (name.equals("socket")) {
+            return new PowerSocket(name, dep);
         }
         return null;
     }

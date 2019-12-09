@@ -28,19 +28,10 @@ public class HttpServer implements IHttpServer, IAppModule {
     private IWebServer server;
 
     private String modName;
-    private String apiVer;
 
     public HttpServer(String name, IAppModule ...dep) {
         this.modName = name;
         this.server = (IWebServer) dep[0];
-    }
-
-    /**
-     * Set api version
-     * @throws IOException If fail to init server
-     */
-    public void setAPI(String api) throws IOException {
-        this.apiVer = api;
     }
 
     /**
@@ -52,7 +43,7 @@ public class HttpServer implements IHttpServer, IAppModule {
         if (name.equals("index")) {
             server.addHandler("/", handler);
         } else {
-            server.addHandler("/api/" + apiVer + "/" + name, handler);
+            server.addHandler("/" + name, handler);
         }
     }
 

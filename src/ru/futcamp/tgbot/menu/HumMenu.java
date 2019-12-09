@@ -58,7 +58,8 @@ public class HumMenu implements IMenu, IAppModule {
         StringBuilder txt = new StringBuilder("Увлажнение воздуха\n\n");
 
         for (HumInfo info : ctrl.getMeteo().getHumInfo()) {
-            txt.append("<b>").append(info.getAlias()).append("</b>\nСтатус: <b>").append(info.isStatus() ? "Работает" : "Отключен").append("</b>\n");
+            txt.append("<b>").append(info.getAlias()).append("</b>\nСтатус: <b>").append(info.isStatus() ? "Работает" : "Отключен").append("</b> ");
+            txt.append("Держать: <b>").append(info.getThreshold()).append("%</b>\n\n");
         }
 
         msg.setText(txt.toString());

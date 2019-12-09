@@ -18,8 +18,7 @@
 package ru.futcamp.controller.subcontrollers.modules.light;
 
 import ru.futcamp.IAppModule;
-import ru.futcamp.controller.events.EventListener;
-import ru.futcamp.controller.events.Events;
+import ru.futcamp.controller.subcontrollers.Events;
 import ru.futcamp.controller.subcontrollers.modules.light.db.ILightDB;
 import ru.futcamp.controller.subcontrollers.modules.light.db.LightDB;
 import ru.futcamp.utils.configs.IConfigs;
@@ -35,7 +34,7 @@ import java.util.Map;
 /**
  * Light control class
  */
-public class LightControl implements ILightControl, EventListener, IAppModule {
+public class LightControl implements ILightControl, IAppModule {
     private IConfigs cfg;
     private ILogger log;
 
@@ -214,46 +213,40 @@ public class LightControl implements ILightControl, EventListener, IAppModule {
         return modName;
     }
 
-    @Override
-    public void getEvent(Events event, String module, String ip, int channel) {
-        if (module.equals(modName)) {
-            switch (event) {
-                case SYNC_EVENT:
-                    for (Map.Entry<String, ILightDevice> entry : devices.entrySet()) {
-                        ILightDevice device = entry.getValue();
-                        if (device.getIp().equals(ip)) {
-                            try {
-                                device.syncStates();
-                            } catch (Exception e) {
-                                log.error("Fail to first start sync of light device \"" + device.getName() + "\"", "LIGHT");
-                            }
-                            return;
+    /**
+     * Generate new event
+     * @param ip Address of device
+     * @param channel Channel of device
+     * @param event Event type
+     */
+    public void genEvent(String ip, int channel, Events event) {
+        switch (event) {
+            case SYNC_EVENT:
+                for (Map.Entry<String, ILightDevice> entry : devices.entrySet()) {
+                    ILightDevice device = entry.getValue();
+                    if (device.getIp().equals(ip)) {
+                        try {
+                            device.syncStates();
+                        } catch (Exception e) {
+                            log.error("Fail to first start sync of light device \"" + device.getName() + "\"", "LIGHT");
                         }
                     }
-                    break;
+                }
+                break;
 
-                case SWITCH_STATUS_EVENT:
-                    for (Map.Entry<String, ILightDevice> entry : devices.entrySet()) {
-                        ILightDevice device = entry.getValue();
-                        if (device.getSwitchIP().equals(ip) && device.getSwitchChannel() == channel) {
-                            try {
-                                switchStatus(device.getAlias());
-                            } catch (Exception e) {
-                                log.error("Fail to switch status of light device \"" + device.getName() + "\"", "LIGHT");
-                            }
-                            return;
+            case SWITCH_STATUS_EVENT:
+                for (Map.Entry<String, ILightDevice> entry : devices.entrySet()) {
+                    ILightDevice device = entry.getValue();
+                    if (device.getSwitchIP().equals(ip) && device.getSwitchChannel() == channel) {
+                        try {
+                            switchStatus(device.getAlias());
+                        } catch (Exception e) {
+                            log.error("Fail to switch status of light device \"" + device.getName() + "\"", "LIGHT");
                         }
+                        return;
                     }
-                    break;
-
-                case SECURE_OPEN_EVENT:
-                    try {
-                        setGroupStatus("street", true);
-                    } catch (Exception e) {
-                        log.error("Fail to set light group status", "LIGHT");
-                    }
-                    break;
-            }
+                }
+                break;
         }
     }
 }

@@ -15,20 +15,16 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.subcontrollers.modules.therm;
+package ru.futcamp.utils.configs.settings.socket;
 
-import ru.futcamp.controller.ActMgmt;
-import ru.futcamp.controller.subcontrollers.Events;
+public class SocketSettings {
+    private SocketDeviceSettings[] devices;
 
-import java.util.List;
+    public SocketDeviceSettings[] getDevices() {
+        return devices;
+    }
 
-public interface IThermControl {
-    List<ThermInfo> getThermInfo();
-    ThermInfo getThermInfo(String alias) throws Exception;
-    void switchStatus(String alias) throws Exception;
-    void changeThreshold(String alias, ActMgmt action) throws Exception;
-    void loadStates() throws Exception;
-    void addDevice(IThermDevice device);
-    void getUpdate();
-    void genEvent(String socket, Events event) throws Exception;
+    public void setDevices(SocketDeviceSettings[] devices) {
+        this.devices = devices;
+    }
 }

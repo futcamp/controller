@@ -70,7 +70,7 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot,
     /**
      * Add new menu item
      * @param level Menu level
-     * @param menu Menu jbject
+     * @param menu Menu object
      */
     public void addMenu(LevelMenu level, IMenu menu) {
         this.menus.put(level, menu);

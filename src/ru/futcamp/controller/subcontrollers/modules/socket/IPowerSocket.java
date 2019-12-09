@@ -15,9 +15,17 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.events;
+package ru.futcamp.controller.subcontrollers.modules.socket;
 
-public interface IEventManager {
-    void addListener(Events event, EventListener listener);
-    void genEvent(Events event, String module, String ip, int channel);
+import ru.futcamp.controller.subcontrollers.Events;
+
+import java.util.List;
+
+public interface IPowerSocket {
+    List<SocketInfo> getSocketInfo();
+    SocketInfo getSocketInfo(String alias) throws Exception;
+    SocketInfo getSocketInfo(String ip, int channel) throws Exception;
+    void setStatus(String alias, boolean dev, boolean status);
+    void addDevice(ISocketDevice device);
+    void genEvent(String ip, int channel, Events event);
 }

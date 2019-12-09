@@ -21,7 +21,6 @@ public class HttpSettings {
     private int port;
     private int queue;
     private int threads;
-    private String api;
 
     public int getPort() {
         return port;
@@ -45,13 +44,5 @@ public class HttpSettings {
 
     public void setThreads(int threads) {
         this.threads = threads;
-    }
-
-    public String getApi() {
-        return api;
-    }
-
-    public void setApi(String api) {
-        this.api = api;
     }
 }

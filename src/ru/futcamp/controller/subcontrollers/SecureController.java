@@ -20,9 +20,6 @@ package ru.futcamp.controller.subcontrollers;
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.ActMgmt;
 import ru.futcamp.controller.TimeMgmt;
-import ru.futcamp.controller.events.EventListener;
-import ru.futcamp.controller.events.Events;
-import ru.futcamp.controller.events.IEventManager;
 import ru.futcamp.controller.subcontrollers.modules.secure.*;
 import ru.futcamp.controller.subcontrollers.modules.vision.CamDevice;
 import ru.futcamp.controller.subcontrollers.modules.vision.ICamDevice;
@@ -45,7 +42,6 @@ public class SecureController implements ISecureController, IAppModule {
     private IMainInHome mih;
     private IVision vision;
     private Runnable visionTask;
-    private IEventManager evMngr;
 
     private String modName;
 
@@ -53,12 +49,11 @@ public class SecureController implements ISecureController, IAppModule {
         this.modName = name;
         this.log = (ILogger) dep[0];
         this.cfg = (IConfigs) dep[1];
-        this.evMngr = (IEventManager) dep[2];
-        this.secure = (ISecurity) dep[3];
-        this.secureTask = (Runnable) dep[4];
-        this.mih = (IMainInHome) dep[5];
-        this.vision = (IVision) dep[6];
-        this.visionTask = (Runnable) dep[7];
+        this.secure = (ISecurity) dep[2];
+        this.secureTask = (Runnable) dep[3];
+        this.mih = (IMainInHome) dep[4];
+        this.vision = (IVision) dep[5];
+        this.visionTask = (Runnable) dep[6];
     }
 
     public boolean start() {
@@ -76,16 +71,17 @@ public class SecureController implements ISecureController, IAppModule {
     private boolean startSecureModule() {
         SecureSettings secCfg = cfg.getSecureCfg();
 
+        mih.setSockets(secCfg.getMih().getLamp(), secCfg.getMih().getRadio());
+
         /*
          * Add devices from configs
          */
         for (SecureDeviceSettings dev : secCfg.getDevices()) {
             SecureDevice device = new SecureDevice(dev.getName(), dev.getAlias(), dev.getIp(),
-                    dev.getChannel(), dev.getType(), dev.getGroup(), dev.getCamera().getName(),
-                    dev.getCamera().isEnable());
+                    dev.getChannel(), dev.getType(), dev.getGroup(), dev.getCamera());
             secure.addDevice(device);
             log.info("Add new secure device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\" chan \"" +
-                    dev.getChannel() + "\"", "CTRL");
+                    dev.getChannel() + "\"", "SECURECTRL");
         }
 
         /*
@@ -94,8 +90,7 @@ public class SecureController implements ISecureController, IAppModule {
         try {
             secure.loadStates();
         } catch (Exception e) {
-            log.error("Fail to load secure states from db: " + e.getMessage(), "CTRL");
-            return false;
+            log.error("Fail to load secure states from db: " + e.getMessage(), "SECURECTRL");
         }
 
         /*
@@ -104,8 +99,7 @@ public class SecureController implements ISecureController, IAppModule {
         try {
             mih.loadDataFromDb();
         } catch (Exception e) {
-            log.error("Fail to load ManInHome states from db: " + e.getMessage(), "CTRL");
-            return false;
+            log.error("Fail to load ManInHome states from db: " + e.getMessage(), "SECURECTRL");
         }
 
         /*
@@ -113,13 +107,6 @@ public class SecureController implements ISecureController, IAppModule {
          */
         Timer secureTmr = new Timer(true);
         secureTmr.scheduleAtFixedRate((TimerTask)secureTask, 0, 1000);
-
-        /*
-         * Add events
-         */
-        evMngr.addListener(Events.SYNC_EVENT, (EventListener) secure);
-        evMngr.addListener(Events.SYNC_EVENT, (EventListener) mih);
-        evMngr.addListener(Events.SECURE_OPEN_EVENT, (EventListener) secure);
         return true;
     }
 
@@ -133,7 +120,7 @@ public class SecureController implements ISecureController, IAppModule {
             ICamDevice device = new CamDevice(dev.getName(), dev.getAlias(), dev.getIp(), dev.getChannel(), dev.isWarming(), dev.getLamps());
             vision.addCamera(device);
             log.info("Add new vision device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\" chan \"" +
-                    dev.getChannel() + "\"", "CTRL");
+                    dev.getChannel() + "\"", "SECURECTRL");
         }
 
         /*
@@ -185,6 +172,14 @@ public class SecureController implements ISecureController, IAppModule {
      * @throws Exception If fail to save new status to DB
      */
     public void switchSecureStatus() throws Exception { secure.switchStatus(); }
+
+    /**
+     * Generate new event
+     * @param ip Address of device
+     * @param channel Channel of device
+     * @param event Event type
+     */
+    public void genSecureEvent(String ip, int channel, Events event) { secure.genEvent(ip, channel, event); }
 
     /**
      * Get photo from camera

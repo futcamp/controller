@@ -21,7 +21,7 @@ import com.alibaba.fastjson.JSON;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import ru.futcamp.IAppModule;
-import ru.futcamp.controller.events.Events;
+import ru.futcamp.controller.subcontrollers.Events;
 import ru.futcamp.controller.IController;
 import ru.futcamp.net.web.HttpResponse;
 import ru.futcamp.net.web.handlers.data.LightData;
@@ -58,11 +58,11 @@ public class LightHandler implements HttpHandler, IAppModule {
 
             switch (data.getEvent()) {
                 case "switch":
-                    ctrl.genEvent(Events.SWITCH_STATUS_EVENT, "light", inIP, data.getChannel());
+                    ctrl.getLight().genLightEvent(inIP, data.getChannel(), Events.SWITCH_STATUS_EVENT);
                     break;
 
                 case "sync":
-                    ctrl.genEvent(Events.SYNC_EVENT, "light", inIP, 0);
+                    ctrl.getLight().genLightEvent(inIP, 0, Events.SYNC_EVENT);
                     break;
             }
         } catch (Exception e) {

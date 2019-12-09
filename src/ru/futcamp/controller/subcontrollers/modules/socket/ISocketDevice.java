@@ -15,10 +15,15 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.events;
+package ru.futcamp.controller.subcontrollers.modules.socket;
 
-public enum Events {
-    SWITCH_STATUS_EVENT,
-    SYNC_EVENT,
-    SECURE_OPEN_EVENT
+public interface ISocketDevice {
+    String getAlias();
+    String getIp();
+    void syncStates() throws Exception;
+    boolean isStatus();
+    void setStatus(boolean status);
+    int getChannel();
+    String getModule();
+    void setDevice(boolean device);
 }

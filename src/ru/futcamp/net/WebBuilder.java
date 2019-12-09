@@ -41,12 +41,8 @@ public class WebBuilder implements IBuilder {
             return new HttpServer(name, dep);
         } else if (name.equals("ligh")) {
             return new LightHandler(name, dep);
-        } else if (name.equals("mihh")) {
-            return new MIHHandler(name, dep);
-        } else if (name.equals("humh")) {
-            return new HumHandler(name, dep);
-        } else if (name.equals("thermh")) {
-            return new ThermHandler(name, dep);
+        } else if (name.equals("sockh")) {
+            return new SocketHandler(name, dep);
         } else {
             return null;
         }

@@ -19,7 +19,7 @@ package ru.futcamp.controller.subcontrollers.modules.hum;
 
 public class HumData {
     private boolean status;
-    private boolean heater;
+    private boolean humidifier;
     private int threshold;
 
     public synchronized boolean isStatus() {
@@ -30,12 +30,12 @@ public class HumData {
         this.status = status;
     }
 
-    public synchronized boolean isHeater() {
-        return heater;
+    public synchronized boolean isHumidifier() {
+        return humidifier;
     }
 
-    public synchronized void setHeater(boolean heater) {
-        this.heater = heater;
+    public synchronized void setHumidifier(boolean humidifier) {
+        this.humidifier = humidifier;
     }
 
     public synchronized int getThreshold() {

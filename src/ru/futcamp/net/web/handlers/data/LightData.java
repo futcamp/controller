@@ -21,6 +21,8 @@ public class LightData {
     private String event;
     private int channel;
 
+    public LightData() {}
+
     public LightData(String ev, int chan) {
         this.event = ev;
         this.channel = chan;

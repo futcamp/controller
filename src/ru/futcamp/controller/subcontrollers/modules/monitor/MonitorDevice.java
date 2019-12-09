@@ -20,7 +20,7 @@ package ru.futcamp.controller.subcontrollers.modules.monitor;
 import ru.futcamp.controller.subcontrollers.modules.light.mod.LightModule;
 import ru.futcamp.controller.subcontrollers.modules.meteo.mod.MeteoModule;
 import ru.futcamp.controller.subcontrollers.modules.secure.mod.SecureModule;
-import ru.futcamp.controller.subcontrollers.modules.therm.mod.ThermModule;
+import ru.futcamp.controller.subcontrollers.modules.socket.mod.SocketModule;
 
 public class MonitorDevice extends MonitorData implements IMonitorDevice {
     private String name;
@@ -48,8 +48,8 @@ public class MonitorDevice extends MonitorData implements IMonitorDevice {
                 MeteoModule.checkStatus(ip);
                 break;
 
-            case "therm":
-                ThermModule.checkStatus(ip);
+            case "socket":
+                SocketModule.checkStatus(ip);
                 break;
 
             case "secure":

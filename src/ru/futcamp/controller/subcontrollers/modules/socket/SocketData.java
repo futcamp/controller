@@ -15,8 +15,25 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.events;
+package ru.futcamp.controller.subcontrollers.modules.socket;
 
-public interface EventListener {
-    void getEvent(Events event,  String module, String ip, int channel);
+public class SocketData {
+    private boolean status;
+    private boolean device;
+
+    public synchronized boolean isStatus() {
+        return status;
+    }
+
+    public synchronized void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public boolean isDevice() {
+        return device;
+    }
+
+    public void setDevice(boolean device) {
+        this.device = device;
+    }
 }

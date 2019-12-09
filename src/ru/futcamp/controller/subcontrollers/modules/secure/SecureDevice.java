@@ -30,9 +30,8 @@ public class SecureDevice extends SecureData implements ISecureDevice {
     private String type;
     private String group;
     private String camera;
-    private boolean watch;
 
-    public SecureDevice(String name, String alias, String ip, int chan, String type, String group, String cam, boolean watch) {
+    public SecureDevice(String name, String alias, String ip, int chan, String type, String group, String cam) {
         this.name = name;
         this.alias = alias;
         this.ip = ip;
@@ -40,7 +39,6 @@ public class SecureDevice extends SecureData implements ISecureDevice {
         this.type = type;
         this.group = group;
         this.camera = cam;
-        this.watch = watch;
     }
 
     /**
@@ -102,9 +100,5 @@ public class SecureDevice extends SecureData implements ISecureDevice {
 
     public String getCamera() {
         return camera;
-    }
-
-    public boolean isWatch() {
-        return watch;
     }
 }

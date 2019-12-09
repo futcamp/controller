@@ -24,7 +24,7 @@ public class SecureDeviceSettings {
     private int channel;
     private String type;
     private String group;
-    private SecureCamSettings camera;
+    private String camera;
 
     public String getName() {
         return name;
@@ -74,11 +74,11 @@ public class SecureDeviceSettings {
         this.group = group;
     }
 
-    public SecureCamSettings getCamera() {
+    public String getCamera() {
         return camera;
     }
 
-    public void setCamera(SecureCamSettings camera) {
+    public void setCamera(String camera) {
         this.camera = camera;
     }
 }

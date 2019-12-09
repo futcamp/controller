@@ -71,7 +71,7 @@ public class HumCtrlMenu implements IMenu, IAppModule {
         HumInfo info = ctrl.getMeteo().getHumInfo(menu.getDevice());
 
         String txt = "Настройка увлажнения\n\n";
-        txt += "<b>" + menu.getDevice() + "</b>\n";
+        txt += "Имя: <b>" + menu.getDevice() + "</b>\n";
         txt += "Статус: <b>" + (info.isStatus() ? "Работает" : "Отключен") + "</b>\n";
         txt += "Обогреватель: <b>" + (info.isHeater() ? "Работает" : "Отключен") + "</b>\n";
         txt += "Текущая влажность: <b>" + ctrl.getMeteo().getMeteoInfo(info.getSensor()).getHum() + "%</b>\n";

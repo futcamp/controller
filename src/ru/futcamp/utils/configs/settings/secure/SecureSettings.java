@@ -22,7 +22,7 @@ import ru.futcamp.utils.configs.settings.RedisSettings;
 public class SecureSettings {
     private int interval;
     private RedisSettings db;
-    private String mih;
+    private MIHSettings mih;
     private String[] lamps;
     private SecureDeviceSettings[] devices;
 
@@ -50,19 +50,19 @@ public class SecureSettings {
         this.db = db;
     }
 
-    public String getMih() {
-        return mih;
-    }
-
-    public void setMih(String mih) {
-        this.mih = mih;
-    }
-
     public String[] getLamps() {
         return lamps;
     }
 
     public void setLamps(String[] lamps) {
         this.lamps = lamps;
+    }
+
+    public MIHSettings getMih() {
+        return mih;
+    }
+
+    public void setMih(MIHSettings mih) {
+        this.mih = mih;
     }
 }

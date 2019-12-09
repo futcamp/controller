@@ -17,7 +17,6 @@
 
 package ru.futcamp.tgbot;
 
-import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.futcamp.tgbot.menu.IMenu;
 import ru.futcamp.tgbot.menu.LevelMenu;
 

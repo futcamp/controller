@@ -21,7 +21,7 @@ import com.alibaba.fastjson.JSON;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import ru.futcamp.IAppModule;
-import ru.futcamp.controller.events.Events;
+import ru.futcamp.controller.subcontrollers.Events;
 import ru.futcamp.controller.IController;
 import ru.futcamp.net.web.HttpResponse;
 import ru.futcamp.net.web.handlers.data.SecureData;
@@ -58,11 +58,11 @@ public class SecureHandler implements HttpHandler, IAppModule {
 
             switch (data.getEvent()) {
                 case "open":
-                    ctrl.genEvent(Events.SECURE_OPEN_EVENT, "secure", inIP, data.getChannel());
+                    ctrl.getSecure().genSecureEvent(inIP, data.getChannel(), Events.SECURE_OPEN_EVENT);
                     break;
 
                 case "sync":
-                    ctrl.genEvent(Events.SYNC_EVENT, "secure", inIP, 0);
+                    ctrl.getSecure().genSecureEvent(inIP, 0, Events.SYNC_EVENT);
                     break;
             }
         } catch (Exception e) {

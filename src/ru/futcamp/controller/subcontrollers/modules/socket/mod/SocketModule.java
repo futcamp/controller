@@ -15,27 +15,29 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.subcontrollers.modules.hum.mod;
+package ru.futcamp.controller.subcontrollers.modules.socket.mod;
 
 import ru.futcamp.net.web.HttpClient;
 
 /**
  * Therm control communication
  */
-public class HumModule {
+public class SocketModule {
     private static final int TIMEOUT = 4000;
 
     /**
      * Sync states with device
      * @param ip Address of device
+     * @param channel Device channel
      * @param status Therm control status
-     * @param heater Heater state
      * @throws Exception If fail to sync with device
      */
-    public static void syncStates(String ip, boolean status, boolean heater) throws Exception {
-        synchronized (HumModule.class) {
-            HttpClient client = new HttpClient("http://" + ip + "/therm?status=" + status + "&heater=" + heater);
+    public static void syncState(String ip, int channel, boolean device, boolean status) throws Exception {
+        synchronized (SocketModule.class) {
+            System.out.println("OK1");
+            HttpClient client = new HttpClient("http://" + ip + "/socket?device=" + device + "&chan=" + channel + "&status=" + status);
             client.getRequest(TIMEOUT);
+            System.out.println("EXIT1");
         }
     }
 
@@ -45,9 +47,11 @@ public class HumModule {
      * @throws Exception If fail to get status
      */
     public static void checkStatus(String ip) throws Exception {
-        synchronized (HumModule.class) {
+        synchronized (SocketModule.class) {
+            System.out.println("OK2");
             HttpClient client = new HttpClient("http://" + ip + "/");
             client.getRequest(TIMEOUT);
+            System.out.println("EXIT2");
         }
     }
 }

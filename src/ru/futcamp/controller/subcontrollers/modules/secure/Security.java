@@ -18,8 +18,7 @@
 package ru.futcamp.controller.subcontrollers.modules.secure;
 
 import ru.futcamp.IAppModule;
-import ru.futcamp.controller.events.EventListener;
-import ru.futcamp.controller.events.Events;
+import ru.futcamp.controller.subcontrollers.Events;
 import ru.futcamp.controller.subcontrollers.modules.light.ILightControl;
 import ru.futcamp.controller.subcontrollers.modules.secure.db.ISecureDB;
 import ru.futcamp.controller.subcontrollers.modules.secure.db.SecureDB;
@@ -36,7 +35,7 @@ import java.util.List;
 /**
  * Security process
  */
-public class Security extends SecureData implements ISecurity, EventListener, IAppModule {
+public class Security extends SecureData implements ISecurity, IAppModule {
     private ILogger log;
     private INotifier notify;
     private IConfigs cfg;
@@ -152,46 +151,48 @@ public class Security extends SecureData implements ISecurity, EventListener, IA
         return alarm;
     }
 
-    @Override
-    public void getEvent(Events event, String module, String ip, int channel) {
-        if (module.equals(modName)) {
-            switch (event) {
-                case SYNC_EVENT:
+    /**
+     * Generate new event
+     * @param ip Address of device
+     * @param channel Channel of device
+     * @param event Event type
+     */
+    public void genEvent(String ip, int channel, Events event) {
+        switch (event) {
+            case SYNC_EVENT:
+                for (ISecureDevice device : devices) {
+                    if (device.getIp().equals(ip)) {
+                        try {
+                            device.syncSecureAlarm(isAlarm());
+                        } catch (Exception e) {
+                            log.error("Fail to first start sync of secure device \"" + device.getName() + "\"", "SECURE");
+                        }
+                    }
+                }
+                break;
+
+            case SECURE_OPEN_EVENT:
+                if (!isAlarm() && isStatus()) {
                     for (ISecureDevice device : devices) {
-                        if (device.getIp().equals(ip)) {
+                        if (device.getIp().equals(ip) && device.getChannel() == channel) {
+                            setAlarm(true);
+                            /*
+                             * Send notify
+                             */
                             try {
-                                device.syncSecureAlarm(isAlarm());
-                            } catch (Exception e) {
-                                log.error("Fail to first start sync of secure device \"" + device.getName() + "\"", "LIGHT");
-                            }
-                        }
-                    }
-
-                    break;
-
-                case SECURE_OPEN_EVENT:
-                    if (!isAlarm() && isStatus()) {
-                        for (ISecureDevice device : devices) {
-                            if (device.getIp().equals(ip) && device.getChannel() == channel) {
-                                setAlarm(true);
-                                /*
-                                 * Send notify
-                                 */
-                                try {
-                                    notify.sendNotify("ОХРАНА", "Внимание! Проникновение! Открыта: " + device.getAlias());
-                                    if (device.isWatch()) {
-                                        Thread.sleep(500);
-                                        vision.getPhoto(device.getCamera(), "/tmp/secure.jpg");
-                                        notify.sendNotifyPhoto(device.getCamera(), "/tmp/secure.jpg");
-                                    }
-                                } catch (Exception e) {
-                                    log.error("Fail to send secure notify: " + e.getMessage(), "SECURE");
+                                notify.sendNotify("ОХРАНА", "Внимание! Проникновение! Открыта: " + device.getAlias());
+                                if (!device.getCamera().equals("")) {
+                                    Thread.sleep(500);
+                                    vision.getPhoto(device.getCamera(), "/tmp/secure.jpg");
+                                    notify.sendNotifyPhoto(device.getCamera(), "/tmp/secure.jpg");
                                 }
+                            } catch (Exception e) {
+                                log.error("Fail to send secure notify: " + e.getMessage(), "SECURE");
                             }
                         }
                     }
-                    break;
-            }
+                }
+                break;
         }
     }
 }

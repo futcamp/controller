@@ -61,7 +61,7 @@ public class MeteoMenu implements IMenu, IAppModule {
         txt.append("Метео данные\n\n");
         for (MeteoInfo info : infoList) {
             txt.append("<b>").append(info.getAlias()).append("</b>\nТемпература: <b>").append(info.getTemp()).append("°</b> ");
-            if (info.getHum() != 0) {
+            if (info.getHum() != 0 && info.getHum() != 1) {
                 txt.append("Влажность: <b>").append(info.getHum()).append("%</b>\n\n");
             } else {
                 txt.append("\n\n");

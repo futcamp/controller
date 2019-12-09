@@ -20,7 +20,7 @@ package ru.futcamp.utils.configs.settings.hum;
 public class HumDeviceSettings {
     private String name;
     private String alias;
-    private String ip;
+    private String socket;
     private String sensor;
 
     public String getName() {
@@ -39,12 +39,12 @@ public class HumDeviceSettings {
         this.alias = alias;
     }
 
-    public String getIp() {
-        return ip;
+    public String getSocket() {
+        return socket;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setSocket(String ip) {
+        this.socket = ip;
     }
 
     public String getSensor() {

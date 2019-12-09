@@ -71,7 +71,7 @@ public class ThermCtrlMenu implements IMenu, IAppModule {
         ThermInfo info = ctrl.getMeteo().getThermInfo(menu.getDevice());
 
         String txt = "Настройка обогрева\n\n";
-        txt += "<b>" + menu.getDevice() + "</b>\n";
+        txt += "Имя: <b>" + menu.getDevice() + "</b>\n";
         txt += "Статус: <b>" + (info.isStatus() ? "Работает" : "Отключен") + "</b>\n";
         txt += "Обогреватель: <b>" + (info.isHeater() ? "Работает" : "Отключен") + "</b>\n";
         txt += "Текущая температура: <b>" + ctrl.getMeteo().getMeteoInfo(info.getSensor()).getTemp() + "°</b>\n";

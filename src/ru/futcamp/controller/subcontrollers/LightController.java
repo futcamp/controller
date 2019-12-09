@@ -18,9 +18,6 @@
 package ru.futcamp.controller.subcontrollers;
 
 import ru.futcamp.IAppModule;
-import ru.futcamp.controller.events.EventListener;
-import ru.futcamp.controller.events.Events;
-import ru.futcamp.controller.events.IEventManager;
 import ru.futcamp.controller.subcontrollers.modules.light.ILightControl;
 import ru.futcamp.controller.subcontrollers.modules.light.ILightDevice;
 import ru.futcamp.controller.subcontrollers.modules.light.LightDevice;
@@ -35,7 +32,6 @@ import java.util.List;
 public class LightController implements ILightController, IAppModule {
     private ILogger log;
     private IConfigs cfg;
-    private IEventManager evMngr;
     private ILightControl light;
 
     private String modName;
@@ -44,8 +40,7 @@ public class LightController implements ILightController, IAppModule {
         this.modName = name;
         this.log = (ILogger) dep[0];
         this.cfg = (IConfigs) dep[1];
-        this.evMngr = (IEventManager) dep[2];
-        this.light = (ILightControl) dep[3];
+        this.light = (ILightControl) dep[2];
     }
 
     public boolean start() {
@@ -66,7 +61,7 @@ public class LightController implements ILightController, IAppModule {
             ILightDevice device = new LightDevice(dev.getName(), dev.getAlias(), dev.getGroup(), dev.getIp(), dev.getChannel(), dev.getSwitcher().getIp(), dev.getSwitcher().getChannel());
             light.addDevice(device);
             log.info("Add new light device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\" chan \"" +
-                    device.getChannel() + "\"", "CTRL");
+                    device.getChannel() + "\"", "LIGHTCTRL");
         }
 
         /*
@@ -75,15 +70,8 @@ public class LightController implements ILightController, IAppModule {
         try {
             light.loadStates();
         } catch (Exception e) {
-            log.error("Fail to load light states from db: " + e.getMessage(), "CTRL");
-            return false;
+            log.error("Fail to load light states from db: " + e.getMessage(), "LIGHTCTRL");
         }
-
-        /*
-         * Add events
-         */
-        evMngr.addListener(Events.SYNC_EVENT, (EventListener) light);
-        evMngr.addListener(Events.SWITCH_STATUS_EVENT, (EventListener) light);
         return true;
     }
 
@@ -145,6 +133,14 @@ public class LightController implements ILightController, IAppModule {
     public LightInfo getLightInfo(String alias) throws Exception {
         return light.getLightInfo(alias);
     }
+
+    /**
+     * Generate new event
+     * @param ip Address of device
+     * @param channel Channel of device
+     * @param event Event type
+     */
+    public void genLightEvent(String ip, int channel, Events event) { light.genEvent(ip, channel, event); }
 
     public String getModName() {
         return modName;

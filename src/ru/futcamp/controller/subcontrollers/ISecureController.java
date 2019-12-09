@@ -31,6 +31,7 @@ public interface ISecureController {
 
     SecureInfo getSecureInfo();
     void switchSecureStatus() throws Exception;
+    void genSecureEvent(String ip, int channel, Events event);
 
     void getVisionPhoto(String alias, String fileName) throws Exception;
     void getVisionPhoto(String alias, String fileName, boolean isLight) throws Exception;

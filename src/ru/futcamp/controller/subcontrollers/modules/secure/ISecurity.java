@@ -17,9 +17,12 @@
 
 package ru.futcamp.controller.subcontrollers.modules.secure;
 
+import ru.futcamp.controller.subcontrollers.Events;
+
 public interface ISecurity {
     void addDevice(ISecureDevice device);
     void loadStates() throws Exception;
     void switchStatus() throws Exception;
     SecureInfo getSecureInfo();
+    void genEvent(String ip, int channel, Events event);
 }

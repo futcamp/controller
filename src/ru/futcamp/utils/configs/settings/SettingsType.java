@@ -27,5 +27,6 @@ public enum SettingsType {
     HUM_SET,
     LIGHT_SET,
     VISION_SET,
-    MONITOR_SET
+    MONITOR_SET,
+    SOCKET_SET
 }

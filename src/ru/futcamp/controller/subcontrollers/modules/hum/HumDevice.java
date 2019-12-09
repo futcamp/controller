@@ -17,20 +17,18 @@
 
 package ru.futcamp.controller.subcontrollers.modules.hum;
 
-import ru.futcamp.controller.subcontrollers.modules.hum.mod.HumModule;
-
 /**
  * Therm control device
  */
 public class HumDevice extends HumData implements IHumDevice {
     private String name;
     private String alias;
-    private String ip;
+    private String socket;
     private String sensor;
 
-    public HumDevice(String name, String alias, String ip, String sensor) {
+    public HumDevice(String name, String alias, String socket, String sensor) {
         this.name = name;
-        this.ip = ip;
+        this.socket = socket;
         this.alias = alias;
         this.sensor = sensor;
     }
@@ -43,14 +41,6 @@ public class HumDevice extends HumData implements IHumDevice {
     @Override
     public void setThreshold(int threshold) {
         super.setThreshold(threshold);
-    }
-
-    /**
-     * Sync states with device
-     * @throws Exception If fail to sync state
-     */
-    public void syncStates() throws Exception {
-        HumModule.syncStates(ip, isStatus(), isHeater());
     }
 
     public String getName() {
@@ -69,12 +59,12 @@ public class HumDevice extends HumData implements IHumDevice {
         this.alias = alias;
     }
 
-    public String getIp() {
-        return ip;
+    public String getSocket() {
+        return socket;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setSocket(String socket) {
+        this.socket = socket;
     }
 
     public String getSensor() {

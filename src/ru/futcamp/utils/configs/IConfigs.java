@@ -23,6 +23,7 @@ import ru.futcamp.utils.configs.settings.light.LightSettings;
 import ru.futcamp.utils.configs.settings.meteo.MeteoSettings;
 import ru.futcamp.utils.configs.settings.monitor.MonitorSettings;
 import ru.futcamp.utils.configs.settings.secure.SecureSettings;
+import ru.futcamp.utils.configs.settings.socket.SocketSettings;
 import ru.futcamp.utils.configs.settings.therm.ThermSettings;
 import ru.futcamp.utils.configs.settings.vision.VisionSettings;
 
@@ -39,4 +40,5 @@ public interface IConfigs {
     VisionSettings getVisionCfg();
     MonitorSettings getMonitorCfg();
     HumSettings getHumCfg();
+    SocketSettings getSockCfg();
 }

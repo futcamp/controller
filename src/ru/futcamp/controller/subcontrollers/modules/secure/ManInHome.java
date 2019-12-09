@@ -19,13 +19,11 @@ package ru.futcamp.controller.subcontrollers.modules.secure;
 
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.ActMgmt;
-import ru.futcamp.controller.events.EventListener;
-import ru.futcamp.controller.events.Events;
 import ru.futcamp.controller.TimeMgmt;
 import ru.futcamp.controller.subcontrollers.modules.light.ILightControl;
 import ru.futcamp.controller.subcontrollers.modules.secure.db.ISecureDB;
 import ru.futcamp.controller.subcontrollers.modules.secure.db.SecureDB;
-import ru.futcamp.controller.subcontrollers.modules.secure.mod.SecureModule;
+import ru.futcamp.controller.subcontrollers.modules.socket.IPowerSocket;
 import ru.futcamp.utils.TimeControl;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.configs.settings.RedisSettings;
@@ -36,25 +34,22 @@ import java.sql.SQLException;
 /**
  * Main In Home security system
  */
-public class ManInHome extends MIHData implements IMainInHome, EventListener, IAppModule {
+public class ManInHome extends MIHData implements IMainInHome, IAppModule {
     private ILogger log;
     private ILightControl light;
     private IConfigs cfg;
+    private IPowerSocket socket;
 
     private String modName;
+    private String radioSocket;
+    private String lampSocket;
 
     public ManInHome(String name, IAppModule ...dep) {
         modName = name;
         this.log = (ILogger) dep[0];
         this.light = (ILightControl) dep[1];
         this.cfg = (IConfigs) dep[2];
-    }
-
-    /**
-     * Sync states with device
-     */
-    public void syncStates() throws Exception {
-        SecureModule.setMIHStates(cfg.getSecureCfg().getMih(), isRadio(), isLamp());
+        this.socket = (IPowerSocket) dep[3];
     }
 
     public void switchStatus() throws Exception {
@@ -91,7 +86,15 @@ public class ManInHome extends MIHData implements IMainInHome, EventListener, IA
             }
         }
 
-        syncStates();
+        /*
+         * Sync states with device
+         */
+        try {
+            socket.setStatus(lampSocket, isLamp(), isStatus());
+            socket.setStatus(radioSocket, isRadio(), isStatus());
+        } catch (Exception e) {
+            log.error("Fail to sync MIH states: " + e.getMessage(), "SECURE");
+        }
     }
 
     /**
@@ -203,12 +206,12 @@ public class ManInHome extends MIHData implements IMainInHome, EventListener, IA
                 if (!isLamp() || !isRadio()) {
                     setLamp(true);
                     setRadio(true);
-
                     /*
                      * Sync states with device
                      */
                     try {
-                        syncStates();
+                        socket.setStatus(lampSocket, isLamp(), isStatus());
+                        socket.setStatus(radioSocket, isRadio(), isStatus());
                     } catch (Exception e) {
                         log.error("Fail to sync MIH states: " + e.getMessage(), "SECURE");
                     }
@@ -228,7 +231,8 @@ public class ManInHome extends MIHData implements IMainInHome, EventListener, IA
                      * Sync states with device
                      */
                     try {
-                        syncStates();
+                        socket.setStatus(lampSocket, isLamp(), isStatus());
+                        socket.setStatus(radioSocket, isRadio(), isStatus());
                     } catch (Exception e) {
                         log.error("Fail to sync MIH states: " + e.getMessage(), "SECURE");
                     }
@@ -241,18 +245,8 @@ public class ManInHome extends MIHData implements IMainInHome, EventListener, IA
         return modName;
     }
 
-    @Override
-    public void getEvent(Events event, String module, String ip, int channel) {
-        if (module.equals(modName)) {
-            switch (event) {
-                case SYNC_EVENT:
-                    try {
-                        syncStates();
-                    } catch (Exception e) {
-                        log.error("Fail to first start sync of MIH device", "MIH");
-                    }
-                    break;
-            }
-        }
+    public void setSockets(String lampSocket, String radioSocket) {
+        this.lampSocket = lampSocket;
+        this.radioSocket = radioSocket;
     }
 }
