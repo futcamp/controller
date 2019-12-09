@@ -22,9 +22,9 @@ import ru.futcamp.controller.TimeMgmt;
 
 public interface IMainInHome {
     void loadDataFromDb() throws Exception;
-    void syncStates() throws Exception;
     void switchStatus() throws Exception;
     void changeTime(TimeMgmt time, ActMgmt action) throws Exception;
     MIHInfo getMIHInfo();
     void getUpdate();
+    void setSockets(String lampSocket, String radioSocket);
 }

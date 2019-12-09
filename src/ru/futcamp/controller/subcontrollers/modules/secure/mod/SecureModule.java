@@ -39,20 +39,6 @@ public class SecureModule {
     }
 
     /**
-     * Sync states with device
-     * @param ip Address of device
-     * @param radio Radio state
-     * @param lamp Lamp state
-     * @throws Exception If fail to send states
-     */
-    public static void setMIHStates(String ip, boolean radio, boolean lamp) throws Exception {
-        synchronized (SecureModule.class) {
-            HttpClient client = new HttpClient("http://" + ip + "/mih?radio=" + radio + "&lamp=" + lamp);
-            client.getRequest(TIMEOUT);
-        }
-    }
-
-    /**
      * Check device status
      * @param ip Address of device
      * @throws Exception If fail to get status

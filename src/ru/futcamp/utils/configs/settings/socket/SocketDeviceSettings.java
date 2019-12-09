@@ -15,25 +15,28 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.net.web.handlers.data;
+package ru.futcamp.utils.configs.settings.socket;
 
-public class SecureData {
-    private String event;
+public class SocketDeviceSettings {
+    private String alias;
+    private String ip;
     private int channel;
+    private String module;
 
-    public SecureData() {}
-
-    public SecureData(String ev, int chan) {
-        this.event = ev;
-        this.channel = chan;
+    public String getAlias() {
+        return alias;
     }
 
-    public String getEvent() {
-        return event;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
-    public void setEvent(String event) {
-        this.event = event;
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
     public int getChannel() {
@@ -42,5 +45,13 @@ public class SecureData {
 
     public void setChannel(int channel) {
         this.channel = channel;
+    }
+
+    public String getModule() {
+        return module;
+    }
+
+    public void setModule(String module) {
+        this.module = module;
     }
 }

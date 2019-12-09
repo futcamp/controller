@@ -17,7 +17,6 @@
 
 package ru.futcamp.controller;
 
-import ru.futcamp.controller.events.Events;
 import ru.futcamp.controller.subcontrollers.ILightController;
 import ru.futcamp.controller.subcontrollers.IMeteoController;
 import ru.futcamp.controller.subcontrollers.IMiscController;
@@ -29,5 +28,4 @@ public interface IController {
     ILightController getLight();
     IMiscController getMisc();
     boolean startAll();
-    void genEvent(Events ev, String mod, String ip, int chan) throws Exception;
 }

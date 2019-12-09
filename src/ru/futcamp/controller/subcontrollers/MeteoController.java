@@ -19,9 +19,6 @@ package ru.futcamp.controller.subcontrollers;
 
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.ActMgmt;
-import ru.futcamp.controller.events.EventListener;
-import ru.futcamp.controller.events.Events;
-import ru.futcamp.controller.events.IEventManager;
 import ru.futcamp.controller.subcontrollers.modules.hum.HumDevice;
 import ru.futcamp.controller.subcontrollers.modules.hum.HumInfo;
 import ru.futcamp.controller.subcontrollers.modules.hum.IHumControl;
@@ -50,7 +47,6 @@ import java.util.TimerTask;
 public class MeteoController implements IMeteoController, IAppModule {
     private ILogger log;
     private IConfigs cfg;
-    private IEventManager evMngr;
     private IMeteoStation meteo;
     private Runnable meteoTask;
     private IThermControl therm;
@@ -64,13 +60,12 @@ public class MeteoController implements IMeteoController, IAppModule {
         modName = name;
         this.log = (ILogger) dep[0];
         this.cfg = (IConfigs) dep[1];
-        this.evMngr = (IEventManager) dep[2];
-        this.meteo = (IMeteoStation) dep[3];
-        this.meteoTask = (Runnable) dep[4];
-        this.therm = (IThermControl) dep[5];
-        this.thermTask = (Runnable) dep[6];
-        this.hum = (IHumControl) dep[7];
-        this.humTask = (Runnable) dep[8];
+        this.meteo = (IMeteoStation) dep[2];
+        this.meteoTask = (Runnable) dep[3];
+        this.therm = (IThermControl) dep[4];
+        this.thermTask = (Runnable) dep[5];
+        this.hum = (IHumControl) dep[6];
+        this.humTask = (Runnable) dep[7];
     }
 
     public boolean start() {
@@ -119,9 +114,9 @@ public class MeteoController implements IMeteoController, IAppModule {
          * Add devices from cfg
          */
         for (ThermDeviceSettings dev : thermCfg.getDevices()) {
-            IThermDevice device = new ThermDevice(dev.getName(), dev.getAlias(), dev.getIp(), dev.getSensor());
+            IThermDevice device = new ThermDevice(dev.getName(), dev.getAlias(), dev.getSocket(), dev.getSensor());
             therm.addDevice(device);
-            log.info("Add new therm device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\"", "CTRL");
+            log.info("Add new therm device name \"" + dev.getName() + "\" ip \"" + dev.getSocket() + "\"", "METEOCTRL");
         }
 
         /*
@@ -130,8 +125,7 @@ public class MeteoController implements IMeteoController, IAppModule {
         try {
             therm.loadStates();
         } catch (Exception e) {
-            log.error("Fail to load therm states from db: " + e.getMessage(), "CTRL");
-            return false;
+            log.error("Fail to load therm states from db: " + e.getMessage(), "METEOCTRL");
         }
 
         /*
@@ -139,11 +133,6 @@ public class MeteoController implements IMeteoController, IAppModule {
          */
         Timer thermTmr = new Timer(true);
         thermTmr.scheduleAtFixedRate((TimerTask)thermTask, 0, 1000);
-
-        /*
-         * Add events
-         */
-        evMngr.addListener(Events.SYNC_EVENT, (EventListener) therm);
         return true;
     }
 
@@ -154,9 +143,9 @@ public class MeteoController implements IMeteoController, IAppModule {
          * Add devices from cfg
          */
         for (HumDeviceSettings dev : humCfg.getDevices()) {
-            IHumDevice device = new HumDevice(dev.getName(), dev.getAlias(), dev.getIp(), dev.getSensor());
+            IHumDevice device = new HumDevice(dev.getName(), dev.getAlias(), dev.getSocket(), dev.getSensor());
             hum.addDevice(device);
-            log.info("Add new hum device name \"" + dev.getName() + "\" ip \"" + dev.getIp() + "\"", "CTRL");
+            log.info("Add new hum device name \"" + dev.getName() + "\" ip \"" + dev.getSocket() + "\"", "METEOCTRL");
         }
 
         /*
@@ -165,20 +154,16 @@ public class MeteoController implements IMeteoController, IAppModule {
         try {
             hum.loadStates();
         } catch (Exception e) {
-            log.error("Fail to load hum states from db: " + e.getMessage(), "CTRL");
-            return false;
+            log.error("Fail to load hum states from db: " + e.getMessage(), "METEOCTRL");
         }
-
+        try {
+            hum.switchStatus("Каб.531");
+        } catch (Exception ignored) {}
         /*
          * Run task
          */
         Timer humTmr = new Timer(true);
         humTmr.scheduleAtFixedRate((TimerTask)humTask, 0, 1000);
-
-        /*
-         * Add events
-         */
-        evMngr.addListener(Events.SYNC_EVENT, (EventListener) hum);
         return true;
     }
 
@@ -244,6 +229,14 @@ public class MeteoController implements IMeteoController, IAppModule {
     }
 
     /**
+     * Generate new event
+     * @param socket Power socket
+     * @param event Event type
+     * @throws Exception If fail to gen event
+     */
+    public void genThermEvent(String socket, Events event) throws Exception { therm.genEvent(socket, event); }
+
+    /**
      * Switch current therm status
      * @param alias Alias of device
      * @throws Exception If fail to set new status
@@ -274,6 +267,14 @@ public class MeteoController implements IMeteoController, IAppModule {
     public void changeHumThreshold(String alias, ActMgmt action) throws Exception {
         hum.changeThreshold(alias, action);
     }
+
+    /**
+     * Generate new event
+     * @param socket Power socket
+     * @param event Event type
+     * @throws Exception If fail to gen event
+     */
+    public void genHumEvent(String socket, Events event) throws Exception { hum.genEvent(socket, event); }
 
     public String getModName() {
         return modName;

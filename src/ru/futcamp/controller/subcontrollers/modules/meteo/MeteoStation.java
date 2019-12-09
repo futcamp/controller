@@ -151,7 +151,7 @@ public class MeteoStation implements IMeteoStation, IAppModule {
             try {
                 saveMeteoData(device);
             } catch (Exception e) {
-                log.error("Fail to save meteo data to ru.futcamp.db: " + e.getMessage(), "METEO");
+                log.error("Fail to save meteo data to db: " + e.getMessage(), "METEO");
             }
         }
     }

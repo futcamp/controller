@@ -19,12 +19,12 @@ package ru.futcamp.controller.subcontrollers.modules.hum;
 
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.ActMgmt;
-import ru.futcamp.controller.events.EventListener;
-import ru.futcamp.controller.events.Events;
+import ru.futcamp.controller.subcontrollers.Events;
 import ru.futcamp.controller.subcontrollers.modules.hum.db.IHumDB;
 import ru.futcamp.controller.subcontrollers.modules.hum.db.HumDB;
 import ru.futcamp.controller.subcontrollers.modules.hum.db.HumDBData;
 import ru.futcamp.controller.subcontrollers.modules.meteo.IMeteoStation;
+import ru.futcamp.controller.subcontrollers.modules.socket.IPowerSocket;
 import ru.futcamp.utils.configs.IConfigs;
 import ru.futcamp.utils.configs.settings.RedisSettings;
 import ru.futcamp.utils.log.ILogger;
@@ -38,10 +38,11 @@ import java.util.Map;
 /**
  * Humidity control class
  */
-public class HumControl implements IHumControl, EventListener, IAppModule {
+public class HumControl implements IHumControl, IAppModule {
     private ILogger log;
     private IMeteoStation meteo;
     private IConfigs cfg;
+    private IPowerSocket socket;
 
     private Map<String, IHumDevice> devices = new HashMap<>();
     private String modName;
@@ -51,6 +52,7 @@ public class HumControl implements IHumControl, EventListener, IAppModule {
         this.log = (ILogger) dep[0];
         this.meteo = (IMeteoStation) dep[1];
         this.cfg = (IConfigs) dep[2];
+        this.socket = (IPowerSocket) dep[3];
     }
 
     /**
@@ -136,15 +138,15 @@ public class HumControl implements IHumControl, EventListener, IAppModule {
      */
     public void switchStatus(String alias) throws Exception {
         IHumDevice device = devices.get(alias);
+        device.setThreshold(40);
 
         boolean status = device.isStatus();
         device.setStatus(!status);
-        saveStates(device);
 
         if (device.isStatus()) {
             log.info("Set hum status \"" + device.getName() + "\" to \"true\"", "HUM");
         } else {
-            device.setHeater(false);
+            device.setHumidifier(false);
             log.info("Set hum status \"" + device.getName() + "\" to \"false\"", "HUM");
         }
 
@@ -152,9 +154,18 @@ public class HumControl implements IHumControl, EventListener, IAppModule {
          * Syncing states with device
          */
         try {
-            device.syncStates();
+            socket.setStatus(device.getSocket(), device.isHumidifier(), device.isStatus());
         } catch (Exception e) {
             log.error("Fail to sync hum device " + device.getName(), "HUM");
+        }
+
+        /*
+         * Save to DB
+         */
+        try {
+            saveStates(device);
+        } catch (Exception e) {
+            log.error("Fail to save device \"" + device.getName() + "\" state to db", "HUM");
         }
     }
 
@@ -172,7 +183,7 @@ public class HumControl implements IHumControl, EventListener, IAppModule {
         }
 
         info.setStatus(device.isStatus());
-        info.setHeater(device.isHeater());
+        info.setHeater(device.isHumidifier());
         info.setName(device.getName());
         info.setThreshold(device.getThreshold());
         info.setSensor(device.getSensor());
@@ -192,7 +203,7 @@ public class HumControl implements IHumControl, EventListener, IAppModule {
 
             IHumDevice device = entry.getValue();
             info.setStatus(device.isStatus());
-            info.setHeater(device.isHeater());
+            info.setHeater(device.isHumidifier());
             info.setName(device.getName());
             info.setThreshold(device.getThreshold());
             info.setAlias(device.getAlias());
@@ -208,7 +219,7 @@ public class HumControl implements IHumControl, EventListener, IAppModule {
      * Update states
      */
     public void getUpdate() {
-        int cutHum = 0;
+        int curHum = 0;
 
         for(Map.Entry<String, IHumDevice> entry : devices.entrySet()) {
             IHumDevice device = entry.getValue();
@@ -221,29 +232,23 @@ public class HumControl implements IHumControl, EventListener, IAppModule {
                     continue;
                 }
 
-                if (cutHum < device.getThreshold()) {
-                    if (!device.isHeater()) {
+                if (curHum < device.getThreshold()) {
+                    if (!device.isHumidifier()) {
                         log.info("Set humidifier status \"" + device.getName() + "\" to \"true\"", "HUM");
-                        device.setHeater(true);
-                        /*
-                         * Syncing states with device
-                         */
+                        device.setHumidifier(true);
                         try {
-                            device.syncStates();
+                            socket.setStatus(device.getSocket(), device.isHumidifier(), device.isStatus());
                         } catch (Exception e) {
                             log.error("Fail to sync hum device " + device.getName(), "HUM");
                         }
                     }
                 }
-                if (cutHum > device.getThreshold()) {
-                    if (device.isHeater()) {
+                if (curHum > device.getThreshold()) {
+                    if (device.isHumidifier()) {
                         log.info("Set hum status \"" + device.getName() + "\" to \"false\"", "HUM");
-                        device.setHeater(false);
-                        /*
-                         * Syncing states with device
-                         */
+                        device.setHumidifier(false);
                         try {
-                            device.syncStates();
+                            socket.setStatus(device.getSocket(), device.isHumidifier(), device.isStatus());
                         } catch (Exception e) {
                             log.error("Fail to sync hum device " + device.getName(), "HUM");
                         }
@@ -257,37 +262,22 @@ public class HumControl implements IHumControl, EventListener, IAppModule {
         return modName;
     }
 
-    @Override
-    public void getEvent(Events event, String module, String ip, int channel) {
-        if (module.equals(modName)) {
-            switch (event) {
-                case SYNC_EVENT:
-                    for (Map.Entry<String, IHumDevice> entry : devices.entrySet()) {
-                        IHumDevice device = entry.getValue();
-                        if (device.getIp().equals(ip)) {
-                            try {
-                                device.syncStates();
-                            } catch (Exception e) {
-                                log.error("Fail to first start sync of hum device \"" + device.getName() + "\"", "HUM");
-                            }
-                            return;
-                        }
-                    }
-                    break;
-
-                case SWITCH_STATUS_EVENT:
-                    for (Map.Entry<String, IHumDevice> entry : devices.entrySet()) {
-                        IHumDevice device = entry.getValue();
-                        if (device.getIp().equals(ip)) {
-                            try {
-                                switchStatus(device.getAlias());
-                            } catch (Exception e) {
-                                log.error("Fail to switch status of device \"" + device.getName() + "\"", "HUM");
-                            }
-                            return;
-                        }
-                    }
-                    break;
+    /**
+     * Generate new event
+     * @param socket Power socket
+     * @param event Event type
+     * @throws Exception If fail to gen event
+     */
+    public void genEvent(String socket, Events event) throws Exception {
+        for (Map.Entry<String, IHumDevice> entry : devices.entrySet()) {
+            IHumDevice device = entry.getValue();
+            if (device.getSocket().equals(socket)) {
+                switch (event) {
+                    case SWITCH_STATUS_EVENT:
+                        switchStatus(device.getAlias());
+                        break;
+                }
+                return;
             }
         }
     }

@@ -18,8 +18,7 @@
 package ru.futcamp.controller;
 
 import ru.futcamp.IAppModule;
-import ru.futcamp.controller.events.Events;
-import ru.futcamp.controller.events.IEventManager;
+import ru.futcamp.controller.subcontrollers.Events;
 import ru.futcamp.controller.subcontrollers.ILightController;
 import ru.futcamp.controller.subcontrollers.IMeteoController;
 import ru.futcamp.controller.subcontrollers.IMiscController;
@@ -29,7 +28,6 @@ import ru.futcamp.controller.subcontrollers.ISecureController;
  * Smart home controller
  */
 public class Controller implements IController, IAppModule {
-    private IEventManager evMngr;
     private IMeteoController meteo;
     private ISecureController secure;
     private ILightController light;
@@ -39,11 +37,10 @@ public class Controller implements IController, IAppModule {
 
     public Controller(String name, IAppModule ...dep) {
         modName = name;
-        this.evMngr = (IEventManager) dep[0];
-        this.meteo = (IMeteoController) dep[1];
-        this.secure = (ISecureController) dep[2];
-        this.light = (ILightController) dep[3];
-        this.misc = (IMiscController) dep[4];
+        this.meteo = (IMeteoController) dep[0];
+        this.secure = (ISecureController) dep[1];
+        this.light = (ILightController) dep[2];
+        this.misc = (IMiscController) dep[3];
     }
 
     /**
@@ -79,18 +76,6 @@ public class Controller implements IController, IAppModule {
 
     public IMiscController getMisc() {
         return this.misc;
-    }
-
-    /**
-     * Generate new event
-     * @param ev Event type
-     * @param mod Module
-     * @param ip Address of device
-     * @param chan Device channel
-     * @throws Exception If fail to generate event
-     */
-    public void genEvent(Events ev, String mod, String ip, int chan) throws Exception {
-        evMngr.genEvent(ev, mod, ip, chan);
     }
 
     public String getModName() {

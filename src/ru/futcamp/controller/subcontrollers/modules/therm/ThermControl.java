@@ -19,9 +19,9 @@ package ru.futcamp.controller.subcontrollers.modules.therm;
 
 import ru.futcamp.IAppModule;
 import ru.futcamp.controller.ActMgmt;
-import ru.futcamp.controller.events.EventListener;
-import ru.futcamp.controller.events.Events;
+import ru.futcamp.controller.subcontrollers.Events;
 import ru.futcamp.controller.subcontrollers.modules.meteo.IMeteoStation;
+import ru.futcamp.controller.subcontrollers.modules.socket.IPowerSocket;
 import ru.futcamp.controller.subcontrollers.modules.therm.db.IThermDB;
 import ru.futcamp.controller.subcontrollers.modules.therm.db.ThermDB;
 import ru.futcamp.controller.subcontrollers.modules.therm.db.ThermDBData;
@@ -38,10 +38,11 @@ import java.util.Map;
 /**
  * Therm control class
  */
-public class ThermControl implements IThermControl, EventListener, IAppModule {
+public class ThermControl implements IThermControl, IAppModule {
     private ILogger log;
     private IMeteoStation meteo;
     private IConfigs cfg;
+    private IPowerSocket socket;
 
     private Map<String, IThermDevice> devices = new HashMap<>();
 
@@ -52,6 +53,7 @@ public class ThermControl implements IThermControl, EventListener, IAppModule {
         this.log = (ILogger) dep[0];
         this.meteo = (IMeteoStation) dep[1];
         this.cfg = (IConfigs) dep[2];
+        this.socket = (IPowerSocket) dep[3];
     }
 
     /**
@@ -149,13 +151,10 @@ public class ThermControl implements IThermControl, EventListener, IAppModule {
             log.info("Set therm status \"" + device.getName() + "\" to \"false\"", "THERM");
         }
 
-        /*
-         * Syncing states with device
-         */
         try {
-            device.syncStates();
+            socket.setStatus(device.getSocket(), device.isHeater(), device.isStatus());
         } catch (Exception e) {
-            log.error("Fail to sync therm device " + device.getName(), "THERM");
+            log.error("Fail to sync hum device " + device.getName(), "HUM");
         }
     }
 
@@ -226,13 +225,10 @@ public class ThermControl implements IThermControl, EventListener, IAppModule {
                     if (!device.isHeater()) {
                         log.info("Set heater status \"" + device.getName() + "\" to \"true\"", "THERM");
                         device.setHeater(true);
-                        /*
-                         * Syncing states with device
-                         */
                         try {
-                            device.syncStates();
+                            socket.setStatus(device.getSocket(), device.isHeater(), device.isStatus());
                         } catch (Exception e) {
-                            log.error("Fail to sync therm device " + device.getName(), "THERM");
+                            log.error("Fail to sync hum device " + device.getName(), "HUM");
                         }
                     }
                 }
@@ -240,13 +236,10 @@ public class ThermControl implements IThermControl, EventListener, IAppModule {
                     if (device.isHeater()) {
                         log.info("Set heater status \"" + device.getName() + "\" to \"false\"", "THERM");
                         device.setHeater(false);
-                        /*
-                         * Syncing states with device
-                         */
                         try {
-                            device.syncStates();
+                            socket.setStatus(device.getSocket(), device.isHeater(), device.isStatus());
                         } catch (Exception e) {
-                            log.error("Fail to sync therm device " + device.getName(), "THERM");
+                            log.error("Fail to sync hum device " + device.getName(), "HUM");
                         }
                     }
                 }
@@ -258,37 +251,22 @@ public class ThermControl implements IThermControl, EventListener, IAppModule {
         return modName;
     }
 
-    @Override
-    public void getEvent(Events event, String module, String ip, int channel) {
-        if (module.equals(modName)) {
-            switch (event) {
-                case SYNC_EVENT:
-                    for (Map.Entry<String, IThermDevice> entry : devices.entrySet()) {
-                        IThermDevice device = entry.getValue();
-                        if (device.getIp().equals(ip)) {
-                            try {
-                                device.syncStates();
-                            } catch (Exception e) {
-                                log.error("Fail to first start sync of therm device \"" + device.getName() + "\"", "THERM");
-                            }
-                            return;
-                        }
-                    }
-                    break;
-
-                case SWITCH_STATUS_EVENT:
-                    for (Map.Entry<String, IThermDevice> entry : devices.entrySet()) {
-                        IThermDevice device = entry.getValue();
-                        if (device.getIp().equals(ip)) {
-                            try {
-                                switchStatus(device.getAlias());
-                            } catch (Exception e) {
-                                log.error("Fail to switch status of therm device \"" + device.getName() + "\"", "THERM");
-                            }
-                            return;
-                        }
-                    }
-                    break;
+    /**
+     * Generate new event
+     * @param socket Power socket
+     * @param event Event type
+     * @throws Exception If fail to gen event
+     */
+    public void genEvent(String socket, Events event) throws Exception {
+        for (Map.Entry<String, IThermDevice> entry : devices.entrySet()) {
+            IThermDevice device = entry.getValue();
+            if (device.getSocket().equals(socket)) {
+                switch (event) {
+                    case SWITCH_STATUS_EVENT:
+                        switchStatus(device.getAlias());
+                        break;
+                }
+                return;
             }
         }
     }

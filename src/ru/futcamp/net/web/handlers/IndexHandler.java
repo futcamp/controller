@@ -33,8 +33,6 @@ public class IndexHandler implements HttpHandler, IAppModule {
 
     @Override
     public void handle(HttpExchange ex) {
-        System.out.println(ex.getRequestURI());
-        System.out.println(ex.getRemoteAddress().getAddress().toString());
     }
 
     @Override

@@ -91,6 +91,9 @@ public class Application implements IApplication, IAppModule {
             if (cfg.getModCfg("hum")) {
                 cfg.readFromFile(path.getPath("hum"), HUM_SET);
             }
+            if (cfg.getModCfg("socket")) {
+                cfg.readFromFile(path.getPath("socket"), SOCKET_SET);
+            }
         } catch (Exception e) {
             log.error("Fail to read configs: " + e.getMessage(), "APP");
             return;
@@ -115,7 +118,6 @@ public class Application implements IApplication, IAppModule {
         HttpSettings httpCfg = cfg.getHttpCfg();
         log.info("Starting http server", "APP");
         try {
-            httpSrv.setAPI(httpCfg.getApi());
             httpSrv.start(httpCfg.getPort(), httpCfg.getQueue(), httpCfg.getThreads());
         } catch (Exception e) {
             log.error("Fail to start web server: " + e.getMessage(), "APP");

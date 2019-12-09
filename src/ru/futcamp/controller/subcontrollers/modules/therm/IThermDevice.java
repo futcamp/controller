@@ -22,11 +22,10 @@ public interface IThermDevice {
     void setName(String name);
     String getAlias();
     void setAlias(String alias);
-    String getIp();
-    void setIp(String ip);
+    String getSocket();
+    void setSocket(String socket);
     String getSensor();
     void setSensor(String sensor);
-    void syncStates() throws Exception;
     boolean isStatus();
     void setStatus(boolean status);
     boolean isHeater();

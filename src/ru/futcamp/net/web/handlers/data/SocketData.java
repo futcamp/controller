@@ -15,25 +15,32 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.utils.configs.settings.secure;
+package ru.futcamp.net.web.handlers.data;
 
-public class SecureCamSettings {
-    private boolean enable;
-    private String name;
+public class SocketData {
+    private String event;
+    private int channel;
 
-    public boolean isEnable() {
-        return enable;
+    public SocketData() {}
+
+    public SocketData(String ev, int chan) {
+        this.event = ev;
+        this.channel = chan;
     }
 
-    public void setEnable(boolean enable) {
-        this.enable = enable;
+    public String getEvent() {
+        return event;
     }
 
-    public String getName() {
-        return name;
+    public void setEvent(String event) {
+        this.event = event;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public int getChannel() {
+        return channel;
+    }
+
+    public void setChannel(int channel) {
+        this.channel = channel;
     }
 }

@@ -17,6 +17,11 @@
 
 package ru.futcamp.controller.subcontrollers;
 
+import ru.futcamp.controller.subcontrollers.modules.socket.SocketInfo;
+
 public interface IMiscController {
     boolean start();
+
+    SocketInfo getSocketInfo(String ip, int channel) throws Exception;
+    void genSocketEvent(String ip, int channel, Events event);
 }

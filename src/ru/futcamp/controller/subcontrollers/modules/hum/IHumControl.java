@@ -18,6 +18,7 @@
 package ru.futcamp.controller.subcontrollers.modules.hum;
 
 import ru.futcamp.controller.ActMgmt;
+import ru.futcamp.controller.subcontrollers.Events;
 
 import java.util.List;
 
@@ -29,4 +30,5 @@ public interface IHumControl {
     void loadStates() throws Exception;
     void addDevice(IHumDevice device);
     void getUpdate();
+    void genEvent(String socket, Events event) throws Exception;
 }

@@ -15,20 +15,10 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.controller.subcontrollers.modules.therm;
+package ru.futcamp.controller.subcontrollers;
 
-import ru.futcamp.controller.ActMgmt;
-import ru.futcamp.controller.subcontrollers.Events;
-
-import java.util.List;
-
-public interface IThermControl {
-    List<ThermInfo> getThermInfo();
-    ThermInfo getThermInfo(String alias) throws Exception;
-    void switchStatus(String alias) throws Exception;
-    void changeThreshold(String alias, ActMgmt action) throws Exception;
-    void loadStates() throws Exception;
-    void addDevice(IThermDevice device);
-    void getUpdate();
-    void genEvent(String socket, Events event) throws Exception;
+public enum Events {
+    SWITCH_STATUS_EVENT,
+    SYNC_EVENT,
+    SECURE_OPEN_EVENT
 }

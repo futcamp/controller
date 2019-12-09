@@ -35,9 +35,11 @@ public interface IMeteoController {
     ThermInfo getThermInfo(String alias) throws Exception;
     void switchThermStatus(String alias) throws Exception;
     void changeThermThreshold(String alias, ActMgmt action) throws Exception;
+    void genThermEvent(String socket, Events event) throws Exception;
 
     void switchHumStatus(String alias) throws Exception;
     List<HumInfo> getHumInfo();
     HumInfo getHumInfo(String alias) throws Exception;
     void changeHumThreshold(String alias, ActMgmt action) throws Exception;
+    void genHumEvent(String socket, Events event) throws Exception;
 }

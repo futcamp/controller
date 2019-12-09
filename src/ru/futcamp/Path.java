@@ -68,6 +68,9 @@ class Path {
 
             case "hum":
                 return "/etc/futcamp/hum.conf";
+
+            case "socket":
+                return "/etc/futcamp/socket.conf";
         }
         return null;
     }

@@ -30,4 +30,5 @@ public interface ILightController {
     LightInfo getLightInfo(String alias) throws Exception;
     List<LightInfo> getLightInfo();
     List<LightInfo> getLightGroupInfo(String group);
+    void genLightEvent(String ip, int channel, Events event);
 }

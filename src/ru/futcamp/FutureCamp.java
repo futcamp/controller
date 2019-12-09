@@ -20,7 +20,6 @@ package ru.futcamp;
 import com.sun.net.httpserver.HttpHandler;
 import org.telegram.telegrambots.ApiContextInitializer;
 import ru.futcamp.net.web.IHttpServer;
-import ru.futcamp.net.web.server.IWebServer;
 import ru.futcamp.tgbot.ITelegramBot;
 import ru.futcamp.tgbot.menu.IMenu;
 
@@ -79,30 +78,29 @@ public class FutureCamp implements IFutureCamp {
      * @param builder Controller fabric
      */
     private void buildController(IBuilder builder) {
-        addModule(builder.makeModule("evmngr"));
-
+        addModule(builder.makeModule("socket", getMod("log")));
         addModule(builder.makeModule("meteolcd"));
         addModule(builder.makeModule("meteo", getMod("log")));
         addModule(builder.makeModule("meteotsk", getMod("log"), getMod("meteo"), getMod("cfg"), getMod("meteolcd")));
-        addModule(builder.makeModule("therm", getMod("log"), getMod("meteo"), getMod("cfg")));
+        addModule(builder.makeModule("therm", getMod("log"), getMod("meteo"), getMod("cfg"), getMod("socket")));
         addModule(builder.makeModule("thermtsk", getMod("therm"), getMod("cfg")));
-        addModule(builder.makeModule("hum", getMod("log"), getMod("meteo"), getMod("cfg")));
+        addModule(builder.makeModule("hum", getMod("log"), getMod("meteo"), getMod("cfg"), getMod("socket")));
         addModule(builder.makeModule("humtsk", getMod("hum"), getMod("cfg")));
         addModule(builder.makeModule("light", getMod("cfg"), getMod("log")));
         addModule(builder.makeModule("vision", getMod("light"), getMod("log")));
         addModule(builder.makeModule("vistask", getMod("vision"), getMod("cfg")));
         addModule(builder.makeModule("secure", getMod("log"), getMod("ntf"), getMod("cfg"), getMod("light"), getMod("vision")));
-        addModule(builder.makeModule("mih", getMod("log"), getMod("light"), getMod("cfg")));
+        addModule(builder.makeModule("mih", getMod("log"), getMod("light"), getMod("cfg"), getMod("socket")));
         addModule(builder.makeModule("securetsk", getMod("mih"), getMod("cfg"), getMod("secure")));
         addModule(builder.makeModule("monitor", getMod("log"), getMod("ntf"), getMod("cfg")));
         addModule(builder.makeModule("montsk", getMod("monitor"), getMod("cfg")));
 
-        addModule(builder.makeModule("meteoc", getMod("log"), getMod("cfg"), getMod("evmngr"), getMod("meteo"), getMod("meteotsk"), getMod("therm"), getMod("thermtsk"), getMod("hum"), getMod("humtsk")));
-        addModule(builder.makeModule("securec", getMod("log"), getMod("cfg"), getMod("evmngr"), getMod("secure"), getMod("securetsk"), getMod("mih"), getMod("vision"), getMod("vistask")));
-        addModule(builder.makeModule("lightc", getMod("log"), getMod("cfg"), getMod("evmngr"), getMod("light")));
-        addModule(builder.makeModule("miscc", getMod("log"), getMod("cfg"), getMod("evmngr"), getMod("monitor"), getMod("montsk")));
+        addModule(builder.makeModule("meteoc", getMod("log"), getMod("cfg"), getMod("meteo"), getMod("meteotsk"), getMod("therm"), getMod("thermtsk"), getMod("hum"), getMod("humtsk")));
+        addModule(builder.makeModule("securec", getMod("log"), getMod("cfg"), getMod("secure"), getMod("securetsk"), getMod("mih"), getMod("vision"), getMod("vistask")));
+        addModule(builder.makeModule("lightc", getMod("log"), getMod("cfg"), getMod("light")));
+        addModule(builder.makeModule("miscc", getMod("log"), getMod("cfg"), getMod("monitor"), getMod("montsk"), getMod("socket")));
 
-        addModule(builder.makeModule("ctrl", getMod("evmngr"), getMod("meteoc"), getMod("securec"), getMod("lightc"), getMod("miscc")));
+        addModule(builder.makeModule("ctrl", getMod("meteoc"), getMod("securec"), getMod("lightc"), getMod("miscc")));
     }
 
     /**
@@ -123,9 +121,7 @@ public class FutureCamp implements IFutureCamp {
         server.addHandler("index", (HttpHandler) builder.makeModule("idxh"));
         server.addHandler("light", (HttpHandler) builder.makeModule("ligh", getMod("log"), getMod("ctrl")));
         server.addHandler("security", (HttpHandler) builder.makeModule("sech", getMod("log"), getMod("ctrl")));
-        server.addHandler("mih", (HttpHandler) builder.makeModule("mihh", getMod("log"), getMod("ctrl")));
-        server.addHandler("therm", (HttpHandler) builder.makeModule("thermh", getMod("log"), getMod("ctrl")));
-        server.addHandler("hum", (HttpHandler) builder.makeModule("humh", getMod("log"), getMod("ctrl")));
+        server.addHandler("socket", (HttpHandler) builder.makeModule("sockh", getMod("log"), getMod("ctrl")));
     }
 
     /**

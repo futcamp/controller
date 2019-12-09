@@ -15,20 +15,34 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-package ru.futcamp.net.web.handlers.data;
+package ru.futcamp.controller.subcontrollers.modules.socket;
 
-public class MIHData {
-    private String event;
+public class SocketInfo {
+    private String alias;
+    private String module;
+    private boolean status;
 
-    public MIHData(String ev) {
-        this.event = ev;
+    public boolean isStatus() {
+        return status;
     }
 
-    public String getEvent() {
-        return event;
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 
-    public void setEvent(String event) {
-        this.event = event;
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public String getModule() {
+        return module;
+    }
+
+    public void setModule(String module) {
+        this.module = module;
     }
 }
